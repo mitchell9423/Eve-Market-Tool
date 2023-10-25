@@ -2,41 +2,84 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using System.Threading.Tasks;
 using UnityEngine.Windows;
+using GameEvent;
 
 namespace EveMarket
 {
+	[ExecuteAlways]
 	public class DisplayPanel : MonoBehaviour
 	{
 		private Vector2 scrollPos;
-		private string text = "";
+		public static string text = "";
+		public float scrollPosX;
+		public float scrollWidthOffset;
+		public float viewPosX;
+		public float viewWidthOffset;
 
 		private void OnGUI()
 		{
+			GUI.backgroundColor = Color.black;
+
 			int fontSize = 25;
 
 			// Create a new style for the TextField
-			GUI.backgroundColor = Color.black;
-			GUIStyle textFieldStyle = new GUIStyle();
-			textFieldStyle.fontSize = fontSize;
-			textFieldStyle.normal.textColor = Color.cyan;
-			textFieldStyle.normal.background = Texture2D.grayTexture;
+			GUIStyle displayFieldStyle = new GUIStyle(GUI.skin.box);
+			displayFieldStyle.normal.textColor = Color.cyan;
+			displayFieldStyle.alignment = TextAnchor.UpperLeft;
+
+			string buttonLabel = "Load Static Data";
+
+			float posY = 10;
+			float posX = 10;
+
+			float buttonHeight = displayFieldStyle.CalcHeight(new GUIContent(buttonLabel), 150.0f);
+			if (GUI.Button(new Rect(posX, posY, 150.0f, buttonHeight), "Load Static Data"))
+			{
+				StaticData.UpdateStaticData();
+			}
 
 			// Create TextField
-			float boxHeight = 5;
-			GUI.Box(new Rect(5f, boxHeight, Screen.width - 10f, Screen.height - (boxHeight + 5)), "");
-			scrollPos = GUI.BeginScrollView(new Rect(10f, boxHeight + 10f, Screen.width - 20f, (Screen.height - (boxHeight + 5)) - 20), scrollPos, new Rect(0, 0, Screen.width - 20f, text.Length * 20));
+			// Calculate the size of the text content
+			Vector2 textSize = displayFieldStyle.CalcSize(new GUIContent(text));
 
-			// Create a new style for the suggestions
-			float warningLabelHieght = 0;
-			GUI.Label(new Rect(10, warningLabelHieght, Screen.width - 20f, textFieldStyle.CalcHeight(new GUIContent(text), Screen.width - 20f)), text, textFieldStyle);
+			posX = 20;
+			posY += buttonHeight + 10;
+			float positionRectWidth = Screen.width - (posX * 2);
+			float positionRectHeight = Screen.height - posY - 10;
+			float contentRectWidth = Mathf.Max(positionRectWidth - 10f, textSize.x + 5);
+			float contentRectHeight = Mathf.Max(positionRectHeight - 10f, textSize.y + 5);
+
+			Rect scrollViewPositionRect = new Rect(
+				posX,
+				posY,
+				positionRectWidth,
+				positionRectHeight
+				);
+
+			Rect scrollViewRect = new Rect(
+				0,
+				0,
+				contentRectWidth,
+				contentRectHeight
+				);
+
+			scrollPos = GUI.BeginScrollView(scrollViewPositionRect, scrollPos, scrollViewRect);
+
+			GUI.Box(new Rect(
+				0,
+				0,
+				contentRectWidth,
+				contentRectHeight
+				), text, displayFieldStyle);
 
 			GUI.EndScrollView();
 		}
 
-		public void SetDisplayText(string newtext)
+		public static void SetDisplayText(string _text)
 		{
-			text = newtext;
+			text = _text;
 		}
 	}
 }

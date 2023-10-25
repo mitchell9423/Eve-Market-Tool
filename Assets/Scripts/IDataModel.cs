@@ -10,6 +10,7 @@ namespace EveMarket
 	{
 		public int Id { get; set; }
 		public string Description { get; set; }
+		public string Name { get; set; }
 	}
 
 	[Serializable]
@@ -18,7 +19,7 @@ namespace EveMarket
 		[JsonProperty("description")]
 		public string Description { get; set; }
 
-		[JsonProperty("group_id")]
+		[JsonProperty("market_group_id")]
 		public int Id { get; set; }
 
 		[JsonProperty("name")]

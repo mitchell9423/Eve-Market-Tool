@@ -215,37 +215,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &682748230
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 682748231}
-  m_Layer: 0
-  m_Name: HttpHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &682748231
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 682748230}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.6488881, y: -0.4816658, z: -0.27278465}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1981779259
 GameObject:
   m_ObjectHideFlags: 0
@@ -257,6 +226,7 @@ GameObject:
   - component: {fileID: 1981779261}
   - component: {fileID: 1981779260}
   - component: {fileID: 1981779262}
+  - component: {fileID: 1981779263}
   m_Layer: 0
   m_Name: MainDisplay
   m_TagString: Untagged
@@ -276,6 +246,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4c351489e3ae0d4096cda505f0c467d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scrollPosX: 10
+  scrollWidthOffset: 50
+  viewPosX: 0
+  viewWidthOffset: 0
 --- !u!4 &1981779261
 Transform:
   m_ObjectHideFlags: 0
@@ -303,12 +277,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e7b4a7b9444e524f9e63b24bc0e6390, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  httpHandler: {fileID: 0}
-  displayPanel: {fileID: 0}
+  httpHandler: {fileID: 1981779263}
+  displayPanel: {fileID: 1981779260}
+--- !u!114 &1981779263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981779259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b41070b2c7c776141b194cfda8be128c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 519420032}
   - {fileID: 1981779261}
-  - {fileID: 682748231}
