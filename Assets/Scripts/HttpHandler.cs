@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -13,15 +14,16 @@ namespace EveMarket
 	{
 		public static HttpHandler instance;
 
+		public delegate void JobStatus();
+		public static JobStatus StatusComplete;
+
+		private static int pendingRequests = 0;
+
 		private readonly HttpClient _httpClient;
 
 		public HttpHandler()
 		{
 			_httpClient = new HttpClient();
-		}
-
-		void Start()
-		{
 			instance = this;
 		}
 
@@ -46,6 +48,8 @@ namespace EveMarket
 
 		public Task GetAsync<T>(string url, System.Action<string> callback)
 		{
+			Interlocked.Increment(ref pendingRequests);
+			Debug.LogWarning($"There are {pendingRequests} pending operations.");
 			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
 			UnityWebRequest webRequest = UnityWebRequest.Get(url);
@@ -65,7 +69,16 @@ namespace EveMarket
 				tcs.SetResult(true);
 			};
 
+			CompleteTask();
 			return tcs.Task;
+		}
+
+		private void CompleteTask()
+		{
+			if (Interlocked.Decrement(ref pendingRequests) == 0)  // Decrement counter and check
+			{
+				StatusComplete?.Invoke();
+			}
 		}
 
 		//private IEnumerator FetchData(List<object> itemGroupIdsToNames)

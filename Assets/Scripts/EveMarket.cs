@@ -14,7 +14,7 @@ namespace EveMarket
 		[SerializeField] DisplayPanel displayPanel;
 
 		[SerializeField] MarketGroup marketGroup;
-		[SerializeField] ItemInfo itemInfo;
+		[SerializeField] UniverseItem itemInfo;
 
 		private void OnEnable()
 		{

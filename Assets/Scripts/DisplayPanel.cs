@@ -22,7 +22,7 @@ namespace EveMarket
 		{
 			GUI.backgroundColor = Color.black;
 
-			int fontSize = 25;
+			//int fontSize = 25;
 
 			// Create a new style for the TextField
 			GUIStyle displayFieldStyle = new GUIStyle(GUI.skin.box);

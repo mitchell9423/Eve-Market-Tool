@@ -33,7 +33,7 @@ namespace EveMarket
 	}
 
 	[Serializable]
-	public class ItemInfo : IDataModel
+	public class UniverseItem : IDataModel
 	{
 		[JsonProperty("capacity")]
 		public double Capacity { get; set; }
