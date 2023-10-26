@@ -81,5 +81,10 @@ namespace EveMarket
 		{
 			text = _text;
 		}
+
+		public static void ClearDisplay()
+		{
+			text = "";
+		}
 	}
 }

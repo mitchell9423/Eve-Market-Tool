@@ -9,12 +9,16 @@ namespace EveMarket
 	public interface IDataModel
 	{
 		public int Id { get; set; }
+	}
+
+	public interface IObjectModel : IDataModel
+	{
 		public string Description { get; set; }
 		public string Name { get; set; }
 	}
 
 	[Serializable]
-	public class MarketGroup : IDataModel
+	public class MarketGroup : IObjectModel
 	{
 		[JsonProperty("description")]
 		public string Description { get; set; }
@@ -33,7 +37,7 @@ namespace EveMarket
 	}
 
 	[Serializable]
-	public class UniverseItem : IDataModel
+	public class UniverseItem : IObjectModel
 	{
 		[JsonProperty("capacity")]
 		public double Capacity { get; set; }
@@ -77,6 +81,19 @@ namespace EveMarket
 
 		[JsonProperty("volume")]
 		public double Volume { get; set; }
+	}
+
+	[Serializable]
+	public class MarketPrice : IDataModel
+	{
+		[JsonProperty("adjusted_price")]
+		public double AdjustedPrice { get; set; }
+
+		[JsonProperty("average_price")]
+		public double AveragePrice { get; set; }
+
+		[JsonProperty("type_id")]
+		public Int32 Id { get; set; }
 	}
 
 	[Serializable]

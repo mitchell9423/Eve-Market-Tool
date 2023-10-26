@@ -1,3 +1,4 @@
+using EveMarket.Network;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -12,53 +13,42 @@ namespace EveMarket
 	public static class FileManager
 	{
 		const string MARKET_GROUPS_PATH = "Assets\\StaticData\\MarketGroups.json";
-		const string UNIVERSE_ITEMS_PATH = "Assets\\StaticData\\UniverseItems.json";
+		const string UNIVERSE_TYPES_PATH = "Assets\\StaticData\\UniverseItems.json";
+		const string MARKET_PRICES_PATH = "Assets\\StaticData\\MarketPrices.json";
 
-		private static string GetMarketGroupPath()
+		static readonly Dictionary<Type, string> TypeFilePath = new Dictionary<Type, string>()
 		{
-			return $"{Path.GetFullPath(@"./")}{MARKET_GROUPS_PATH}";
-		}
+			{ typeof(MarketPrice), MARKET_PRICES_PATH },
+			{ typeof(MarketGroup), MARKET_GROUPS_PATH },
+			{ typeof(UniverseItem), UNIVERSE_TYPES_PATH }
+		};
 
-		private static string GetUniverseItemPath()
+		private static string GetFilePath<T>()
 		{
-			return $"{Path.GetFullPath(@"./")}{UNIVERSE_ITEMS_PATH}";
+			return $"{Path.GetFullPath(@"./")}{TypeFilePath[typeof(T)]}";
 		}
 
 		public static void SerializeObject<T>(T item)
 		{
-			string path = "";
-
-			if (item is MarketGroup)
-			{
-				path = GetMarketGroupPath();
-			}
-			else
-			{
-				path = GetUniverseItemPath();
-			}
+			string path = GetFilePath<T>();
 
 			string data = JsonConvert.SerializeObject(item, Formatting.Indented);
-			_ = WriteFile(path, data);
+
+			Task.Run(() => WriteFile(path, data));
 		}
 
 		public static T DeserializeFromFile<T,Y>()
 		{
-			Type type = typeof(T);
-			string path = "";
+			Type type = typeof(Y);
 
-			if (type == typeof(MarketGroup))
-			{
-				path = GetMarketGroupPath();
-			}
-			else if (type == typeof(UniverseItem))
-			{
-				path = GetUniverseItemPath();
-			}
+			string path = GetFilePath<Y>();
 
-			return JsonConvert.DeserializeObject<T>(File.ReadAllText(path));
+			string data = File.ReadAllText(path);
+
+			return JsonConvert.DeserializeObject<T>(data);
 		}
 
-		static async Task WriteFile(string path, string data)
+		static void WriteFile(string path, string data)
 		{
 			if (!File.Exists(path))
 			{

@@ -228,7 +228,7 @@ GameObject:
   - component: {fileID: 1981779262}
   - component: {fileID: 1981779263}
   m_Layer: 0
-  m_Name: MainDisplay
+  m_Name: EveMarket
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

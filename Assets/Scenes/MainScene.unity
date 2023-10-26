@@ -227,9 +227,10 @@ GameObject:
   - component: {fileID: 1258408450}
   - component: {fileID: 1258408449}
   - component: {fileID: 1258408448}
+  - component: {fileID: 1258408452}
   m_Layer: 0
   m_Name: EveMarket
-  m_TagString: Untagged
+  m_TagString: ThreadDispatcher
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -274,6 +275,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e7b4a7b9444e524f9e63b24bc0e6390, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unityMainThreadDispatcher: {fileID: 1258408452}
   httpHandler: {fileID: 1258408449}
   displayPanel: {fileID: 1258408448}
 --- !u!4 &1258408451
@@ -291,6 +293,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1258408452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1258408447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f69d2cd7117b6794194e967310bfae20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

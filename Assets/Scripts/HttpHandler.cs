@@ -1,4 +1,4 @@
-using System;
+using EveMarket.Util;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -14,10 +14,9 @@ namespace EveMarket
 	{
 		public static HttpHandler instance;
 
-		public delegate void JobStatus();
-		public static JobStatus StatusComplete;
-
 		private static int pendingRequests = 0;
+		private static int completedRequests = 0;
+		private static int totalRequests = 0;
 
 		private readonly HttpClient _httpClient;
 
@@ -46,10 +45,10 @@ namespace EveMarket
 			}
 		}
 
-		public Task GetAsync<T>(string url, System.Action<string> callback)
+		public async Task AsyncGetRequest<T>(string url, System.Action<string> callback)
 		{
+			Interlocked.Increment(ref totalRequests);
 			Interlocked.Increment(ref pendingRequests);
-			Debug.LogWarning($"There are {pendingRequests} pending operations.");
 			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
 			UnityWebRequest webRequest = UnityWebRequest.Get(url);
@@ -67,61 +66,21 @@ namespace EveMarket
 					callback(webRequest.downloadHandler.text);
 				}
 				tcs.SetResult(true);
+				CompleteTask();
 			};
 
-			CompleteTask();
-			return tcs.Task;
+			await tcs.Task;
 		}
 
 		private void CompleteTask()
 		{
+			Interlocked.Increment(ref completedRequests);
 			if (Interlocked.Decrement(ref pendingRequests) == 0)  // Decrement counter and check
 			{
-				StatusComplete?.Invoke();
+				EveDelegate.StaticUpdateComplete?.Invoke();
 			}
+
+			Debug.LogWarning($"Completed {completedRequests} requests with {pendingRequests} of {totalRequests} requests pending.");
 		}
-
-		//private IEnumerator FetchData(List<object> itemGroupIdsToNames)
-		//{
-		//	foreach (var groupObject in itemGroupIdsToNames)
-		//	{
-		//		string groupId = groupObject.id; // Replace with actual field
-		//		string groupName = groupObject.name; // Replace with actual field
-
-		//		yield return FetchJson($"{marketGroupsURL}{groupId}", groupJson =>
-		//		{
-		//			if (groupJson != null)
-		//			{
-		//				// Deserialize groupJson to get types
-		//				List<string> types = new List<string>(); // Replace with actual deserialization
-
-		//				foreach (var typeId in types)
-		//				{
-		//					StartCoroutine(FetchJson($"{universeTypesURL}{typeId}", itemJson =>
-		//					{
-		//						if (itemJson != null)
-		//						{
-		//							// Deserialize itemJson to get item details
-		//							// ...
-
-		//							if (!mappedItems.ContainsKey(groupName))
-		//							{
-		//								mappedItems[groupName] = new Dictionary<string, object>();
-		//							}
-
-		//							mappedItems[groupName][itemJson.name] = new
-		//							{
-		//								name = itemJson.name,
-		//								id = itemJson.type_id,
-		//								group_name = groupName,
-		//								group_id = itemJson.group_id
-		//							};
-		//						}
-		//					}));
-		//				}
-		//			}
-		//		});
-		//	}
-		//}
 	}
 }
