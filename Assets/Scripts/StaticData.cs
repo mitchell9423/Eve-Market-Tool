@@ -63,19 +63,29 @@ namespace EveMarket
 
 		public static void LoadStaticData()
 		{
-			lock (marketPrices)
+			if (marketPrices != null)
 			{
-				marketPrices = FileManager.DeserializeFromFile<Dictionary<int, MarketPrice>, MarketPrice>();
+				lock (marketPrices)
+				{
+					marketPrices = FileManager.DeserializeFromFile<Dictionary<int, MarketPrice>, MarketPrice>();
+				}
 			}
 
-			lock (groupObjects)
+			if (groupObjects != null)
 			{
-				groupObjects = FileManager.DeserializeFromFile<Dictionary<int, MarketGroup>, MarketGroup>();
+				lock (groupObjects)
+				{
+					groupObjects = FileManager.DeserializeFromFile<Dictionary<int, MarketGroup>, MarketGroup>();
+				}
 			}
 
-			lock (itemObjects)
+
+			if (groupObjects != null)
 			{
-				itemObjects = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>, UniverseItem>();
+				lock (itemObjects)
+				{
+					itemObjects = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>, UniverseItem>();
+				}
 			}
 
 			EveDelegate.StaticLoadComplete?.Invoke();
@@ -98,54 +108,60 @@ namespace EveMarket
 				return;
 			}
 
-
-
-
-
-
-
-			T objectModel = JsonConvert.DeserializeObject<T>(response);
-			if (objectModel == null)
+			if (typeof(T) == typeof(MarketPrice))
 			{
-				Debug.Log("Error receiving data.");
-				return;
-			}
-
-			StringBuilder localSb = new StringBuilder();
-			if (objectModel is MarketGroup marketGroup)
-			{
-				lock (groupObjects)
-				{
-					groupObjects[marketGroup.Id] = marketGroup;
-					localSb.Append($"{groupObjects[marketGroup.Id].Id,5} : {groupObjects[marketGroup.Id].Name}\n");
-				}
-
-				foreach (var itemId in marketGroup.Types)
-				{
-					NetworkManager.AsyncRequest<UniverseItem>(itemId.ToString());
-				}
-			}
-			else if (objectModel is UniverseItem universeItem)
-			{
-				lock (itemObjects)
-				{
-					itemObjects[universeItem.Id] = universeItem;
-					localSb.Append($"{itemObjects[universeItem.Id].Id,5} : {itemObjects[universeItem.Id].Name}\n");
-				}
-			}
-
-			lock (sb)
-			{
-				sb.Append(localSb);
+				Debug.Log("Stop!");
 			}
 
 			try
 			{
+				T objectModel = JsonConvert.DeserializeObject<T>(response);
 
+				if (objectModel == null)
+				{
+					Debug.Log("Error receiving data.");
+					return;
+				}
 
+				StringBuilder localSb = new StringBuilder();
+				if (objectModel is MarketGroup marketGroup)
+				{
+					lock (groupObjects)
+					{
+						groupObjects[marketGroup.Id] = marketGroup;
+						localSb.Append($"{groupObjects[marketGroup.Id].Id,5} : {groupObjects[marketGroup.Id].Name}\n");
+					}
+
+					foreach (var itemId in marketGroup.Types)
+					{
+						NetworkManager.AsyncRequest<UniverseItem>(itemId.ToString());
+					}
+				}
+				else if (objectModel is UniverseItem universeItem)
+				{
+					lock (itemObjects)
+					{
+						itemObjects[universeItem.Id] = universeItem;
+						localSb.Append($"{itemObjects[universeItem.Id].Id,5} : {itemObjects[universeItem.Id].Name}\n");
+					}
+				}
+				else if (objectModel is MarketPrice marketPrice)
+				{
+					lock (marketPrices)
+					{
+						marketPrices[marketPrice.Id] = marketPrice;
+						localSb.Append($"{marketPrices[marketPrice.Id].Id,5} : {marketPrices[marketPrice.Id].AveragePrice}\n");
+					}
+				}
+
+				lock (sb)
+				{
+					sb.Append(localSb);
+				}
 			}
 			catch (Exception ex)
 			{
+				Debug.LogError($"Error deserializing type {typeof(T)} object.");
 				Debug.Log($"{ex}");
 			}
 

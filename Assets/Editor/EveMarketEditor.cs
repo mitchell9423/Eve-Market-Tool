@@ -32,6 +32,13 @@ namespace EveMarket
 
 			EditorGUILayout.Space(10);
 
+			if (GUILayout.Button("Load Static Data"))
+			{
+				targetObject.LoadStaticData();
+			}
+
+			EditorGUILayout.Space(10);
+
 			if (GUILayout.Button("Update Static Data"))
 			{
 				targetObject.UpdateStaticData();

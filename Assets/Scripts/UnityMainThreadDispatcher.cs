@@ -10,11 +10,18 @@ namespace EveMarket.Util
 	{
 		private readonly Queue<System.Action> _executionQueue = new Queue<System.Action>();
 
-		public static UnityMainThreadDispatcher Instance { get; set; }
+		static UnityMainThreadDispatcher instance; 
+		public static UnityMainThreadDispatcher Instance 
+		{ 
+			get
+			{
+				if (instance == null)
+				{
+					instance = FindObjectOfType<UnityMainThreadDispatcher>();
+				}
 
-		private void Awake()
-		{
-			Instance = this;
+				return instance;
+			}
 		}
 
 		public void Enqueue(System.Action action)

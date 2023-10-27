@@ -43,7 +43,7 @@ namespace EveMarket
 
 			string path = GetFilePath<Y>();
 
-			string data = File.ReadAllText(path);
+			string data = ReadFile(path);
 
 			return JsonConvert.DeserializeObject<T>(data);
 		}
@@ -56,6 +56,16 @@ namespace EveMarket
 			}
 
 			File.WriteAllText(path, data);
+		}
+
+		static string ReadFile(string path)
+		{
+			if (!File.Exists(path))
+			{
+				File.Create(path).Dispose();
+			}
+
+			return File.ReadAllText(path);
 		}
 	}
 }

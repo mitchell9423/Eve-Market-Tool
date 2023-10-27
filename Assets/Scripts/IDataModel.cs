@@ -94,6 +94,9 @@ namespace EveMarket
 
 		[JsonProperty("type_id")]
 		public Int32 Id { get; set; }
+
+		[JsonProperty("name")]
+		public string Name { get; set; }
 	}
 
 	[Serializable]
