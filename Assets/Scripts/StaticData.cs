@@ -7,6 +7,7 @@ using System.Text;
 using EveMarket.Util;
 using EveMarket.Network;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace EveMarket
 {
@@ -40,9 +41,9 @@ namespace EveMarket
 
 		public static List<IDataModel> DataModels
 		{
-			get 
+			get
 			{
-				lock (itemObjects) 
+				lock (itemObjects)
 				{
 					return itemObjects.Values.Cast<IDataModel>().ToList();
 				}
@@ -51,9 +52,11 @@ namespace EveMarket
 
 		public static void UpdateStaticData()
 		{
+			EveDelegate.Subscribe(ref EveDelegate.StaticUpdateComplete, SaveStaticData);
+
 			lock (sb) { sb.Clear(); }
 
-			NetworkManager.AsyncRequest<MarketPrice>();
+			NetworkManager.AsyncRequest<List<MarketPrice>>();
 
 			foreach (var groupId in GroupIdsToName.Keys)
 			{
@@ -67,7 +70,7 @@ namespace EveMarket
 			{
 				lock (marketPrices)
 				{
-					marketPrices = FileManager.DeserializeFromFile<Dictionary<int, MarketPrice>, MarketPrice>();
+					marketPrices = FileManager.DeserializeFromFile<Dictionary<int, MarketPrice>>();
 				}
 			}
 
@@ -75,25 +78,23 @@ namespace EveMarket
 			{
 				lock (groupObjects)
 				{
-					groupObjects = FileManager.DeserializeFromFile<Dictionary<int, MarketGroup>, MarketGroup>();
+					groupObjects = FileManager.DeserializeFromFile<Dictionary<int, MarketGroup>>();
 				}
 			}
 
 
-			if (groupObjects != null)
+			if (itemObjects != null)
 			{
 				lock (itemObjects)
 				{
-					itemObjects = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>, UniverseItem>();
+					itemObjects = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>>();
 				}
 			}
-
-			EveDelegate.StaticLoadComplete?.Invoke();
 
 			Debug.Log("Static Data Loaded.");
 		}
 
-		public static void HandleResponse<T>(string response) where T : IDataModel
+		public static void HandleResponse<T>(string response)
 		{
 			string str;
 
@@ -106,11 +107,6 @@ namespace EveMarket
 
 				Debug.Log("Error receiving data.");
 				return;
-			}
-
-			if (typeof(T) == typeof(MarketPrice))
-			{
-				Debug.Log("Stop!");
 			}
 
 			try
@@ -145,12 +141,15 @@ namespace EveMarket
 						localSb.Append($"{itemObjects[universeItem.Id].Id,5} : {itemObjects[universeItem.Id].Name}\n");
 					}
 				}
-				else if (objectModel is MarketPrice marketPrice)
+				else if (objectModel is List<MarketPrice> marketPriceArray)
 				{
 					lock (marketPrices)
 					{
-						marketPrices[marketPrice.Id] = marketPrice;
-						localSb.Append($"{marketPrices[marketPrice.Id].Id,5} : {marketPrices[marketPrice.Id].AveragePrice}\n");
+						for (int i = 0; i < marketPriceArray.Count; i++)
+						{
+							marketPrices[marketPriceArray[i].Id] = marketPriceArray[i];
+							localSb.Append($"{marketPrices[marketPriceArray[i].Id].Id,5} : {marketPrices[marketPriceArray[i].Id].AveragePrice}\n");
+						}
 					}
 				}
 
@@ -174,6 +173,30 @@ namespace EveMarket
 			{
 				DisplayPanel.text = str;
 			});
+
+			HttpHandler.CompleteStaticUpdateTask();
+		}
+
+		private static void SaveStaticData()
+		{
+			Debug.Log($"SaveStaticData()");
+
+			lock (groupObjects)
+			{
+				FileManager.SerializeObject(groupObjects);
+			}
+
+			lock (itemObjects)
+			{
+				FileManager.SerializeObject(itemObjects);
+			}
+
+			lock (marketPrices)
+			{
+				FileManager.SerializeObject(marketPrices);
+			}
+
+			EveDelegate.Unsubscribe(ref EveDelegate.StaticUpdateComplete, SaveStaticData);
 		}
 	}
 }

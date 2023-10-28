@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace EveMarket.Util
@@ -9,5 +11,15 @@ namespace EveMarket.Util
 		public delegate void JobStatus();
 		public static JobStatus StaticUpdateComplete;
 		public static JobStatus StaticLoadComplete;
+
+		public static void Subscribe(ref JobStatus _delegate, Action action)
+		{
+			_delegate += new JobStatus(action);
+		}
+
+		public static void Unsubscribe(ref JobStatus _delegate, Action action)
+		{
+			_delegate -= new JobStatus(action);
+		}
 	}
 }

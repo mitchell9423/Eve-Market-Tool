@@ -37,12 +37,12 @@ namespace EveMarket
 
 		private void Start()
 		{
-			EveDelegate.StaticLoadComplete += CreateObjectList;
 			LoadStaticData();
 		}
 
 		public void LoadStaticData()
 		{
+			EveDelegate.StaticLoadComplete += CreateObjectList;
 			StaticData.LoadStaticData();
 		}
 

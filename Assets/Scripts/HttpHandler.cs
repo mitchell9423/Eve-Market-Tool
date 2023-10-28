@@ -63,24 +63,30 @@ namespace EveMarket
 				}
 				else
 				{
-					callback(webRequest.downloadHandler.text);
+
+					UnityMainThreadDispatcher.Instance.Enqueue(() =>
+					{
+						callback(webRequest.downloadHandler.text);
+					});
 				}
 				tcs.SetResult(true);
-				CompleteTask();
 			};
 
 			await tcs.Task;
 		}
 
-		private void CompleteTask()
+		public static void CompleteStaticUpdateTask()
 		{
 			Interlocked.Increment(ref completedRequests);
 			if (Interlocked.Decrement(ref pendingRequests) == 0)  // Decrement counter and check
 			{
+				completedRequests = 0;
+				totalRequests = 0;
+
 				EveDelegate.StaticUpdateComplete?.Invoke();
 			}
 
-			Debug.LogWarning($"Completed {completedRequests} requests with {pendingRequests} of {totalRequests} requests pending.");
+			Debug.Log($"Completed {completedRequests} requests with {pendingRequests} of {totalRequests} requests pending.");
 		}
 	}
 }
