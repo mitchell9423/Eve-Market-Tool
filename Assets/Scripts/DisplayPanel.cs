@@ -18,9 +18,16 @@ namespace EveMarket
 		public float viewPosX;
 		public float viewWidthOffset;
 
+		public static bool showGUI = false;
+
 		private void OnGUI()
 		{
-			GUI.backgroundColor = Color.black;
+            if (!showGUI)
+            {
+				return;
+            }
+
+            GUI.backgroundColor = Color.black;
 
 			//int fontSize = 25;
 

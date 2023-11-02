@@ -84,15 +84,6 @@ namespace EveMarket
 	}
 
 	[Serializable]
-	public class MarketPriceArray : IDataModel
-	{
-		[JsonProperty("type_id")]
-		public Int32 Id { get; set; }
-
-		public MarketPrice[] marketPrices { get; set; }
-	}
-
-	[Serializable]
 	public class MarketPrice : IDataModel
 	{
 		[JsonProperty("adjusted_price")]
@@ -103,9 +94,6 @@ namespace EveMarket
 
 		[JsonProperty("type_id")]
 		public Int32 Id { get; set; }
-
-		//[JsonProperty("name")]
-		//public string Name { get; set; }
 	}
 
 	[Serializable]

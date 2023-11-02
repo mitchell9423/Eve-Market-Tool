@@ -4,17 +4,25 @@ using UnityEngine;
 using EveMarket.Util;
 using Unity.VisualScripting;
 using UnityEditor;
+using System.Text;
+using System.Linq;
 
 namespace EveMarket
 {
 	[ExecuteAlways]
 	public class EveMarket : MonoBehaviour
 	{
+		public ObjectType objectType = ObjectType.MarketGroup;
+
 		[SerializeField] UnityMainThreadDispatcher unityMainThreadDispatcher;
 		[SerializeField] HttpHandler httpHandler;
 		[SerializeField] DisplayPanel displayPanel;
 
-		[SerializeField] public List<IDataModel> modelList = new List<IDataModel>();
+		public bool showGUI = false;
+
+		public Dictionary<int, MarketObject> marketObjects = new Dictionary<int, MarketObject>();
+
+		StringBuilder sb = new StringBuilder();
 
 		private void OnEnable()
 		{
@@ -22,7 +30,6 @@ namespace EveMarket
 			{
 				unityMainThreadDispatcher = gameObject.AddComponent<UnityMainThreadDispatcher>();
 			}
-
 
 			if (!gameObject.TryGetComponent(out httpHandler))
 			{
@@ -42,13 +49,12 @@ namespace EveMarket
 
 		public void LoadStaticData()
 		{
-			EveDelegate.StaticLoadComplete += CreateObjectList;
 			StaticData.LoadStaticData();
+			ConstructMarketObjects();
 		}
 
 		public void UpdateStaticData()
 		{
-			EveDelegate.StaticUpdateComplete += CreateObjectList;
 			StaticData.UpdateStaticData();
 		}
 
@@ -57,11 +63,45 @@ namespace EveMarket
 			DisplayPanel.ClearDisplay();
 		}
 
-		public void CreateObjectList()
+		public void ConstructMarketObjects()
 		{
-			EveDelegate.StaticUpdateComplete -= CreateObjectList;
-			EveDelegate.StaticLoadComplete -= CreateObjectList;
-			modelList = StaticData.DataModels;
+			lock (StaticData.groupObjects)
+			{
+				foreach (var group in StaticData.groupObjects.Values)
+				{
+					marketObjects[group.Id] = new MarketObject(group);
+				}
+			}
+
+			BuildDisplayString();
+		}
+
+		void BuildDisplayString()
+		{
+			sb.Clear();
+
+			for (int i = 0; i < marketObjects.Count; i++)
+			{
+				MarketObject marketObject = marketObjects.ElementAt(i).Value;
+
+				sb.Append($"\nGroup: {marketObject.GroupName}\n");
+
+				for (int j = 0; j < marketObject.ItemCount; j++)
+				{
+					MarketObject.MarketItem marketItem = marketObject.GetItemByIndex(j);
+
+					sb.Append($"\n  {marketItem.ItemName}   Average Price: {marketItem.AveragePrice}");
+				}
+
+				sb.Append($"\n\n");
+			}
+
+			DisplayPanel.SetDisplayText(sb.ToString());
+		}
+
+		public void ToggleGUI()
+		{
+			DisplayPanel.showGUI = showGUI;
 		}
 	}
 }

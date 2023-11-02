@@ -4,17 +4,23 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using System.Diagnostics.Eventing.Reader;
+using System.Linq;
 
 namespace EveMarket
 {
 	[CustomEditor(typeof(EveMarket))]
 	public class EveMarketEditor : Editor
 	{
+		float nameWidth;
+		float priceLabelWidth;
+		float priceWidth;
+
 		EveMarket eveMarket;
+
 		SerializedProperty unityMainThreadDispatcher;
 		SerializedProperty httpHandler;
 		SerializedProperty displayPanel;
-		SerializedProperty modelList;
 
 		Dictionary<Type, string> TypeLabel = new Dictionary<Type, string>()
 		{
@@ -26,7 +32,6 @@ namespace EveMarket
 		void OnEnable()
 		{
 			eveMarket = (EveMarket)target;
-			//modelList = serializedObject.FindProperty("modelList");
 			unityMainThreadDispatcher = serializedObject.FindProperty("unityMainThreadDispatcher");
 			httpHandler = serializedObject.FindProperty("httpHandler");
 			displayPanel = serializedObject.FindProperty("displayPanel");
@@ -63,50 +68,50 @@ namespace EveMarket
 
 			EditorGUILayout.Space(10);
 
-			// Custom List Display
-			EditorGUILayout.LabelField("Object Model List", EditorStyles.boldLabel);
-			for (int i = 0; i < eveMarket.modelList.Count; i++)
+			using (new GUILayout.HorizontalScope(EditorStyles.helpBox))
 			{
+				EditorGUILayout.LabelField("Object Model List", EditorStyles.boldLabel);
+				EditorGUILayout.Space();
+				EditorGUI.BeginChangeCheck();
+				eveMarket.showGUI = EditorGUILayout.Toggle("Show GUI Display", eveMarket.showGUI);
+				if (EditorGUI.EndChangeCheck())
+				{
+					eveMarket.ToggleGUI();
+				}
+			}
+
+			for (int i = 0; i < eveMarket.marketObjects.Count; i++)
+			{
+				MarketObject marketObject = eveMarket.marketObjects.ElementAt(i).Value;
+
 				EditorGUILayout.Space(10);
+
 				using (new GUILayout.VerticalScope(EditorStyles.helpBox))
 				{
-					IDataModel objModel = eveMarket.modelList[i];
-					if (objModel is IObjectModel objectModel)
+					EditorGUILayout.LabelField($"Group: {marketObject.GroupName}");
+
+					EditorGUILayout.Space(10);
+
+					for (int j = 0; j < marketObject.ItemCount; j++)
 					{
-						EditorGUILayout.LabelField(TypeLabel[objectModel.GetType()], EditorStyles.boldLabel);
+						MarketObject.MarketItem marketItem = marketObject.GetItemByIndex(j);
+
 						using (new GUILayout.HorizontalScope())
 						{
-							EditorGUILayout.LabelField("Name:", GUILayout.Width(50));
-							objectModel.Name = EditorGUILayout.TextField(objectModel.Name);
+							EditorGUILayout.LabelField($"  {marketItem.ItemName}", GUILayout.Width(250));
 							EditorGUILayout.Space();
-							EditorGUILayout.LabelField("Id:", GUILayout.Width(20));
-							objectModel.Id = EditorGUILayout.IntField(objectModel.Id);
+							EditorGUILayout.LabelField($"Average Price:", GUILayout.Width(87));
+							EditorGUILayout.LabelField($"{marketItem.AveragePrice}", GUILayout.Width(100));
+
+							// Add more types here as needed
 						}
-						// Add more fields as needed
 					}
-					// Add more types as needed
 
 					EditorGUILayout.Space();
 				}
 			}
 
 			EditorGUILayout.Space(10);
-
-			// Add / Remove buttons
-			using (new GUILayout.HorizontalScope())
-			{
-				if (GUILayout.Button("Add Element"))
-				{
-					eveMarket.modelList.Add(new MarketGroup()); // Add a new MarketGroup as an example
-				}
-				if (GUILayout.Button("Remove Element"))
-				{
-					if (eveMarket.modelList.Count > 0)
-					{
-						eveMarket.modelList.RemoveAt(eveMarket.modelList.Count - 1);
-					}
-				}
-			}
 
 			serializedObject.ApplyModifiedProperties();
 		}

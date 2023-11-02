@@ -11,6 +11,13 @@ using System.Threading.Tasks;
 
 namespace EveMarket
 {
+	public enum ObjectType
+	{
+		MarketPrice,
+		MarketGroup,
+		UniverseItem
+	}
+
 	public static class StaticData
 	{
 		private static StringBuilder sb = new StringBuilder();
@@ -35,20 +42,9 @@ namespace EveMarket
 			{ 530, "Mercoxit" }
 		};
 
-		private static Dictionary<int, MarketPrice> marketPrices = new Dictionary<int, MarketPrice>();
-		private static Dictionary<int, MarketGroup> groupObjects = new Dictionary<int, MarketGroup>();
-		private static Dictionary<int, UniverseItem> itemObjects = new Dictionary<int, UniverseItem>();
-
-		public static List<IDataModel> DataModels
-		{
-			get
-			{
-				lock (itemObjects)
-				{
-					return itemObjects.Values.Cast<IDataModel>().ToList();
-				}
-			}
-		}
+		public static Dictionary<int, MarketPrice> marketPrices = new Dictionary<int, MarketPrice>();
+		public static Dictionary<int, MarketGroup> groupObjects = new Dictionary<int, MarketGroup>();
+		public static Dictionary<int, UniverseItem> itemObjects = new Dictionary<int, UniverseItem>();
 
 		public static void UpdateStaticData()
 		{
