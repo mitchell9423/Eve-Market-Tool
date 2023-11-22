@@ -31,6 +31,7 @@ namespace EveMarket
 
 		void OnEnable()
 		{
+			EveMarket.ShowGUI = EditorPrefs.GetBool("ShowGUI", false);
 			eveMarket = (EveMarket)target;
 			unityMainThreadDispatcher = serializedObject.FindProperty("unityMainThreadDispatcher");
 			httpHandler = serializedObject.FindProperty("httpHandler");
@@ -61,28 +62,26 @@ namespace EveMarket
 
 			EditorGUILayout.Space(10);
 
-			if (GUILayout.Button("Clear Display"))
-			{
-				eveMarket.ClearDisplay();
-			}
-
-			EditorGUILayout.Space(10);
-
 			using (new GUILayout.HorizontalScope(EditorStyles.helpBox))
 			{
-				EditorGUILayout.LabelField("Object Model List", EditorStyles.boldLabel);
-				EditorGUILayout.Space();
+				EditorGUILayout.LabelField("Show GUI Display", EditorStyles.boldLabel, GUILayout.Width(120));
+
 				EditorGUI.BeginChangeCheck();
-				eveMarket.showGUI = EditorGUILayout.Toggle("Show GUI Display", eveMarket.showGUI);
+				EveMarket.ShowGUI = EditorGUILayout.Toggle(EveMarket.ShowGUI);
 				if (EditorGUI.EndChangeCheck())
 				{
-					eveMarket.ToggleGUI();
+					EditorPrefs.SetBool("ShowGUI", EveMarket.ShowGUI);
 				}
 			}
 
-			for (int i = 0; i < eveMarket.marketObjects.Count; i++)
+			using (new GUILayout.VerticalScope(EditorStyles.helpBox))
 			{
-				MarketObject marketObject = eveMarket.marketObjects.ElementAt(i).Value;
+				EditorGUILayout.LabelField("Object Model List", EditorStyles.boldLabel);
+			}
+
+			for (int i = 0; i < EveMarket.MarketObjects.Count; i++)
+			{
+				MarketObject marketObject = EveMarket.MarketObjects.ElementAt(i).Value;
 
 				EditorGUILayout.Space(10);
 

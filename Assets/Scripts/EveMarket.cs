@@ -18,14 +18,16 @@ namespace EveMarket
 		[SerializeField] HttpHandler httpHandler;
 		[SerializeField] DisplayPanel displayPanel;
 
-		public bool showGUI = false;
+		public static bool ShowGUI { get; set; }
 
-		public Dictionary<int, MarketObject> marketObjects = new Dictionary<int, MarketObject>();
+		public static Dictionary<int, MarketObject> MarketObjects = new Dictionary<int, MarketObject>();
 
 		StringBuilder sb = new StringBuilder();
 
 		private void OnEnable()
 		{
+			LoadStaticData();
+
 			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
 			{
 				unityMainThreadDispatcher = gameObject.AddComponent<UnityMainThreadDispatcher>();
@@ -44,7 +46,6 @@ namespace EveMarket
 
 		private void Start()
 		{
-			LoadStaticData();
 		}
 
 		public void LoadStaticData()
@@ -58,18 +59,13 @@ namespace EveMarket
 			StaticData.UpdateStaticData();
 		}
 
-		public void ClearDisplay()
-		{
-			DisplayPanel.ClearDisplay();
-		}
-
 		public void ConstructMarketObjects()
 		{
 			lock (StaticData.groupObjects)
 			{
 				foreach (var group in StaticData.groupObjects.Values)
 				{
-					marketObjects[group.Id] = new MarketObject(group);
+					MarketObjects[group.Id] = new MarketObject(group);
 				}
 			}
 
@@ -80,9 +76,9 @@ namespace EveMarket
 		{
 			sb.Clear();
 
-			for (int i = 0; i < marketObjects.Count; i++)
+			for (int i = 0; i < MarketObjects.Count; i++)
 			{
-				MarketObject marketObject = marketObjects.ElementAt(i).Value;
+				MarketObject marketObject = MarketObjects.ElementAt(i).Value;
 
 				sb.Append($"\nGroup: {marketObject.GroupName}\n");
 
@@ -95,13 +91,6 @@ namespace EveMarket
 
 				sb.Append($"\n\n");
 			}
-
-			DisplayPanel.SetDisplayText(sb.ToString());
-		}
-
-		public void ToggleGUI()
-		{
-			DisplayPanel.showGUI = showGUI;
 		}
 	}
 }

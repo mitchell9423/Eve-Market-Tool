@@ -1,97 +1,165 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using System.Threading.Tasks;
 using UnityEngine.Windows;
 using GameEvent;
+using System.Linq;
+using System;
+using UnityEngine.UIElements;
+using UnityEngine.Rendering;
 
 namespace EveMarket
 {
 	[ExecuteAlways]
 	public class DisplayPanel : MonoBehaviour
 	{
-		private Vector2 scrollPos;
-		public static string text = "";
-		public float scrollPosX;
-		public float scrollWidthOffset;
-		public float viewPosX;
-		public float viewWidthOffset;
+		public enum PanelState
+		{
+			AveragePrice
+		}
 
-		public static bool showGUI = false;
+		private PanelState panelState = PanelState.AveragePrice;
+		private Dictionary<PanelState, Action> Panels;
+
+		private Vector2 scrollPos;
+		public float scrollPosX;
+
+		Color defaultColor;
+		public static bool ShowGUI => EveMarket.ShowGUI;
+
+		private void OnEnable()
+		{
+			defaultColor = GUI.backgroundColor;
+			Panels = new Dictionary<PanelState, Action>()
+			{
+				{ PanelState.AveragePrice, AveragePriceLayout }
+			};
+		}
 
 		private void OnGUI()
 		{
-            if (!showGUI)
+			if (!ShowGUI)
             {
 				return;
-            }
-
-            GUI.backgroundColor = Color.black;
-
-			//int fontSize = 25;
-
-			// Create a new style for the TextField
-			GUIStyle displayFieldStyle = new GUIStyle(GUI.skin.box);
-			displayFieldStyle.normal.textColor = Color.cyan;
-			displayFieldStyle.alignment = TextAnchor.UpperLeft;
-
-			string buttonLabel = "Load Static Data";
-
-			float posY = 10;
-			float posX = 10;
-
-			float buttonHeight = displayFieldStyle.CalcHeight(new GUIContent(buttonLabel), 150.0f);
-			if (GUI.Button(new Rect(posX, posY, 150.0f, buttonHeight), "Load Static Data"))
-			{
-				StaticData.UpdateStaticData();
 			}
 
-			// Create TextField
-			// Calculate the size of the text content
-			Vector2 textSize = displayFieldStyle.CalcSize(new GUIContent(text));
+			GUI.backgroundColor = Color.black;
 
-			posX = 20;
-			posY += buttonHeight + 10;
-			float positionRectWidth = Screen.width - (posX * 2);
-			float positionRectHeight = Screen.height - posY - 10;
-			float contentRectWidth = Mathf.Max(positionRectWidth - 10f, textSize.x + 5);
-			float contentRectHeight = Mathf.Max(positionRectHeight - 10f, textSize.y + 5);
+			GUILayout.Space(10);
 
-			Rect scrollViewPositionRect = new Rect(
-				posX,
-				posY,
-				positionRectWidth,
-				positionRectHeight
-				);
+			using (new GUILayout.HorizontalScope())
+			{
+				GUILayout.Space(10);
 
-			Rect scrollViewRect = new Rect(
-				0,
-				0,
-				contentRectWidth,
-				contentRectHeight
-				);
+				using (new GUILayout.HorizontalScope(GUI.skin.box))
+				{
+					Button("Load Static Data", "Tool Tip", StaticData.LoadStaticData);
+					GUILayout.Space(10);
+					Button("Update Static Data", "Tool Tip", StaticData.UpdateStaticData);
+				}
+			}
 
-			scrollPos = GUI.BeginScrollView(scrollViewPositionRect, scrollPos, scrollViewRect);
+			using (new GUILayout.HorizontalScope())
+			{
+				GUILayout.Space(10);
 
-			GUI.Box(new Rect(
-				0,
-				0,
-				contentRectWidth,
-				contentRectHeight
-				), text, displayFieldStyle);
+				using (new GUILayout.HorizontalScope(GUI.skin.box))
+				{
+					Button("Average Price", "Tool Tip", DisplayAveragePrice);
+				}
+			}
 
-			GUI.EndScrollView();
+			scrollPos = GUILayout.BeginScrollView(scrollPos);
+			Panels[panelState].Invoke();
+			GUILayout.EndScrollView();
 		}
 
-		public static void SetDisplayText(string _text)
+		private void Button(string text, string toolTip, Action action)
 		{
-			text = _text;
+			GUIContent content = new GUIContent(text, toolTip);
+			GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
+			buttonStyle.fixedWidth = buttonStyle.CalcSize(content).x;
+			buttonStyle.hover.textColor = Color.yellow;
+
+			if (GUILayout.Button(content, buttonStyle))
+			{
+				action.Invoke();
+			}
 		}
 
-		public static void ClearDisplay()
+		private void DisplayAveragePrice() => panelState = PanelState.AveragePrice;
+		private void AveragePriceLayout()
 		{
-			text = "";
+			// Item block widths
+			int nameWidth = 300;
+			int spacer = 10;
+			int labelWidth = 87;
+			int priceWidth = 100;
+			int blockWidth = nameWidth + spacer + priceWidth + labelWidth;
+
+			// Define the number of rows and columns
+			int numObjects = EveMarket.MarketObjects.Count;
+			int columns = Mathf.FloorToInt((float)Screen.width / blockWidth);
+			int rows = numObjects > 0 ? Mathf.CeilToInt((float)numObjects / columns) : 0;
+			int index = 0;
+
+			// Create the grid
+
+			for (int row = 0; row < rows; row++)
+			{
+				if (index >= numObjects) break;
+
+				GUILayout.Space(10);
+
+				using (new GUILayout.HorizontalScope())
+				{
+					for (int col = 0; col < columns; col++)
+					{
+						if (index >= numObjects) break;
+
+						GUI.backgroundColor = Color.black;
+
+						MarketObject marketObject = EveMarket.MarketObjects.ElementAt(index).Value;
+
+						GUILayout.Space(10);
+
+						using (new GUILayout.VerticalScope(GUI.skin.box, GUILayout.Width(blockWidth)))
+						{
+							GUIStyle boldLabel = new GUIStyle(GUI.skin.label);
+							boldLabel.fontStyle = FontStyle.Bold;
+							boldLabel.fontSize = 20;
+							GUILayout.Label($"{marketObject.GroupName}", boldLabel);
+
+							GUILayout.Space(10);
+
+							for (int j = 0; j < marketObject.ItemCount; j++)
+							{
+								using (new GUILayout.VerticalScope(GUI.skin.box))
+								{
+									MarketObject.MarketItem marketItem = marketObject.GetItemByIndex(j);
+
+									using (new GUILayout.HorizontalScope())
+									{
+										GUILayout.Label($"  {marketItem.ItemName}", GUILayout.Width(nameWidth));
+										GUILayout.Space(spacer);
+										GUILayout.Label($"Average Price:", GUILayout.Width(labelWidth));
+										GUILayout.Label($"{marketItem.AveragePrice}", GUILayout.Width(priceWidth));
+
+										// Add more types here as needed
+									}
+								}
+							}
+
+							GUILayout.Space(10);
+						}
+
+						GUI.backgroundColor = defaultColor;
+
+						index++;
+					}
+				}
+			}
 		}
 	}
 }

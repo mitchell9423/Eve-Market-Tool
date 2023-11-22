@@ -167,7 +167,7 @@ namespace EveMarket
 
 			UnityMainThreadDispatcher.Instance.Enqueue(() =>
 			{
-				DisplayPanel.text = str;
+				Debug.Log(str);
 			});
 
 			HttpHandler.CompleteStaticUpdateTask();
