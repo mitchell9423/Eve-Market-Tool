@@ -20,8 +20,6 @@ namespace EveMarket
 
 		public static bool ShowGUI { get; set; }
 
-		public static Dictionary<int, MarketObject> MarketObjects = new Dictionary<int, MarketObject>();
-
 		StringBuilder sb = new StringBuilder();
 
 		private void OnEnable()
@@ -51,24 +49,12 @@ namespace EveMarket
 		public void LoadStaticData()
 		{
 			StaticData.LoadStaticData();
-			ConstructMarketObjects();
+			BuildDisplayString();
 		}
 
 		public void UpdateStaticData()
 		{
 			StaticData.UpdateStaticData();
-		}
-
-		public void ConstructMarketObjects()
-		{
-			lock (StaticData.groupObjects)
-			{
-				foreach (var group in StaticData.groupObjects.Values)
-				{
-					MarketObjects[group.Id] = new MarketObject(group);
-				}
-			}
-
 			BuildDisplayString();
 		}
 
@@ -76,15 +62,15 @@ namespace EveMarket
 		{
 			sb.Clear();
 
-			for (int i = 0; i < MarketObjects.Count; i++)
+			for (int i = 0; i < StaticData.MarketObjects.Count; i++)
 			{
-				MarketObject marketObject = MarketObjects.ElementAt(i).Value;
+				MarketObject marketObject = StaticData.MarketObjects.ElementAt(i).Value;
 
 				sb.Append($"\nGroup: {marketObject.GroupName}\n");
 
 				for (int j = 0; j < marketObject.ItemCount; j++)
 				{
-					MarketObject.MarketItem marketItem = marketObject.GetItemByIndex(j);
+					MarketItem marketItem = marketObject.GetItemByIndex(j);
 
 					sb.Append($"\n  {marketItem.ItemName}   Average Price: {marketItem.AveragePrice}");
 				}

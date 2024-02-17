@@ -1,26 +1,16 @@
+using EveMarket.Network;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 namespace EveMarket
 {
+	[Serializable]
 	public class MarketObject
 	{
-		public class MarketItem
-		{
-			UniverseItem item;
-			MarketPrice price;
-
-			public MarketItem(UniverseItem _item, MarketPrice _price)
-			{
-				item = _item;
-				price = _price;
-			}
-
-			public string ItemName { get => item.Name; }
-			public double AveragePrice { get => price.AveragePrice; }
-		}
-
 		public MarketGroup Group { get; private set; }
 		public List<MarketItem> Items { get; private set; } = new List<MarketItem>();
 
@@ -30,16 +20,58 @@ namespace EveMarket
 		public MarketObject(MarketGroup _group)
 		{
 			Group = _group;
-
-			lock (StaticData.itemObjects)
+			foreach (var typeId in Group.Types)
 			{
-				lock (StaticData.marketPrices)
+				lock (StaticData.ItemObjects)
 				{
-					foreach (var itemId in Group.Types)
+					lock (StaticData.MarketPrices)
 					{
-						if (StaticData.itemObjects.ContainsKey(itemId) && StaticData.marketPrices.ContainsKey(itemId))
+						if (StaticData.ItemObjects.ContainsKey(typeId) && StaticData.MarketPrices.ContainsKey(typeId))
 						{
-							Items.Add(new MarketItem(StaticData.itemObjects[itemId], StaticData.marketPrices[itemId]));
+							lock (StaticData.OrderRecords)
+							{
+								foreach (var regionOrders in StaticData.OrderRecords.Values)
+								{
+									if (!regionOrders.ContainsKey(typeId)) regionOrders[typeId] = new OrderRecord(new List<MarketOrder>());
+								}
+
+								Items.Add(new MarketItem(StaticData.ItemObjects[typeId], StaticData.MarketPrices[typeId], StaticData.OrderRecords));
+							}
+						}
+					}
+				}
+			}
+
+			OverrideMarginStaus();
+		}
+
+		public void UpdateMarketData()
+		{
+			for (int i = 0; i < Items.Count; i++)
+			{
+				Items[i].UpdateOrders();
+			}
+
+			OverrideMarginStaus();
+		}
+
+		public void OverrideMarginStaus()
+		{
+			for (int i = 0; i < Items.Count; i++)
+			{
+				string name = Items[i].ItemName;
+
+				if (name.Contains("Compressed") && !name.Contains("Batch"))
+				{
+					string uncompressedName = name.Replace("Compressed ", "");
+
+					MarketItem uncompressedItem = Items.Find(item => item.ItemName == uncompressedName);
+
+					if (uncompressedItem != null && uncompressedItem.CurrentBuyPrice > 0)
+					{
+						if (Items[i].CurrentSellPrice > uncompressedItem.CurrentBuyPrice / uncompressedItem.MarginPercentage)
+						{
+							uncompressedItem.MarginStatus = MarginStatus.High;
 						}
 					}
 				}

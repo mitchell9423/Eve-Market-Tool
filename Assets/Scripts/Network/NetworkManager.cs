@@ -4,22 +4,37 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
 namespace EveMarket.Network
 {
+	public enum UpdateStatus
+	{
+		Idle,
+		Updating
+	}
+
 	public static class NetworkManager
 	{
+		public static int pendingRequests = 0;
+		public static int completedRequests = 0;
+		public static int totalRequests = 0;
+
+		public static UpdateStatus Status = UpdateStatus.Idle;
+
 		static Dictionary<Type, string> ModelTypeToURI = new Dictionary<Type, string>()
 		{
 			{ typeof(List<MarketPrice>), NetworkSettings.MARKET_PRICES_URI},
 			{ typeof(MarketGroup), NetworkSettings.MARKET_GROUP_URI},
-			{ typeof(UniverseItem), NetworkSettings.UNIVERSE_TYPES_URI}
+			{ typeof(UniverseItem), NetworkSettings.UNIVERSE_TYPES_URI},
+			{ typeof(List<MarketOrder>), NetworkSettings.ITEM_ORDERS_URI}
 		};
 
-		public static void AsyncRequest<T>(string extension = "")
+		public static void AsyncRequest<T>(string extension = "", Region region = Region.The_Forge, int type_id = 0)
 		{
 			try
 			{
@@ -28,14 +43,33 @@ namespace EveMarket.Network
 				{
 					baseUri = ModelTypeToURI[typeof(T)];
 				}
+				baseUri = baseUri.Replace("[region_id]", StaticData.RegionId[region].ToString());
+				baseUri = baseUri.Replace("[type_id]", type_id.ToString());
 
 				string url = baseUri + extension;
-				_ = HttpHandler.instance.AsyncGetRequest<T>(url, StaticData.HandleResponse<T>);
+				_ = HttpHandler.instance.AsyncGetRequest<T>(url, StaticData.HandleResponse<T>, region, type_id);
 			}
 			catch (Exception ex)
 			{
 				Debug.LogError($"An error occurred: {ex.Message}");
 			}
+		}
+
+		public static void CompleteStaticUpdateTask()
+		{
+			Interlocked.Increment(ref completedRequests);
+			if (Interlocked.Decrement(ref pendingRequests) == 0)  // Decrement counter and check
+			{
+				Status = UpdateStatus.Idle;
+				completedRequests = 0;
+				totalRequests = 0;
+
+				HttpHandler.instance.ClearRequestList();
+				Debug.Log($"All requests have completed.");
+				EveDelegate.StaticUpdateComplete?.Invoke();
+			}
+
+			Debug.Log($"Completed {completedRequests} requests with {pendingRequests} of {totalRequests} requests pending.");
 		}
 
 		public static void JobsComplete()

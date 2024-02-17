@@ -79,9 +79,9 @@ namespace EveMarket
 				EditorGUILayout.LabelField("Object Model List", EditorStyles.boldLabel);
 			}
 
-			for (int i = 0; i < EveMarket.MarketObjects.Count; i++)
+			for (int i = 0; i < StaticData.MarketObjects.Count; i++)
 			{
-				MarketObject marketObject = EveMarket.MarketObjects.ElementAt(i).Value;
+				MarketObject marketObject = StaticData.MarketObjects.ElementAt(i).Value;
 
 				EditorGUILayout.Space(10);
 
@@ -93,7 +93,7 @@ namespace EveMarket
 
 					for (int j = 0; j < marketObject.ItemCount; j++)
 					{
-						MarketObject.MarketItem marketItem = marketObject.GetItemByIndex(j);
+						MarketItem marketItem = marketObject.GetItemByIndex(j);
 
 						using (new GUILayout.HorizontalScope())
 						{

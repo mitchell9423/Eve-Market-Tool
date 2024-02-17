@@ -1,7 +1,10 @@
+using EveMarket.Network;
 using EveMarket.Util;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
@@ -14,17 +17,15 @@ namespace EveMarket
 	{
 		public static HttpHandler instance;
 
-		private static int pendingRequests = 0;
-		private static int completedRequests = 0;
-		private static int totalRequests = 0;
-
 		private readonly HttpClient _httpClient;
-
 		public HttpHandler()
 		{
 			_httpClient = new HttpClient();
 			instance = this;
 		}
+
+		private List<UnityWebRequestAsyncOperation> asyncOps = new List<UnityWebRequestAsyncOperation>();
+		public void ClearRequestList() => asyncOps.Clear();
 
 		public IEnumerator Get<T>(string url, System.Action<string> callback)
 		{
@@ -45,48 +46,65 @@ namespace EveMarket
 			}
 		}
 
-		public async Task AsyncGetRequest<T>(string url, System.Action<string> callback)
+		public void StopAllRequests()
 		{
-			Interlocked.Increment(ref totalRequests);
-			Interlocked.Increment(ref pendingRequests);
+			lock (asyncOps)
+			{
+				foreach (var asyncOp in asyncOps)
+				{
+					if (!asyncOp.isDone)
+					{
+						asyncOp.webRequest.Abort();
+						NetworkManager.CompleteStaticUpdateTask();
+					}
+				}
+			}
+		}
+
+		public async Task AsyncGetRequest<T>(string url, System.Action<string, Region, int> callback, Region region, int type_id = 0)
+		{
+			NetworkManager.Status = UpdateStatus.Updating;
+			Interlocked.Increment(ref NetworkManager.totalRequests);
+			Interlocked.Increment(ref NetworkManager.pendingRequests);
 			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
 			UnityWebRequest webRequest = UnityWebRequest.Get(url);
-			UnityWebRequestAsyncOperation asyncOp = webRequest.SendWebRequest();
 
-			asyncOp.completed += (AsyncOperation op) =>
+			lock (asyncOps)
 			{
-				if (webRequest.result == UnityWebRequest.Result.ConnectionError)
-				{
-					Debug.Log($"Web request Error: {webRequest.error}");
-					callback(null);
-				}
-				else
-				{
+				asyncOps.Add(webRequest.SendWebRequest());
 
-					UnityMainThreadDispatcher.Instance.Enqueue(() =>
+				asyncOps.Last().completed += (AsyncOperation op) =>
+				{
+					if (webRequest.result == UnityWebRequest.Result.ProtocolError)
 					{
-						callback(webRequest.downloadHandler.text);
-					});
-				}
-				tcs.SetResult(true);
-			};
+						Debug.LogError($"Web Protocol Error: {webRequest.error}\n{url}");
+						UnityMainThreadDispatcher.Instance.Enqueue(() =>
+						{
+							callback(null, region, 0);
+						});
+					}
+					else if (webRequest.result == UnityWebRequest.Result.ConnectionError)
+					{
+						Debug.LogError($"Web request Error: {webRequest.error}\n{url}[{StaticData.ItemObjects[type_id].Name}]");
+						UnityMainThreadDispatcher.Instance.Enqueue(() =>
+						{
+							callback(null, region, 0);
+						});
+					}
+					else
+					{
+						UnityMainThreadDispatcher.Instance.Enqueue(() =>
+						{
+							callback(webRequest.downloadHandler.text, region, type_id);
+						});
+					}
 
-			await tcs.Task;
-		}
-
-		public static void CompleteStaticUpdateTask()
-		{
-			Interlocked.Increment(ref completedRequests);
-			if (Interlocked.Decrement(ref pendingRequests) == 0)  // Decrement counter and check
-			{
-				completedRequests = 0;
-				totalRequests = 0;
-
-				EveDelegate.StaticUpdateComplete?.Invoke();
+					tcs.SetResult(true);
+				};
 			}
 
-			Debug.Log($"Completed {completedRequests} requests with {pendingRequests} of {totalRequests} requests pending.");
+			await tcs.Task;
 		}
 	}
 }

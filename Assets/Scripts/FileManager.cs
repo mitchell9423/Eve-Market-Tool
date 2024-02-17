@@ -17,12 +17,14 @@ namespace EveMarket
 		const string MARKET_GROUPS_PATH = "Assets\\StaticData\\MarketGroups.json";
 		const string UNIVERSE_TYPES_PATH = "Assets\\StaticData\\UniverseItems.json";
 		const string MARKET_PRICES_PATH = "Assets\\StaticData\\MarketPrices.json";
+		const string ITEM_ORDERS_PATH = "Assets\\StaticData\\ItemOrders.json";
 
 		static readonly Dictionary<Type, string> TypeFilePath = new Dictionary<Type, string>()
 		{
 			{ typeof(Dictionary<int, MarketPrice>), MARKET_PRICES_PATH },
 			{ typeof(Dictionary<int, MarketGroup>), MARKET_GROUPS_PATH },
-			{ typeof(Dictionary<int, UniverseItem>), UNIVERSE_TYPES_PATH }
+			{ typeof(Dictionary<int, UniverseItem>), UNIVERSE_TYPES_PATH },
+			{ typeof(Dictionary<Region, Dictionary<int, OrderRecord>>), ITEM_ORDERS_PATH }
 		};
 
 		private static string GetFilePath<T>()
@@ -32,7 +34,7 @@ namespace EveMarket
 				return $"{Path.GetFullPath(@"./")}{path}";
 			}
 
-			Debug.LogWarning($"File path for type {typeof(T).Name} not found.");
+			Debug.LogWarning($"File path for type {typeof(T)} not found.");
 
 			return null;
 		}
