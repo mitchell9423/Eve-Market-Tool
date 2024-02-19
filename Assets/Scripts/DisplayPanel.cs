@@ -29,17 +29,24 @@ namespace EveMarket
 			public int spacer;
 			public int labelWidth;
 			public int priceWidth;
+			public int compressedLabelWidth;
 
 			// Define the number of rows and columns
 			public int index;
 			public int numObjects;
 
 			public int blockWidth;
-			public int columns => Mathf.FloorToInt((float)Screen.width / blockWidth);
-			public int rows => numObjects > 0 ? Mathf.CeilToInt((float)numObjects / columns) : 0;
+			public int columns;
+			public int rows;
 
 			// Define Label Texts
 			public string priceLabel;
+
+			public void SetRowCol()
+			{
+				columns = Mathf.FloorToInt((float)Screen.width / (blockWidth + 20));
+				rows = numObjects > 0 ? Mathf.CeilToInt((float)numObjects / columns) : 0;
+			}
 		}
 
 		private PanelState panelState = PanelState.AveragePrice;
@@ -132,17 +139,20 @@ namespace EveMarket
 			panelState = PanelState.CurrentSellPrice;
 
 			// Item block widths
-			props.nameWidth = 300;
-			props.spacer = 10;
+			props.nameWidth = 200;
+			props.spacer = 5;
 			props.labelWidth = 28;
 			props.priceWidth = 90;
-			props.blockWidth = props.nameWidth + ((props.spacer + props.priceWidth + props.labelWidth) * 2);
+			props.compressedLabelWidth = 80;
+			props.blockWidth = props.nameWidth + (props.labelWidth * 2) + ((props.priceWidth + props.spacer) * 3) + props.compressedLabelWidth;
 
 			// Define the number of rows and columns
 			props.numObjects = StaticData.MarketObjects.Count;
 			props.index = 0;
 
 			props.priceLabel = "Sell: ";
+
+			props.SetRowCol();
 		}
 
 		private void DisplayAveragePrice()
@@ -161,6 +171,7 @@ namespace EveMarket
 			props.index = 0;
 
 			props.priceLabel = "Average Price:";
+			props.SetRowCol();
 		}
 
 		private void PriceLayout()
@@ -203,10 +214,25 @@ namespace EveMarket
 
 							for (int j = 0; j < marketObject.ItemCount; j++)
 							{
+								MarketItem marketItem = marketObject.GetItemByIndex(j);
+								if (marketItem.ItemName.Contains("Compressed")) continue;
+
+								double compressedPrice = 0;
+								double reprocessedPrice = 0;
+
+								if (panelState == PanelState.CurrentSellPrice)
+								{
+									MarketItem compressedItem = marketObject.Items.Find(item => item.ItemName == $"Compressed {marketItem.ItemName}");
+									compressedPrice = compressedItem != null ? compressedItem.CurrentSellPrice : 0;
+
+									if (marketObject.GroupName != "Minerals")
+									{
+										reprocessedPrice = Reprocess.CalcReprocessedValue(marketItem);
+									}
+								}
+
 								using (new GUILayout.VerticalScope(GUI.skin.box))
 								{
-									MarketItem marketItem = marketObject.GetItemByIndex(j);
-
 									using (new GUILayout.HorizontalScope())
 									{
 										double price = panelState == PanelState.AveragePrice ? marketItem.AveragePrice : marketItem.CurrentSellPrice;
@@ -221,10 +247,25 @@ namespace EveMarket
 											GUILayout.Space(props.spacer);
 											GUILayout.Label($"Buy: ", GUILayout.Width(props.labelWidth));
 											GUILayout.Label($"{marketItem.CurrentBuyPrice}", GUILayout.Width(props.priceWidth));
+
+											GUILayout.Space(props.spacer);
+											GUILayout.Label($"{props.priceLabel}", GUILayout.Width(props.labelWidth));
+											GUILayout.Label($"{price}", GUILayout.Width(props.priceWidth));
+
+											GUILayout.Space(props.spacer);
+											GUILayout.Label($"Compressed: ", GUILayout.Width(props.compressedLabelWidth));
+											GUILayout.Label($"{compressedPrice}", GUILayout.Width(props.priceWidth));
+
+											GUILayout.Space(props.spacer);
+											GUILayout.Label($"Reprocessed: ", GUILayout.Width(props.compressedLabelWidth));
+											GUILayout.Label($"{reprocessedPrice}", GUILayout.Width(props.priceWidth));
 										}
-										GUILayout.Space(props.spacer);
-										GUILayout.Label($"{props.priceLabel}", GUILayout.Width(props.labelWidth));
-										GUILayout.Label($"{price}", GUILayout.Width(props.priceWidth));
+                                        else
+										{
+											GUILayout.Space(props.spacer);
+											GUILayout.Label($"{props.priceLabel}", GUILayout.Width(props.labelWidth));
+											GUILayout.Label($"{price}", GUILayout.Width(props.priceWidth));
+										}
 
 										GUI.contentColor = defaultColor;
 										GUI.enabled = true;
@@ -234,14 +275,17 @@ namespace EveMarket
 								}
 							}
 
-							GUILayout.Space(10);
+							//GUILayout.Space(10);
 						}
 
 						GUI.backgroundColor = defaultColor;
 
 						index++;
 					}
+
+					GUILayout.Space(20);
 				}
+
 			}
 		}
 	}

@@ -52,7 +52,9 @@ namespace EveMarket
 			{ 527, "Hedbergite" },
 			{ 528, "Hemorphite" },
 			{ 529, "Jaspet" },
-			{ 530, "Mercoxit" }
+			{ 530, "Mercoxit" },
+			{ 3487, "Mordunium" },
+			{ 1857, "Mineral" }
 		};
 
 		public static Dictionary<int, MarketPrice> MarketPrices = new Dictionary<int, MarketPrice>();

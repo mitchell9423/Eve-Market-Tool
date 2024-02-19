@@ -29,6 +29,7 @@ namespace EveMarket
 		}
 
 		public int TypeId { get => item.TypeId; }
+		public int GroupId { get => item.GroupId; }
 		public string ItemName { get => item.Name; }
 		public double AveragePrice { get => price.AveragePrice; }
 		public double MarginPercentage { get => marginPercentage; }

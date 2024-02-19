@@ -317,5 +317,23 @@
       28387,
       22
     ]
+  },
+  "1857": {
+    "description": "Minerals harvested from refined asteroid ore.",
+    "market_group_id": 1857,
+    "name": "Minerals",
+    "parent_group_id": 533,
+    "types": [
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      11399,
+      76374,
+      48927
+    ]
   }
 }
