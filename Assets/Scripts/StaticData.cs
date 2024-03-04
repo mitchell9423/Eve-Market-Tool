@@ -9,15 +9,66 @@ using EveMarket.Network;
 using System.Linq;
 using System.Threading.Tasks;
 using static UnityEditor.Progress;
+using static UnityEngine.UI.Image;
+using static System.Collections.Specialized.BitVector32;
 
 namespace EveMarket
 {
-	public enum MarginStatus
+	public enum ReprocessType
 	{
-		Normal,
-		High,
-		Low
+		None,
+		Abyssal,
+		Coherent,
+		Common,
+		Complex,
+		Exceptional,
+		Mercoxit,
+		Rare,
+		Simple,
+		Ubiquitous,
+		Uncommon,
+		Variegated
 	}
+
+	public enum Mineral
+	{
+		Tritanium, 
+		Pyerite, 
+		Mexallon,
+		Isogen, 
+		Nocxium,
+		Megacyte,
+		Morphite,
+		Zydrine,
+		NeoJadarite,
+		ChromodynamicTricarboxyls
+	}
+
+	public enum Group
+	{
+		Arkonor,
+		Bistot,
+		Pyroxeres,
+		Plagioclase,
+		Spodumain,
+		Veldspar,
+		Scordite,
+		Crokite,
+		Dark_Ochre,
+		Kernite,
+		Gneiss,
+		Omber,
+		Hedbergite,
+		Hemorphite,
+		Jaspet,
+		Mercoxit,
+		Bezdnacine,
+		Rakovene,
+		Talassonite,
+		Mordunium,
+		Mineral
+	}
+
 	public enum ObjectType
 	{
 		MarketPrice,
@@ -31,9 +82,68 @@ namespace EveMarket
 		Lonetrek
 	}
 
+	public enum System
+	{
+		Tunttaras,
+		Ylandoki
+	}
+
+	public enum Range
+	{
+		Station,
+		Solar_System,
+		Jump_1,
+		Jump_2,
+		Jump_3,
+		Jump_4,
+		Jump_5,
+		Jump_10,
+		Jump_20,
+		Jump_30,
+		Jump_40,
+		Region
+	}
+
 	public static class StaticData
 	{
 		private static StringBuilder sb = new StringBuilder();
+		public static Dictionary<System, int> BuyOrderSystems { get; set; } = new Dictionary<System, int>()
+		{
+			{ System.Ylandoki, 30001395 },
+			{ System.Tunttaras, 30001379 }			
+		};
+
+		public static Dictionary<Range, string> RangeStringName = new Dictionary<Range, string>()
+		{
+			{ Range.Station, "station" },
+			{ Range.Solar_System, "solarsystem" },
+			{ Range.Jump_1, "1" },
+			{ Range.Jump_2, "2" },
+			{ Range.Jump_3, "3" },
+			{ Range.Jump_4, "4" },
+			{ Range.Jump_5, "5" },
+			{ Range.Jump_10, "10" },
+			{ Range.Jump_20, "20" },
+			{ Range.Jump_30, "30" },
+			{ Range.Jump_40, "40" },
+			{ Range.Region, "Region" },
+		};
+
+		public static Dictionary<string, int> RangeStringToInt = new Dictionary<string, int>()
+		{
+			{ "region", 100 },
+			{ "solarsystem", 0 },
+			{ "station", 0 },
+			{ "1", 1 },
+			{ "2", 2 },
+			{ "3", 3 },
+			{ "4", 4 },
+			{ "5", 5 },
+			{ "10", 10 },
+			{ "20", 20 },
+			{ "30", 30 },
+			{ "40", 40 }
+		};
 
 		private static Dictionary<int, string> GroupIdsToName = new Dictionary<int, string>()
 		{
@@ -53,10 +163,14 @@ namespace EveMarket
 			{ 528, "Hemorphite" },
 			{ 529, "Jaspet" },
 			{ 530, "Mercoxit" },
+			{ 2538, "Bezdnacine" },
+			{ 2539, "Rakovene" },
+			{ 2540, "Talassonite" },
 			{ 3487, "Mordunium" },
 			{ 1857, "Mineral" }
 		};
 
+		public static Dictionary<int, List<RouteData>> Routes = new Dictionary<int, List<RouteData>>();
 		public static Dictionary<int, MarketPrice> MarketPrices = new Dictionary<int, MarketPrice>();
 		public static Dictionary<int, MarketGroup> GroupObjects = new Dictionary<int, MarketGroup>();
 		public static Dictionary<int, UniverseItem> ItemObjects = new Dictionary<int, UniverseItem>();
@@ -132,6 +246,18 @@ namespace EveMarket
 				}
 			}
 
+			lock (Routes)
+			{
+				try
+				{
+					Routes = FileManager.DeserializeFromFile<Dictionary<int, List<RouteData>>>();
+				}
+				catch
+				{
+					Routes = new Dictionary<int, List<RouteData>>();
+				}
+			}
+
 			ConstructMarketObjects();
 
 			Debug.Log("Static Data Loaded.");
@@ -175,6 +301,7 @@ namespace EveMarket
 				}
 
 				StringBuilder localSb = new StringBuilder();
+
 				if (objectModel is MarketGroup marketGroup)
 				{
 					lock (GroupObjects)
@@ -217,15 +344,55 @@ namespace EveMarket
 						}
 
 						OrderRecords[region][type_id] = new OrderRecord(marketOrders);
+					}
 
-						//if (!OrderRecords[region].ContainsKey(type_id))
-						//{
-						//	OrderRecords[region][type_id] = new OrderRecord(marketOrders);
-						//}
-						//else
-						//{
-						//	OrderRecords[region][type_id].AddOrders(marketOrders);
-						//}
+					if (Routes == null) Routes = new Dictionary<int, List<RouteData>>();
+
+					lock (Routes)
+					{
+						int origin = StaticData.BuyOrderSystems[AppSettings.BuyOrderSystem];
+
+						foreach (var order in marketOrders)
+						{
+							if (Routes.ContainsKey(origin))
+							{
+								if (Routes[origin] != null)
+								{
+									if (Routes[origin].Exists(route => route.Destination == order.SystemId))
+									{
+										continue;
+									}
+								}
+							}
+
+							NetworkManager.AsyncRequest<List<int>>(data: new RouteData(origin: origin, destination: order.SystemId));
+							break;
+						}
+					}
+				}
+				else if (objectModel is List<int> route)
+				{
+					if (Routes == null) Routes = new Dictionary<int, List<RouteData>>();
+
+					lock (Routes)
+					{
+						if (route.Count > 0)
+						{
+							int origin = route[route.Count - 1];
+							int destination = route[0];
+
+							if (!Routes.ContainsKey(origin)) Routes[origin] = new List<RouteData>();
+
+							if (!Routes[origin].Exists(rte => rte.Destination == destination))
+							{
+								Routes[origin].Add(
+									new RouteData(
+										origin: origin,
+										destination: destination,
+										route: route
+										));
+							}
+						}
 					}
 				}
 
@@ -259,29 +426,26 @@ namespace EveMarket
 		{
 			lock (OrderRecords)
 			{
-				foreach (var regionOrders in OrderRecords.Values)
-				{
-					if (regionOrders.ContainsKey(typeId))
-						regionOrders[typeId].ClearOrders();
-				}
+				if (!OrderRecords.ContainsKey(AppSettings.SellRegion))
+					OrderRecords[AppSettings.SellRegion] = new Dictionary<int, OrderRecord>();
 			}
 
-			if (!OrderRecords.ContainsKey(NetworkSettings.SellRegion))
-				OrderRecords[NetworkSettings.SellRegion] = new Dictionary<int, OrderRecord>();
-			NetworkManager.AsyncRequest<List<MarketOrder>>(region: NetworkSettings.SellRegion, type_id: typeId);
+			NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.SellRegion, type_id: typeId);
 
-			if (NetworkSettings.BuyRegion != NetworkSettings.SellRegion)
+			if (AppSettings.BuyRegion != AppSettings.SellRegion)
 			{
-				if (!OrderRecords.ContainsKey(NetworkSettings.BuyRegion))
-					OrderRecords[NetworkSettings.BuyRegion] = new Dictionary<int, OrderRecord>();
-				NetworkManager.AsyncRequest<List<MarketOrder>>(region: NetworkSettings.BuyRegion, type_id: typeId);
+				lock (OrderRecords)
+				{
+					if (!OrderRecords.ContainsKey(AppSettings.BuyRegion))
+						OrderRecords[AppSettings.BuyRegion] = new Dictionary<int, OrderRecord>();
+				}
+
+				NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.BuyRegion, type_id: typeId);
 			}
 		}
 
 		private static void SaveStaticData()
 		{
-			Debug.Log($"SaveStaticData()");
-
 			EveDelegate.Unsubscribe(ref EveDelegate.StaticUpdateComplete, SaveStaticData);
 
 			lock (GroupObjects)
@@ -311,9 +475,25 @@ namespace EveMarket
 				FileManager.SerializeObject(OrderRecords);
 			}
 
+			lock (Routes)
+			{
+				FileManager.SerializeObject(Routes);
+			}
+
 			foreach (var marketObject in MarketObjects.Values)
 			{
 				marketObject.UpdateMarketData();
+			}
+		}
+
+		public static void UpdateMarketObjects()
+		{
+			foreach (var marketObject in MarketObjects.Values)
+			{
+				foreach (var marketItem in marketObject.Items)
+				{
+					marketItem.UpdateOrders();
+				}
 			}
 		}
 	}

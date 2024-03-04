@@ -31,22 +31,25 @@ namespace EveMarket.Network
 			{ typeof(List<MarketPrice>), NetworkSettings.MARKET_PRICES_URI},
 			{ typeof(MarketGroup), NetworkSettings.MARKET_GROUP_URI},
 			{ typeof(UniverseItem), NetworkSettings.UNIVERSE_TYPES_URI},
-			{ typeof(List<MarketOrder>), NetworkSettings.ITEM_ORDERS_URI}
+			{ typeof(List<MarketOrder>), NetworkSettings.ITEM_ORDERS_URI},
+			{ typeof(List<int>), NetworkSettings.ROUTE_URI}
 		};
 
-		public static void AsyncRequest<T>(string extension = "", Region region = Region.The_Forge, int type_id = 0)
+		public static void AsyncRequest<T>(string extension = "", Region region = Region.The_Forge, int type_id = 0, RouteData data = new RouteData())
 		{
 			try
 			{
 				string baseUri;
-				lock (ModelTypeToURI)
-				{
-					baseUri = ModelTypeToURI[typeof(T)];
-				}
+
+				lock (ModelTypeToURI) { baseUri = ModelTypeToURI[typeof(T)]; }
+
 				baseUri = baseUri.Replace("[region_id]", StaticData.RegionId[region].ToString());
 				baseUri = baseUri.Replace("[type_id]", type_id.ToString());
+				baseUri = baseUri.Replace("[destination]", data.Destination.ToString());
+				baseUri = baseUri.Replace("[origin]", data.Origin.ToString());
 
 				string url = baseUri + extension;
+
 				_ = HttpHandler.instance.AsyncGetRequest<T>(url, StaticData.HandleResponse<T>, region, type_id);
 			}
 			catch (Exception ex)

@@ -10,13 +10,40 @@ namespace GameEvent
 	[Serializable]
 	public class CustomGameEvent : UnityEvent<Component, object> { }
 
+	[Serializable]
+	public class GameEventContainer
+	{
+		[SerializeField] public GameEvent gameEvent;
+		[SerializeField] public CustomGameEvent customUnityEvent;
+	}
+
 	public class GameEventListener : MonoBehaviour
 	{
-		[SerializeField] GameEvent gameEvent;
-		[SerializeField] CustomGameEvent customUnityEvent;
+		[SerializeField] List<GameEventContainer> gameEventListeners = new List<GameEventContainer>();
 
-		private void Awake() => gameEvent.Register(gameEventListener: this);
-		private void OnDestroy() => gameEvent.Deregister(gameEventListener: this);
-		public void RaiseEvent(Component sender, object data) => customUnityEvent.Invoke(sender, data);
+		private void Awake()
+		{
+			for (int i = 0; i < gameEventListeners.Count; i++)
+			{
+				if (gameEventListeners[i] == null) gameEventListeners[i] = new GameEventContainer();
+				gameEventListeners[i].gameEvent.Register(gameEventListener: this);
+			}
+		}
+
+		private void OnDestroy()
+		{
+			for (int i = 0; i < gameEventListeners.Count; i++)
+			{
+				gameEventListeners[i].gameEvent.Deregister(gameEventListener: this);
+			}
+		}
+
+		public void RaiseEvent(Component sender, object data)
+		{
+			for (int i = 0; i < gameEventListeners.Count; i++)
+			{
+				gameEventListeners[i].customUnityEvent.Invoke(sender, data);
+			}
+		}
 	}
 }

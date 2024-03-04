@@ -103,17 +103,12 @@ namespace EveMarket
 
 		public OrderRecord(List<MarketOrder> marketOrders)
 		{
-			AddOrders(marketOrders);
+			this.marketOrders = marketOrders;
 		}
 
 		public void AddOrders(List<MarketOrder> marketOrders)
 		{
-			this.marketOrders.AddRange(marketOrders);
-		}
-
-		public void ClearOrders()
-		{
-			marketOrders.Clear();
+			this.marketOrders = marketOrders;
 		}
 	}
 
@@ -165,5 +160,11 @@ namespace EveMarket
 
 		[JsonProperty("value")]
 		public double Value { get; set; }
+	}
+
+	[Serializable]
+	public class RouteInfo
+	{
+		public List<int> Route { get; set; } = new List<int>();
 	}
 }

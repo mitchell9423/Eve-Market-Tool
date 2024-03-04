@@ -1,0 +1,21 @@
+Systems bought from.
+
+Hageken
+Korama
+Sobaseki
+Isanamo
+Amsen
+Kakakela
+Airkio
+Ekura
+Sarekuwa
+Nourvukaiken
+Kamokor
+Jouvulen
+Akiainavas
+
+
+httpSubsystem
+	
+
+pass: yucky

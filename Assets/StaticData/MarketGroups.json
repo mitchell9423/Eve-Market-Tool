@@ -335,5 +335,64 @@
       76374,
       48927
     ]
+  },
+  "2538": {
+    "description": "Bezdnacine",
+    "market_group_id": 2538,
+    "name": "Bezdnacine",
+    "parent_group_id": 54,
+    "types": [
+      62576,
+      62577,
+      62578,
+      56627,
+      56628,
+      52316
+    ]
+  },
+  "2539": {
+    "description": "Rakovene",
+    "market_group_id": 2539,
+    "name": "Rakovene",
+    "parent_group_id": 54,
+    "types": [
+      56629,
+      62579,
+      62580,
+      76373,
+      56630,
+      52315,
+      62581
+    ]
+  },
+  "2540": {
+    "description": "Talassonite",
+    "market_group_id": 2540,
+    "name": "Talassonite",
+    "parent_group_id": 54,
+    "types": [
+      56625,
+      56626,
+      62582,
+      62583,
+      62584,
+      52306
+    ]
+  },
+  "3487": {
+    "description": "",
+    "market_group_id": 3487,
+    "name": "Mordunium",
+    "parent_group_id": 54,
+    "types": [
+      75275,
+      75276,
+      75277,
+      75278,
+      74521,
+      74522,
+      74523,
+      74524
+    ]
   }
 }

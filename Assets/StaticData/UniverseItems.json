@@ -11552,5 +11552,1652 @@
     "radius": 1.0,
     "type_id": 37,
     "volume": 0.01
+  },
+  "62576": {
+    "capacity": 0.0,
+    "description": "Intense neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield huge amounts of <a href=showinfo:34>Tritanium</a>, <a href=showinfo:37>Isogen</a> and <a href=showinfo:40>Megacyte</a>.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4031,
+    "icon_id": 25171,
+    "market_group_id": 2538,
+    "mass": 0.0,
+    "name": "Compressed Bezdnacine",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62576,
+    "volume": 0.16
+  },
+  "52316": {
+    "capacity": 0.0,
+    "description": "Intense neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield huge amounts of <a href=showinfo:34>Tritanium</a>, <a href=showinfo:37>Isogen</a> and <a href=showinfo:40>Megacyte</a>.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4031,
+    "icon_id": 24143,
+    "market_group_id": 2538,
+    "mass": 0.0,
+    "name": "Bezdnacine",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 52316,
+    "volume": 16.0
+  },
+  "62577": {
+    "capacity": 0.0,
+    "description": "Intense neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Isogen and Megacyte.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4031,
+    "icon_id": 25171,
+    "market_group_id": 2538,
+    "mass": 0.0,
+    "name": "Compressed Abyssal Bezdnacine",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62577,
+    "volume": 0.16
+  },
+  "56628": {
+    "capacity": 0.0,
+    "description": "Intense neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Isogen and Megacyte.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4031,
+    "icon_id": 24143,
+    "market_group_id": 2538,
+    "mass": 0.0,
+    "name": "Hadal Bezdnacine",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 56628,
+    "volume": 16.0
+  },
+  "62578": {
+    "capacity": 0.0,
+    "description": "Intense neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Isogen and Megacyte.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4031,
+    "icon_id": 25171,
+    "market_group_id": 2538,
+    "mass": 0.0,
+    "name": "Compressed Hadal Bezdnacine",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62578,
+    "volume": 0.16
+  },
+  "56627": {
+    "capacity": 0.0,
+    "description": "Intense neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Isogen and Megacyte.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4031,
+    "icon_id": 24143,
+    "market_group_id": 2538,
+    "mass": 0.0,
+    "name": "Abyssal Bezdnacine",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 56627,
+    "volume": 16.0
+  },
+  "56630": {
+    "capacity": 0.0,
+    "description": "Protracted neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Isogen and Zydrine",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4030,
+    "icon_id": 24144,
+    "market_group_id": 2539,
+    "mass": 0.0,
+    "name": "Hadal Rakovene",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 56630,
+    "volume": 16.0
+  },
+  "62580": {
+    "capacity": 0.0,
+    "description": "Protracted neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Isogen and Zydrine.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4030,
+    "icon_id": 25172,
+    "market_group_id": 2539,
+    "mass": 0.0,
+    "name": "Compressed Abyssal Rakovene",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62580,
+    "volume": 0.16
+  },
+  "56629": {
+    "capacity": 0.0,
+    "description": "Protracted neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Isogen and Zydrine",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4030,
+    "icon_id": 24144,
+    "market_group_id": 2539,
+    "mass": 0.0,
+    "name": "Abyssal Rakovene",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 56629,
+    "volume": 16.0
+  },
+  "62581": {
+    "capacity": 0.0,
+    "description": "Protracted neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Isogen and Zydrine.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4030,
+    "icon_id": 25172,
+    "market_group_id": 2539,
+    "mass": 0.0,
+    "name": "Compressed Hadal Rakovene",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62581,
+    "volume": 0.16
+  },
+  "52315": {
+    "capacity": 0.0,
+    "description": "Protracted neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield huge amounts of <a href=showinfo:34>Tritanium</a> and <a href=showinfo:37>Isogen</a> whilst also yielding high amount of <a href=showinfo:39>Zydrine</a>.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4030,
+    "icon_id": 24144,
+    "market_group_id": 2539,
+    "mass": 0.0,
+    "name": "Rakovene",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 52315,
+    "volume": 16.0
+  },
+  "76373": {
+    "capacity": 0.0,
+    "description": "Protracted neutron deposition from the chaotic radiations observed near Abyssal Conduits have radically morphed the mineralogical composition of this asteroid type, suspected to be formerly of the Scordite family, into a new configuration in the Rakovene group.\r\n\r\nThis asteroid is in a field that has undergone longterm exposure to Abyssal Conduits and the subtly altered spacetime environment of Pochven. Concentrations of nesosilicate-type minerals such as Neo-Jadarite can be extracted with reprocessing, alongside typical amounts of Tritanium, Isogen, and Zydrine",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.5
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 20.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 2000.0
+      }
+    ],
+    "group_id": 4030,
+    "icon_id": 24144,
+    "market_group_id": 2539,
+    "mass": 0.0,
+    "name": "Nesosilicate Rakovene",
+    "packaged_volume": 0.5,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 76373,
+    "volume": 0.5
+  },
+  "62579": {
+    "capacity": 0.0,
+    "description": "Protracted neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield huge amounts of <a href=showinfo:34>Tritanium</a> and <a href=showinfo:37>Isogen</a> whilst also yielding high amount of <a href=showinfo:39>Zydrine</a>.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4030,
+    "icon_id": 25172,
+    "market_group_id": 2539,
+    "mass": 0.0,
+    "name": "Compressed Rakovene",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62579,
+    "volume": 0.16
+  },
+  "62584": {
+    "capacity": 0.0,
+    "description": "Light neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Nocxium and Megacyte.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4029,
+    "icon_id": 25173,
+    "market_group_id": 2540,
+    "mass": 0.0,
+    "name": "Compressed Hadal Talassonite",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62584,
+    "volume": 0.16
+  },
+  "62582": {
+    "capacity": 0.0,
+    "description": "Light neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield huge amounts of <a href=showinfo:34>Tritanium</a> and <a href=showinfo:38>Nocxium</a> whilst also yielding smaller amount of <a href=showinfo:40>Megacyte</a>.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4029,
+    "icon_id": 25173,
+    "market_group_id": 2540,
+    "mass": 0.0,
+    "name": "Compressed Talassonite",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62582,
+    "volume": 0.16
+  },
+  "56626": {
+    "capacity": 0.0,
+    "description": "Light neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Nocxium and Megacyte.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4029,
+    "icon_id": 24136,
+    "market_group_id": 2540,
+    "mass": 0.0,
+    "name": "Hadal Talassonite",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 56626,
+    "volume": 16.0
+  },
+  "62583": {
+    "capacity": 0.0,
+    "description": "Light neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Nocxium and Megacyte.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.16
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4029,
+    "icon_id": 25173,
+    "market_group_id": 2540,
+    "mass": 0.0,
+    "name": "Compressed Abyssal Talassonite",
+    "packaged_volume": 0.16,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 62583,
+    "volume": 0.16
+  },
+  "75276": {
+    "capacity": 0.0,
+    "description": "Plum Mordunium is an uncommon form of Mordunium ore with a relative density of <a href=showinfo:35>Pyerite</a> mineral content 5% greater than the standard form.\r\n\r\nMordunium is a rare ore that contains a useful concentration of the Pyerite mineral in relatively dense deposits. Though found in remote clusters of asteroids, the ore is readily transportable and easily refined into the useful mineral it contains.\r\n\r\nA special \"Deep Space Survey\" partnership between Ducia Foundry,  Eifyr and Co., Mordu's Legion, and Ytiri was forged by the four members of the Upwell Consortium in order to carry out prospecting expeditions at the edges of empire space, deep in nullsec, and even beyond to wormhole space. In YC124, these survey missions were able to identify a number of rare ore types, each containing an unusually pure deposit of a standard mineral. Mordunium was the Pyerite-bearing ore discovered by this group and was named for the Mordu's Legion contribution to the surveying expeditions.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.001
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 2115,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 2.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60377.0
+      },
+      {
+        "attribute_id": 2711,
+        "value": 74521.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 1E+35
+      },
+      {
+        "attribute_id": 1980,
+        "value": 0.5
+      },
+      {
+        "attribute_id": 1981,
+        "value": 600.0
+      }
+    ],
+    "group_id": 4513,
+    "icon_id": 3319,
+    "market_group_id": 3487,
+    "mass": 1E+35,
+    "name": "Compressed Plum Mordunium",
+    "packaged_volume": 0.001,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 75276,
+    "volume": 0.001
+  },
+  "52306": {
+    "capacity": 0.0,
+    "description": "Light neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield huge amounts of <a href=showinfo:34>Tritanium</a> and <a href=showinfo:38>Nocxium</a> whilst also yielding smaller amount of <a href=showinfo:40>Megacyte</a>.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4029,
+    "icon_id": 24136,
+    "market_group_id": 2540,
+    "mass": 0.0,
+    "name": "Talassonite",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 52306,
+    "volume": 16.0
+  },
+  "75277": {
+    "capacity": 0.0,
+    "description": "Prize Mordunium is a rarer form of Mordunium ore with a relative density of <a href=showinfo:35>Pyerite</a> mineral content 10% greater than the standard form.\r\n\r\nMordunium is a rare ore that contains a useful concentration of the Pyerite mineral in relatively dense deposits. Though found in remote clusters of asteroids, the ore is readily transportable and easily refined into the useful mineral it contains.\r\n\r\nA special \"Deep Space Survey\" partnership between Ducia Foundry,  Eifyr and Co., Mordu's Legion, and Ytiri was forged by the four members of the Upwell Consortium in order to carry out prospecting expeditions at the edges of empire space, deep in nullsec, and even beyond to wormhole space. In YC124, these survey missions were able to identify a number of rare ore types, each containing an unusually pure deposit of a standard mineral. Mordunium was the Pyerite-bearing ore discovered by this group and was named for the Mordu's Legion contribution to the surveying expeditions.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.001
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 2115,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 3.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60377.0
+      },
+      {
+        "attribute_id": 2711,
+        "value": 74521.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 1E+35
+      },
+      {
+        "attribute_id": 1980,
+        "value": 0.5
+      },
+      {
+        "attribute_id": 1981,
+        "value": 600.0
+      }
+    ],
+    "group_id": 4513,
+    "icon_id": 3319,
+    "market_group_id": 3487,
+    "mass": 1E+35,
+    "name": "Compressed Prize Mordunium",
+    "packaged_volume": 0.001,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 75277,
+    "volume": 0.001
+  },
+  "75275": {
+    "capacity": 0.0,
+    "description": "This is the most common form of Mordunium ore with a standard relative density of <a href=showinfo:35>Pyerite</a> mineral content. \r\n\r\nMordunium is a rare ore that contains a useful concentration of the Pyerite mineral in relatively dense deposits. Though found in remote clusters of asteroids, the ore is readily transportable and easily refined into the useful mineral it contains.\r\n\r\nA special \"Deep Space Survey\" partnership between Ducia Foundry,  Eifyr and Co., Mordu's Legion, and Ytiri was forged by the four members of the Upwell Consortium in order to carry out prospecting expeditions at the edges of empire space, deep in nullsec, and even beyond to wormhole space. In YC124, these survey missions were able to identify a number of rare ore types, each containing an unusually pure deposit of a standard mineral. Mordunium was the Pyerite-bearing ore discovered by this group and was named for the Mordu's Legion contribution to the surveying expeditions.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.001
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 2115,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60377.0
+      },
+      {
+        "attribute_id": 2711,
+        "value": 74521.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 1E+35
+      },
+      {
+        "attribute_id": 1980,
+        "value": 0.5
+      },
+      {
+        "attribute_id": 1981,
+        "value": 600.0
+      }
+    ],
+    "group_id": 4513,
+    "icon_id": 3319,
+    "market_group_id": 3487,
+    "mass": 1E+35,
+    "name": "Compressed Mordunium",
+    "packaged_volume": 0.001,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 75275,
+    "volume": 0.001
+  },
+  "75278": {
+    "capacity": 0.0,
+    "description": "Plunder Mordunium is a very rare form of Mordunium ore with a relative density of <a href=showinfo:35>Pyerite</a> mineral content 15% greater than the standard form.\r\n\r\nMordunium is a rare ore that contains a useful concentration of the Pyerite mineral in relatively dense deposits. Though found in remote clusters of asteroids, the ore is readily transportable and easily refined into the useful mineral it contains.\r\n\r\nA special \"Deep Space Survey\" partnership between Ducia Foundry,  Eifyr and Co., Mordu's Legion, and Ytiri was forged by the four members of the Upwell Consortium in order to carry out prospecting expeditions at the edges of empire space, deep in nullsec, and even beyond to wormhole space. In YC124, these survey missions were able to identify a number of rare ore types, each containing an unusually pure deposit of a standard mineral. Mordunium was the Pyerite-bearing ore discovered by this group and was named for the Mordu's Legion contribution to the surveying expeditions.\r\n\r\nThis material is compressed and a much more compact form of the original material.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.001
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 2115,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2727,
+        "value": 5000.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 4.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60377.0
+      },
+      {
+        "attribute_id": 2711,
+        "value": 74521.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 1E+35
+      },
+      {
+        "attribute_id": 1980,
+        "value": 0.0075
+      },
+      {
+        "attribute_id": 1981,
+        "value": 600.0
+      }
+    ],
+    "group_id": 4513,
+    "icon_id": 3319,
+    "market_group_id": 3487,
+    "mass": 1E+35,
+    "name": "Compressed Plunder Mordunium",
+    "packaged_volume": 0.001,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 75278,
+    "volume": 0.001
+  },
+  "56625": {
+    "capacity": 0.0,
+    "description": "Light neutron deposition from the chaotic radiations observed near Abyssal Conduits have morphed the mineralogical composition of this Asteroid type, suspected to be formerly of the Scordite family. Reprocessing it will yield significant amounts of Tritanium whilst also yielding smaller amounts of Nocxium and Megacyte.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 16.0
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60381.0
+      },
+      {
+        "attribute_id": 1980,
+        "value": 15.0
+      },
+      {
+        "attribute_id": 1981,
+        "value": 1000.0
+      }
+    ],
+    "group_id": 4029,
+    "icon_id": 24136,
+    "market_group_id": 2540,
+    "mass": 0.0,
+    "name": "Abyssal Talassonite",
+    "packaged_volume": 16.0,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 56625,
+    "volume": 16.0
+  },
+  "74522": {
+    "capacity": 0.0,
+    "description": "Plum Mordunium is an uncommon form of Mordunium ore with a relative density of <a href=showinfo:35>Pyerite</a> mineral content 5% greater than the standard form.\r\n\r\nMordunium is a rare ore that contains a useful concentration of the Pyerite mineral in relatively dense deposits. Though found in remote clusters of asteroids, the ore is readily transportable and easily refined into the useful mineral it contains.\r\n\r\nA special \"Deep Space Survey\" partnership between Ducia Foundry,  Eifyr and Co., Mordu's Legion, and Ytiri was forged by the four members of the Upwell Consortium in order to carry out prospecting expeditions at the edges of empire space, deep in nullsec, and even beyond to wormhole space. In YC124, these survey missions were able to identify a number of rare ore types, each containing an unusually pure deposit of a standard mineral. Mordunium was the Pyerite-bearing ore discovered by this group and was named for the Mordu's Legion contribution to the surveying expeditions.\r\n\r\nAvailable primarily in nullsec and W-space systems containing A0 (Blue Small) stars, as well as surveyed locations on the borders of empire and nullsec space.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.1
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 2115,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 2.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60377.0
+      },
+      {
+        "attribute_id": 2711,
+        "value": 74521.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 1E+35
+      },
+      {
+        "attribute_id": 1980,
+        "value": 0.5
+      },
+      {
+        "attribute_id": 1981,
+        "value": 600.0
+      }
+    ],
+    "group_id": 4513,
+    "icon_id": 232,
+    "market_group_id": 3487,
+    "mass": 1E+35,
+    "name": "Plum Mordunium",
+    "packaged_volume": 0.1,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 74522,
+    "volume": 0.1
+  },
+  "74521": {
+    "capacity": 0.0,
+    "description": "This is the most common form of Mordunium ore with a standard relative density of <a href=showinfo:35>Pyerite</a> mineral content. \r\n\r\nMordunium is a rare ore that contains a useful concentration of the Pyerite mineral in relatively dense deposits. Though found in remote clusters of asteroids, the ore is readily transportable and easily refined into the useful mineral it contains.\r\n\r\nA special \"Deep Space Survey\" partnership between Ducia Foundry,  Eifyr and Co., Mordu's Legion, and Ytiri was forged by the four members of the Upwell Consortium in order to carry out prospecting expeditions at the edges of empire space, deep in nullsec, and even beyond to wormhole space. In YC124, these survey missions were able to identify a number of rare ore types, each containing an unusually pure deposit of a standard mineral. Mordunium was the Pyerite-bearing ore discovered by this group and was named for the Mordu's Legion contribution to the surveying expeditions.\r\n\r\nAvailable primarily in nullsec and W-space systems containing A0 (Blue Small) stars, as well as surveyed locations on the borders of empire and nullsec space.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.1
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 2115,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60377.0
+      },
+      {
+        "attribute_id": 2711,
+        "value": 74521.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 1E+35
+      },
+      {
+        "attribute_id": 1980,
+        "value": 0.5
+      },
+      {
+        "attribute_id": 1981,
+        "value": 600.0
+      }
+    ],
+    "group_id": 4513,
+    "icon_id": 232,
+    "market_group_id": 3487,
+    "mass": 1E+35,
+    "name": "Mordunium",
+    "packaged_volume": 0.1,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 74521,
+    "volume": 0.1
+  },
+  "74524": {
+    "capacity": 0.0,
+    "description": "Plunder Mordunium is a very rare form of Mordunium ore with a relative density of <a href=showinfo:35>Pyerite</a> mineral content 15% greater than the standard form.\r\n\r\nMordunium is a rare ore that contains a useful concentration of the Pyerite mineral in relatively dense deposits. Though found in remote clusters of asteroids, the ore is readily transportable and easily refined into the useful mineral it contains.\r\n\r\nA special \"Deep Space Survey\" partnership between Ducia Foundry,  Eifyr and Co., Mordu's Legion, and Ytiri was forged by the four members of the Upwell Consortium in order to carry out prospecting expeditions at the edges of empire space, deep in nullsec, and even beyond to wormhole space. In YC124, these survey missions were able to identify a number of rare ore types, each containing an unusually pure deposit of a standard mineral. Mordunium was the Pyerite-bearing ore discovered by this group and was named for the Mordu's Legion contribution to the surveying expeditions.\r\n\r\nAvailable primarily in nullsec and W-space systems containing A0 (Blue Small) stars, as well as surveyed locations on the borders of empire and nullsec space.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.1
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 2115,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2727,
+        "value": 5000.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 4.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60377.0
+      },
+      {
+        "attribute_id": 2711,
+        "value": 74521.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 1E+35
+      },
+      {
+        "attribute_id": 1980,
+        "value": 0.0075
+      },
+      {
+        "attribute_id": 1981,
+        "value": 600.0
+      }
+    ],
+    "group_id": 4513,
+    "icon_id": 232,
+    "market_group_id": 3487,
+    "mass": 1E+35,
+    "name": "Plunder Mordunium",
+    "packaged_volume": 0.1,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 74524,
+    "volume": 0.1
+  },
+  "74523": {
+    "capacity": 0.0,
+    "description": "Prize Mordunium is a rarer form of Mordunium ore with a relative density of <a href=showinfo:35>Pyerite</a> mineral content 10% greater than the standard form.\r\n\r\nMordunium is a rare ore that contains a useful concentration of the Pyerite mineral in relatively dense deposits. Though found in remote clusters of asteroids, the ore is readily transportable and easily refined into the useful mineral it contains.\r\n\r\nA special \"Deep Space Survey\" partnership between Ducia Foundry,  Eifyr and Co., Mordu's Legion, and Ytiri was forged by the four members of the Upwell Consortium in order to carry out prospecting expeditions at the edges of empire space, deep in nullsec, and even beyond to wormhole space. In YC124, these survey missions were able to identify a number of rare ore types, each containing an unusually pure deposit of a standard mineral. Mordunium was the Pyerite-bearing ore discovered by this group and was named for the Mordu's Legion contribution to the surveying expeditions.\r\n\r\nAvailable primarily in nullsec and W-space systems containing A0 (Blue Small) stars, as well as surveyed locations on the borders of empire and nullsec space.",
+    "dogma_attributes": [
+      {
+        "attribute_id": 161,
+        "value": 0.1
+      },
+      {
+        "attribute_id": 162,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 2115,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 3236,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 182,
+        "value": 3386.0
+      },
+      {
+        "attribute_id": 38,
+        "value": 0.0
+      },
+      {
+        "attribute_id": 2699,
+        "value": 3.0
+      },
+      {
+        "attribute_id": 277,
+        "value": 1.0
+      },
+      {
+        "attribute_id": 790,
+        "value": 60377.0
+      },
+      {
+        "attribute_id": 2711,
+        "value": 74521.0
+      },
+      {
+        "attribute_id": 4,
+        "value": 1E+35
+      },
+      {
+        "attribute_id": 1980,
+        "value": 0.5
+      },
+      {
+        "attribute_id": 1981,
+        "value": 600.0
+      }
+    ],
+    "group_id": 4513,
+    "icon_id": 232,
+    "market_group_id": 3487,
+    "mass": 1E+35,
+    "name": "Prize Mordunium",
+    "packaged_volume": 0.1,
+    "portion_size": 100,
+    "published": true,
+    "radius": 1.0,
+    "type_id": 74523,
+    "volume": 0.1
   }
 }

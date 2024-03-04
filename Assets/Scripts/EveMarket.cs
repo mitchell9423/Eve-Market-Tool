@@ -9,7 +9,6 @@ using System.Linq;
 
 namespace EveMarket
 {
-	[ExecuteAlways]
 	public class EveMarket : MonoBehaviour
 	{
 		public ObjectType objectType = ObjectType.MarketGroup;
@@ -22,8 +21,15 @@ namespace EveMarket
 
 		StringBuilder sb = new StringBuilder();
 
+		private void Awake()
+		{
+			AppSettings.LoadPlayerPrefs();
+		}
+
 		private void OnEnable()
 		{
+			AppSettings.LoadPlayerPrefs();
+
 			LoadStaticData();
 
 			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
@@ -44,6 +50,7 @@ namespace EveMarket
 
 		private void Start()
 		{
+			AppSettings.LoadPlayerPrefs();
 		}
 
 		public void LoadStaticData()
@@ -55,6 +62,12 @@ namespace EveMarket
 		public void UpdateStaticData()
 		{
 			StaticData.UpdateStaticData();
+			BuildDisplayString();
+		}
+
+		public void UpdateMarketData()
+		{
+			StaticData.UpdateMarketData(new List<int>());
 			BuildDisplayString();
 		}
 

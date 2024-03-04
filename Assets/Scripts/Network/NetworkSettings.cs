@@ -11,8 +11,6 @@ namespace EveMarket.Network
 		public const string UNIVERSE_TYPES_URI = "https://esi.evetech.net/latest/universe/types/";
 		public const string ITEM_ORDERS_URI = "https://esi.evetech.net/latest/markets/[region_id]/orders/?datasource=tranquility&order_type=all&page=1&type_id=[type_id]";
 		public const string ITEM_HISTORY_URI = "https://esi.evetech.net/latest/markets/[region_id]/history/?datasource=tranquility&type_id=[type_id]";
-
-		public static Region BuyRegion { get; set; } = Region.Lonetrek;
-		public static Region SellRegion { get; set; }
+		public const string ROUTE_URI = "https://esi.evetech.net/latest/route/[destination]/[origin]/?datasource=tranquility&flag=shortest";
 	}
 }

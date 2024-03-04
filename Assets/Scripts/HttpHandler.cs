@@ -27,7 +27,7 @@ namespace EveMarket
 		private List<UnityWebRequestAsyncOperation> asyncOps = new List<UnityWebRequestAsyncOperation>();
 		public void ClearRequestList() => asyncOps.Clear();
 
-		public IEnumerator Get<T>(string url, System.Action<string> callback)
+		public IEnumerator Get<T>(string url, global::System.Action<string> callback)
 		{
 			using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
 			{
@@ -61,7 +61,7 @@ namespace EveMarket
 			}
 		}
 
-		public async Task AsyncGetRequest<T>(string url, System.Action<string, Region, int> callback, Region region, int type_id = 0)
+		public async Task AsyncGetRequest<T>(string url, global::System.Action<string, Region, int> callback, Region region, int type_id = 0)
 		{
 			NetworkManager.Status = UpdateStatus.Updating;
 			Interlocked.Increment(ref NetworkManager.totalRequests);
@@ -86,7 +86,8 @@ namespace EveMarket
 					}
 					else if (webRequest.result == UnityWebRequest.Result.ConnectionError)
 					{
-						Debug.LogError($"Web request Error: {webRequest.error}\n{url}[{StaticData.ItemObjects[type_id].Name}]");
+						string itemName = type_id > 0 ? StaticData.ItemObjects[type_id].Name : "";
+						Debug.LogError($"Web request Error: {webRequest.error}\n{url}[{itemName}]");
 						UnityMainThreadDispatcher.Instance.Enqueue(() =>
 						{
 							callback(null, region, 0);

@@ -8,7 +8,7 @@ namespace EveMarket.Util
 	[ExecuteAlways]
 	public class UnityMainThreadDispatcher : MonoBehaviour
 	{
-		private readonly Queue<System.Action> _executionQueue = new Queue<System.Action>();
+		private readonly Queue<global::System.Action> _executionQueue = new Queue<global::System.Action>();
 
 		static UnityMainThreadDispatcher instance; 
 		public static UnityMainThreadDispatcher Instance 
@@ -24,7 +24,7 @@ namespace EveMarket.Util
 			}
 		}
 
-		public void Enqueue(System.Action action)
+		public void Enqueue(global::System.Action action)
 		{
 			lock (_executionQueue)
 			{
@@ -36,7 +36,7 @@ namespace EveMarket.Util
 		{
 			while (_executionQueue.Count > 0)
 			{
-				System.Action action;
+				global::System.Action action;
 				lock (_executionQueue)
 				{
 					action = _executionQueue.Dequeue();

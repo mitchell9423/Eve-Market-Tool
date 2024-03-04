@@ -1,5 +1,6 @@
 using EveMarket;
 using EveMarket.Network;
+using EveMarket.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,7 +14,6 @@ namespace EveMarket
 	[Serializable]
 	public class MarketItem
 	{
-		float marginPercentage = .20f;
 		UniverseItem item;
 		MarketPrice price;
 		Dictionary<Region, Dictionary<int, OrderRecord>> orders;
@@ -23,106 +23,186 @@ namespace EveMarket
 			item = _item;
 			price = _price;
 			this.orders = orders;
-			CurrentSellPrice = GetCurrentSellPrice();
-			CurrentBuyPrice = GetCurrentBuyPrice();
-			SetMarginStatus();
+			SetCurrentSellPrice();
+			SetMaxBuy();
+			SetCurrentBuyPrice();
+			SetReprocessType();
 		}
 
 		public int TypeId { get => item.TypeId; }
 		public int GroupId { get => item.GroupId; }
 		public string ItemName { get => item.Name; }
 		public double AveragePrice { get => price.AveragePrice; }
-		public double MarginPercentage { get => marginPercentage; }
 		public double CurrentSellPrice { get; set; }
 		public double CurrentBuyPrice { get; set; }
+		public double MaxBuyPrice { get; set; }
 		public double CompressedPrice { get; set; }
-		public MarginStatus MarginStatus { get; set; }
+		public double ReprocessPrice { get; set; }
+		public ReprocessType ReprocessType { get; private set; } = ReprocessType.None;
 
 		private Color textColor;
 
-		public Color GetTextColor(Color defaultColor)
+		private double SetReprocessPrice()
 		{
-			if (MarginStatus == MarginStatus.Low)
-			{
-				return Color.red;
-			}
-			else if (MarginStatus == MarginStatus.High)
-			{
-				return Color.green;
-			}
-			else { return defaultColor; }
+			return ReprocessPrice = (double)Math.Round(Reprocess.CalcReprocessedValue(this));
 		}
 
-		public void SetMarginStatus()
+		private double SetMaxBuy()
 		{
-			if (CurrentSellPrice < CurrentBuyPrice)
-			{
-				MarginStatus = MarginStatus.Low;
-			}
-            else if (CurrentSellPrice > CurrentBuyPrice * (1 + marginPercentage))
-			{
-				MarginStatus = MarginStatus.High;
-			}
-			else { MarginStatus = MarginStatus.Normal; }
-        }
+			return MaxBuyPrice = (double)Math.Round(SetReprocessPrice() * ((100 - (double)AppSettings.MarginPercentage) / 100), 2);
+		}
 
-		private double GetCurrentSellPrice()
+		private void SetCurrentSellPrice()
 		{
-			if (!orders.ContainsKey(NetworkSettings.SellRegion) || orders[NetworkSettings.SellRegion][TypeId].marketOrders == null) return 0;
-
-			var sellOrders = orders[NetworkSettings.SellRegion][TypeId].marketOrders.Where(rec => !rec.IsBuyOrder && (rec.SystemId == 30000142 || rec.SystemId == 30000144));
-			double lowestPice = 0.00d;
-
-			if (sellOrders != null && sellOrders.Count() > 0)
+			if (orders.ContainsKey(AppSettings.SellRegion) && orders[AppSettings.SellRegion][TypeId].marketOrders != null && orders[AppSettings.SellRegion][TypeId].marketOrders.Count() > 0)
 			{
-				lowestPice = sellOrders.First().Price;
-				foreach (var order in sellOrders)
+				List<MarketOrder> sellOrders = orders[AppSettings.SellRegion][TypeId].marketOrders.Where(rec => !rec.IsBuyOrder && (rec.SystemId == 30000142 || rec.SystemId == 30000144)).ToList();
+
+				double lowestPice = 0;
+
+				if (sellOrders != null && sellOrders.Count() > 0)
 				{
-					if (order.Price < lowestPice)
+					lowestPice = sellOrders.First().Price;
+
+					foreach (var order in sellOrders)
 					{
-						lowestPice = order.Price;
+						if (order.Price < lowestPice)
+						{
+							lowestPice = order.Price;
+						}
 					}
 				}
-			}
 
-			return lowestPice;
+				CurrentSellPrice = lowestPice;
+			}
 		}
 
-		private double GetCurrentBuyPrice()
+		private void SetCurrentBuyPrice()
 		{
-			if (!orders.ContainsKey(NetworkSettings.BuyRegion) || orders[NetworkSettings.BuyRegion][TypeId].marketOrders == null) return 0;
-
-			var buyOrders = orders[NetworkSettings.BuyRegion][TypeId].marketOrders.Where(rec => rec.IsBuyOrder);
 			double highestPice = 0.00d;
 
-			if (buyOrders != null && buyOrders.Count() > 0)
+			if (orders.ContainsKey(AppSettings.BuyRegion) || orders[AppSettings.BuyRegion][TypeId].marketOrders != null)
 			{
-				foreach (var order in buyOrders)
+				var buyOrders = orders[AppSettings.BuyRegion][TypeId].marketOrders.Where(rec => rec.IsBuyOrder && rec.Price <= SetMaxBuy());
+
+				if (buyOrders != null && buyOrders.Count() > 0)
 				{
-					if (order.Price > highestPice)
+					foreach (var order in buyOrders)
 					{
-						highestPice = order.Price;
+						int distance = 0;
+
+						if (StaticData.Routes != null)
+						{
+							lock (StaticData.Routes)
+							{
+								if (StaticData.Routes.TryGetValue(StaticData.BuyOrderSystems[AppSettings.BuyOrderSystem], out List<RouteData> routes))
+								{
+									if (StaticData.RangeStringToInt.ContainsKey(AppSettings.BuyRange))
+									{
+										distance = routes.Find(route => route.Destination == order.SystemId).NumJumps - StaticData.RangeStringToInt[AppSettings.BuyRange];
+									}
+								}
+							}
+						}
+
+						if (StaticData.RangeStringToInt[order.Range] >= distance && order.Price > highestPice)
+							highestPice = order.Price;
 					}
 				}
 			}
 
-			return highestPice;
+			CurrentBuyPrice =  highestPice;
 		}
 
 		public void UpdateOrders()
 		{
-			var region = NetworkSettings.BuyRegion;
+			var region = AppSettings.SellRegion;
 			orders[region][TypeId] = new OrderRecord(StaticData.OrderRecords[region][TypeId].marketOrders);
-			CurrentBuyPrice = GetCurrentBuyPrice();
+			SetCurrentSellPrice();
 
-			region = NetworkSettings.SellRegion;
+			region = AppSettings.BuyRegion;
 			orders[region][TypeId] = new OrderRecord(StaticData.OrderRecords[region][TypeId].marketOrders);
-			CurrentSellPrice = GetCurrentSellPrice();
+			SetMaxBuy();
+			SetCurrentBuyPrice();
 		}
 
 		public void ClearOrders(int TypeId)
 		{
-			orders[NetworkSettings.SellRegion][TypeId].marketOrders.Clear();
+			orders[AppSettings.SellRegion][TypeId].marketOrders.Clear();
+		}
+
+		private void SetReprocessType()
+		{
+			switch (ItemName)
+			{
+				case "Bezdnacine":
+				case "Rakovene":
+				case "Talassonite":
+					ReprocessType = ReprocessType.Abyssal;
+					break;
+				case "Hedbergite":
+				case "Hemorphite":
+				case "Jaspet":
+				case "Kernite":
+				case "Omber":
+				case "Ytirium":
+					ReprocessType = ReprocessType.Coherent;
+					break;
+				case "Cobaltite":
+				case "Euxenite":
+				case "Titanite":
+				case "Scheelite":
+					ReprocessType = ReprocessType.Common;
+					break;
+				case "Arkonor":
+				case "Bistot":
+				case "Spodumain":
+				case "Eifyrium":
+				case "Ducinium":
+					ReprocessType = ReprocessType.Complex;
+					break;
+				case "Xenotime":
+				case "Monazite":
+				case "Loparite":
+				case "Ytterbite":
+					ReprocessType = ReprocessType.Exceptional;
+					break;
+				case "Mercoxite":
+					ReprocessType = ReprocessType.Mercoxit;
+					break;
+				case "Carnotite":
+				case "Zircon":
+				case "Pollucite":
+				case "Cinnabar":
+					ReprocessType = ReprocessType.Rare;
+					break;
+				case "Plagioclase":
+				case "Pyroxeres":
+				case "Scordite":
+				case "Veldspar":
+				case "Mordunium":
+					ReprocessType = ReprocessType.Simple;
+					break;
+				case "Zeolites":
+				case "Sylvite":
+				case "Bitumens":
+				case "Coesite":
+					ReprocessType = ReprocessType.Ubiquitous;
+					break;
+				case "Otavite":
+				case "Sperrylite":
+				case "Vanadinite":
+				case "Chromite":
+					ReprocessType = ReprocessType.Uncommon;
+					break;
+				case "Crokite":
+				case "Dark Ochre":
+				case "Gneiss":
+					ReprocessType = ReprocessType.Variegated;
+					break;
+				default:
+					break;
+			}
 		}
 	}
 }

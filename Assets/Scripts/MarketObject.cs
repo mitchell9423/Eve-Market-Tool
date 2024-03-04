@@ -41,8 +41,6 @@ namespace EveMarket
 					}
 				}
 			}
-
-			OverrideMarginStaus();
 		}
 
 		public void UpdateMarketData()
@@ -50,31 +48,6 @@ namespace EveMarket
 			for (int i = 0; i < Items.Count; i++)
 			{
 				Items[i].UpdateOrders();
-			}
-
-			OverrideMarginStaus();
-		}
-
-		public void OverrideMarginStaus()
-		{
-			for (int i = 0; i < Items.Count; i++)
-			{
-				string name = Items[i].ItemName;
-
-				if (name.Contains("Compressed") && !name.Contains("Batch"))
-				{
-					string uncompressedName = name.Replace("Compressed ", "");
-
-					MarketItem uncompressedItem = Items.Find(item => item.ItemName == uncompressedName);
-
-					if (uncompressedItem != null && uncompressedItem.CurrentBuyPrice > 0)
-					{
-						if (Items[i].CurrentSellPrice > uncompressedItem.CurrentBuyPrice / uncompressedItem.MarginPercentage)
-						{
-							uncompressedItem.MarginStatus = MarginStatus.High;
-						}
-					}
-				}
 			}
 		}
 
