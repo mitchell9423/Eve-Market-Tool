@@ -22,6 +22,7 @@ namespace EveMarket
 		Common,
 		Complex,
 		Exceptional,
+		Ice,
 		Mercoxit,
 		Rare,
 		Simple,
@@ -30,8 +31,15 @@ namespace EveMarket
 		Variegated
 	}
 
-	public enum Mineral
+	public enum Product
 	{
+		HeavyWater,
+		LiquidOzone,
+		StrontiumClathrates,
+		HeliumIsotopes,
+		NitrogenIsotopes,
+		OxygenIsotopes,
+		HydrogenIsotopes,
 		Tritanium, 
 		Pyerite, 
 		Mexallon,
@@ -85,7 +93,8 @@ namespace EveMarket
 	public enum System
 	{
 		Tunttaras,
-		Ylandoki
+		Ylandoki,
+		Umokka
 	}
 
 	public enum Range
@@ -110,7 +119,8 @@ namespace EveMarket
 		public static Dictionary<System, int> BuyOrderSystems { get; set; } = new Dictionary<System, int>()
 		{
 			{ System.Ylandoki, 30001395 },
-			{ System.Tunttaras, 30001379 }			
+			{ System.Tunttaras, 30001379 },
+			{ System.Umokka, 30001409 }
 		};
 
 		public static Dictionary<Range, string> RangeStringName = new Dictionary<Range, string>()
@@ -145,6 +155,33 @@ namespace EveMarket
 			{ "40", 40 }
 		};
 
+		public enum Group
+		{
+			Arkonor,
+			Bistot,
+			Pyroxeres,
+			Plagioclase,
+			Spodumain,
+			Veldspar,
+			Scordite,
+			Crokite,
+			Dark_Ochre,
+			Kernite,
+			Gneiss,
+			Omber,
+			Hedbergite,
+			Hemorphite,
+			Jaspet,
+			Mercoxit,
+			Bezdnacine,
+			Rakovene,
+			Talassonite,
+			Mordunium,
+			Mineral,
+			Ice_Ores,
+			Ice_Products
+		}
+
 		private static Dictionary<int, string> GroupIdsToName = new Dictionary<int, string>()
 		{
 			{ 512, "Arkonor" },
@@ -167,7 +204,9 @@ namespace EveMarket
 			{ 2539, "Rakovene" },
 			{ 2540, "Talassonite" },
 			{ 3487, "Mordunium" },
-			{ 1857, "Mineral" }
+			{ 1857, "Mineral" },
+			{ 1855, "Ice Ores"},
+			{ 1033, "Ice Products" }
 		};
 
 		public static Dictionary<int, List<RouteData>> Routes = new Dictionary<int, List<RouteData>>();
@@ -182,28 +221,40 @@ namespace EveMarket
 			{ Region.Lonetrek, 10000016 }
 		};
 
-		public static void UpdateStaticData()
+		public static async Task WaitForPendingRequestsToComplete()
+		{
+			while (NetworkManager.pendingRequests > 0)
+			{
+				await Task.Delay(100); // Wait for 100 milliseconds before checking again
+			}
+		}
+
+		public static async void UpdateStaticData()
 		{
 			EveDelegate.Subscribe(ref EveDelegate.StaticUpdateComplete, SaveStaticData);
 
 			lock (sb) { sb.Clear(); }
 
-			foreach (var groupId in GroupIdsToName.Keys)
+			NetworkManager.AsyncRequest<List<MarketPrice>>();
+
+			var marketGroupIds = GroupIdsToName.Keys.ToArray();
+
+			for (int i = 0; i < marketGroupIds.Length; i++)
 			{
-				NetworkManager.AsyncRequest<MarketGroup>(groupId.ToString());
+				await WaitForPendingRequestsToComplete();
+				NetworkManager.AsyncRequest<MarketGroup>(marketGroupIds[i].ToString());
 			}
 
 			ConstructMarketObjects();
 		}
 
-		public static void UpdateMarketData(List<int> ids)
+		public static async void UpdateMarketData(List<int> ids)
 		{
 			EveDelegate.Subscribe(ref EveDelegate.StaticUpdateComplete, SaveMarketData);
 
-			NetworkManager.AsyncRequest<List<MarketPrice>>();
-
 			foreach (var id in ids)
 			{
+				await WaitForPendingRequestsToComplete();
 				RequestMarketOrders(id);
 			}
 		}

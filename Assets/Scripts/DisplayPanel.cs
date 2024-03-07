@@ -194,6 +194,8 @@ namespace EveMarket
 		{
 			panelState = PanelState.CurrentSellPrice;
 
+			StaticData.LoadStaticData();
+
 			// Item block widths
 			props.nameWidth = 200;
 			props.spacer = 5;
@@ -292,7 +294,7 @@ namespace EveMarket
 								{
 									using (new GUILayout.HorizontalScope())
 									{
-										double buyPrice = panelState == PanelState.AveragePrice ? marketItem.AveragePrice : marketItem.CurrentSellPrice;
+										double sellPrice = panelState == PanelState.AveragePrice ? marketItem.AveragePrice : marketItem.CurrentSellPrice;
 
 										Color defaultColor = GUI.contentColor;
 										GUI.enabled = (!marketItem.ItemName.Contains("Compressed") && marketItem.CurrentBuyPrice > 0) || (marketItem.ItemName.Contains("Compressed") && marketItem.CurrentSellPrice > 0);
@@ -315,34 +317,34 @@ namespace EveMarket
 
 											GUILayout.Space(props.spacer);
 											GUILayout.Label($"Buy: ", GUILayout.Width(props.labelWidth));
-											GUILayout.Label($"{marketItem.CurrentBuyPrice + 0.01d}", GUILayout.Width(props.priceWidth));
+											GUILayout.Label($"{marketItem.CurrentBuyPrice}", GUILayout.Width(props.priceWidth));
 
-											if (marketObject.GroupName == "Minerals")
+											if (marketObject.GroupName == "Minerals" || marketObject.GroupName == "Ice Products")
 											{
 												GUILayout.Space(props.spacer);
 												GUILayout.Label($"{props.priceLabel}", GUILayout.Width(props.labelWidth));
-												GUILayout.Label($"{buyPrice}", GUILayout.Width(props.priceWidth));
+												GUILayout.Label($"{sellPrice}", GUILayout.Width(props.priceWidth));
 											}
 											else
 											{
 												GUILayout.Space(props.spacer);
 												GUILayout.Label($"Max Buy: ", GUILayout.Width(props.labelWidth));
 												GUILayout.Label($"{marketItem.MaxBuyPrice}", GUILayout.Width(props.priceWidth));
+
+												//GUILayout.Space(props.spacer);
+												//GUILayout.Label($"Compressed: ", GUILayout.Width(props.compressedLabelWidth));
+												//GUILayout.Label($"{compressedPrice}", GUILayout.Width(props.priceWidth));
+
+												GUILayout.Space(props.spacer);
+												GUILayout.Label($"Sell Price: ", GUILayout.Width(props.compressedLabelWidth));
+												GUILayout.Label($"{reprocessedPrice}", GUILayout.Width(props.priceWidth));
 											}
-
-											GUILayout.Space(props.spacer);
-											GUILayout.Label($"Compressed: ", GUILayout.Width(props.compressedLabelWidth));
-											GUILayout.Label($"{compressedPrice}", GUILayout.Width(props.priceWidth));
-
-											GUILayout.Space(props.spacer);
-											GUILayout.Label($"Reprocessed: ", GUILayout.Width(props.compressedLabelWidth));
-											GUILayout.Label($"{reprocessedPrice}", GUILayout.Width(props.priceWidth));
 										}
                                         else
 										{
 											GUILayout.Space(props.spacer);
 											GUILayout.Label($"{props.priceLabel}", GUILayout.Width(props.labelWidth));
-											GUILayout.Label($"{buyPrice}", GUILayout.Width(props.priceWidth));
+											GUILayout.Label($"{sellPrice}", GUILayout.Width(props.priceWidth));
 										}
 
 										GUI.contentColor = defaultColor;

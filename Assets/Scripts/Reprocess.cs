@@ -10,9 +10,16 @@ public static class Reprocess
 {
 	public struct MineralOutput
 	{
-		Dictionary<Mineral, int> BaseYield;
+		Dictionary<Product, int> BaseYield;
 
 		public MineralOutput(
+			int HeavyWater = 0,
+			int LiquidOzone = 0,
+			int StrontiumClathrates = 0,
+			int HeliumIsotopes = 0,
+			int NitrogenIsotopes = 0,
+			int OxygenIsotopes = 0,
+			int HydrogenIsotopes = 0,
 			int Tritanium = 0,
 			int Pyerite = 0,
 			int Mexallon = 0,
@@ -25,17 +32,24 @@ public static class Reprocess
 			int ChromodynamicTricarboxyls = 0
 			)
 		{
-			BaseYield = new Dictionary<Mineral, int>();
-			BaseYield[Mineral.Tritanium] = Tritanium;
-			BaseYield[Mineral.Pyerite] = Pyerite;
-			BaseYield[Mineral.Mexallon] = Mexallon;
-			BaseYield[Mineral.Isogen] = Isogen;
-			BaseYield[Mineral.Nocxium] = Nocxium;
-			BaseYield[Mineral.Megacyte] = Megacyte;
-			BaseYield[Mineral.Morphite] = Morphite;
-			BaseYield[Mineral.Zydrine] = Zydrine;
-			BaseYield[Mineral.NeoJadarite] = NeoJadarite;
-			BaseYield[Mineral.ChromodynamicTricarboxyls] = ChromodynamicTricarboxyls;
+			BaseYield = new Dictionary<Product, int>();
+			BaseYield[Product.HeavyWater] = HeavyWater;
+			BaseYield[Product.LiquidOzone] = LiquidOzone;
+			BaseYield[Product.StrontiumClathrates] = StrontiumClathrates;
+			BaseYield[Product.HeliumIsotopes] = HeliumIsotopes;
+			BaseYield[Product.NitrogenIsotopes] = NitrogenIsotopes;
+			BaseYield[Product.OxygenIsotopes] = OxygenIsotopes;
+			BaseYield[Product.HydrogenIsotopes] = HydrogenIsotopes;
+			BaseYield[Product.Tritanium] = Tritanium;
+			BaseYield[Product.Pyerite] = Pyerite;
+			BaseYield[Product.Mexallon] = Mexallon;
+			BaseYield[Product.Isogen] = Isogen;
+			BaseYield[Product.Nocxium] = Nocxium;
+			BaseYield[Product.Megacyte] = Megacyte;
+			BaseYield[Product.Morphite] = Morphite;
+			BaseYield[Product.Zydrine] = Zydrine;
+			BaseYield[Product.NeoJadarite] = NeoJadarite;
+			BaseYield[Product.ChromodynamicTricarboxyls] = ChromodynamicTricarboxyls;
 		}
 
 		public double GetNetValue(ReprocessType reprocessType)
@@ -44,14 +58,20 @@ public static class Reprocess
 			float netYield = CalcNetYield(reprocessType);
 
 			if (!StaticData.MarketObjects.ContainsKey(1857)) return 0;
-			foreach (var marketItem in StaticData.MarketObjects[1857].Items)
-			{
-				string name = marketItem.ItemName;
-				name = name.Replace("-", "");
-				name = name.Replace(" ", "");
-				Mineral mineral = (Mineral)Enum.Parse(typeof(Mineral), name);
 
-				netValue += marketItem.CurrentSellPrice * Mathf.FloorToInt(BaseYield[mineral] * netYield);
+			var productTypeID = reprocessType == ReprocessType.Ice ? 1033 : 1857;
+
+			if (StaticData.MarketObjects.ContainsKey(productTypeID))
+			{
+				foreach (var marketItem in StaticData.MarketObjects[productTypeID].Items)
+				{
+					string name = marketItem.ItemName;
+					name = name.Replace("-", "");
+					name = name.Replace(" ", "");
+					Product product = (Product)Enum.Parse(typeof(Product), name);
+
+					netValue += marketItem.CurrentSellPrice * Mathf.FloorToInt(BaseYield[product] * netYield);
+				}
 			}
 			
 			return netValue;
@@ -60,18 +80,24 @@ public static class Reprocess
 
 	static float baseYield = .54f;
 
-	static int reprocessingSkillLvl = 5;
-	static float ReprocessingSkillPercentage = 1 + (.03f * reprocessingSkillLvl);
+	static int ReprocessingSkillLvl = 5;
+	static float ReprocessingSkillPercentage = 1 + (.03f * ReprocessingSkillLvl);
 
-	static int reprocessingEfficiencySkillLvl = 5;
-	static float ReprocessingEfficiencySkillPercentage = 1 + (.02f * reprocessingEfficiencySkillLvl);
+	static int ReprocessingEfficiencySkillLvl = 5;
+	static float ReprocessingEfficiencySkillPercentage = 1 + (.02f * ReprocessingEfficiencySkillLvl);
+
+	static int ScrapmetalProcessingSkillLvl = 4;
+	static float ScrapmetalProcessingSkillPercentage = 1 + (.02f * ScrapmetalProcessingSkillLvl);
+
+	static int IceProcessingSkillLvl = 5;
+	static float IceProcessingSkillPercentage = 1 + (.02f * IceProcessingSkillLvl);
 
 	// 2% bonus to Bezdnacine, Rakovene, and Talassonite reprocessing yield per skill level.
 	static int AbyssalOreProcessingSkillLvl = 0;
 	static float AbyssalOreProcessingSkillPercentage = 1 + (.02f * AbyssalOreProcessingSkillLvl);
 
 	// 2% bonus to Hedbergite, Hemorphite, Jaspet, Kernite, Omber, and Ytirium reprocessing yield per skill level.
-	static int CoherentOreProcessingSkillLvl = 1;
+	static int CoherentOreProcessingSkillLvl = 4;
 	static float CoherentOreProcessingSkillPercentage = 1 + (.02f * CoherentOreProcessingSkillLvl);
 
 	// 2% bonus to Cobaltite, Euxenite, Titanite, and Scheelite reprocessing yield per skill level.
@@ -107,7 +133,7 @@ public static class Reprocess
 	static float UncommonOreProcessingSkillPercentage = 1 + (.02f * UncommonOreProcessingSkillLvl);
 
 	// 2% bonus to Crokite, Dark Ochre, and Gneiss reprocessing yield per skill level.
-	static int VariegatedOreProcessingSkillLvl = 1;
+	static int VariegatedOreProcessingSkillLvl = 4;
 	static float VariegatedOreProcessingSkillPercentage = 1 + (.02f * VariegatedOreProcessingSkillLvl);
 
 	static float implantsBonus = 1.04f;
@@ -136,6 +162,9 @@ public static class Reprocess
 				break;
 			case ReprocessType.Exceptional:
 				netYield *= ExceptionalOreProcessingSkillPercentage;
+				break;
+			case ReprocessType.Ice:
+				netYield *= IceProcessingSkillPercentage;
 				break;
 			case ReprocessType.Mercoxit:
 				netYield *= MercoxiteOreProcessingSkillPercentage;
@@ -403,32 +432,41 @@ public static class Reprocess
 				Isogen: 79
 				)
 		},
-		{ 
-			"Solid Pyroxeres", 
+		{
+			"Solid Pyroxeres",
 			new MineralOutput(
 				Pyerite: 95,
 				Mexallon: 32
 				)
 		},
 		{
-			"Talassonite", 
+			"Talassonite",
 			new MineralOutput(
 				Tritanium: 40000,
 				Nocxium: 960,
 				Megacyte: 32
 				)
 		},
-		{ 
-			"Veldspar", 
+		{
+			"Veldspar",
 			new MineralOutput(
 				Tritanium: 400
 				)
 		},
-		{ 
-			"Viscous Pyroxeres", 
+		{
+			"Viscous Pyroxeres",
 			new MineralOutput(
 				Pyerite: 99,
 				Mexallon: 33
+				)
+		},
+		{
+			"White Glaze",
+			new MineralOutput(
+				HeavyWater: 69,
+				LiquidOzone: 35,
+				StrontiumClathrates: 1,
+				NitrogenIsotopes: 414
 				)
 		}
 	};
@@ -439,7 +477,12 @@ public static class Reprocess
 		{
 			float val = (float)OreOutputs[item.ItemName].GetNetValue(item.ReprocessType);
 			val = Mathf.Round(val);
-			return val / 100;
+			if (item.ReprocessType != ReprocessType.Ice)
+			{
+				val /= 100;
+			}
+
+			return val;
 		}
 
 		return 0;

@@ -394,5 +394,52 @@
       74523,
       74524
     ]
+  },
+  "1855": {
+    "description": "Materials gathered from ice asteroids.",
+    "market_group_id": 1855,
+    "name": "Ice Ores",
+    "parent_group_id": 1031,
+    "types": [
+      16262,
+      16263,
+      16264,
+      16265,
+      16266,
+      16267,
+      16268,
+      16269,
+      28433,
+      28434,
+      28435,
+      28436,
+      28437,
+      28438,
+      28439,
+      28440,
+      28441,
+      28442,
+      28443,
+      28444,
+      17975,
+      17976,
+      17977,
+      17978
+    ]
+  },
+  "1033": {
+    "description": "Ice isotopes harvested from ice asteroids.",
+    "market_group_id": 1033,
+    "name": "Ice Products",
+    "parent_group_id": 533,
+    "types": [
+      17888,
+      17889,
+      16272,
+      16275,
+      16273,
+      16274,
+      17887
+    ]
   }
 }

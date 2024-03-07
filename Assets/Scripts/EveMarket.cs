@@ -24,13 +24,6 @@ namespace EveMarket
 		private void Awake()
 		{
 			AppSettings.LoadPlayerPrefs();
-		}
-
-		private void OnEnable()
-		{
-			AppSettings.LoadPlayerPrefs();
-
-			LoadStaticData();
 
 			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
 			{
@@ -50,7 +43,7 @@ namespace EveMarket
 
 		private void Start()
 		{
-			AppSettings.LoadPlayerPrefs();
+			LoadStaticData();
 		}
 
 		public void LoadStaticData()

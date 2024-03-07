@@ -23,10 +23,10 @@ namespace EveMarket
 			item = _item;
 			price = _price;
 			this.orders = orders;
+			SetReprocessType();
 			SetCurrentSellPrice();
 			SetMaxBuy();
 			SetCurrentBuyPrice();
-			SetReprocessType();
 		}
 
 		public int TypeId { get => item.TypeId; }
@@ -83,9 +83,11 @@ namespace EveMarket
 
 			if (orders.ContainsKey(AppSettings.BuyRegion) || orders[AppSettings.BuyRegion][TypeId].marketOrders != null)
 			{
-				var buyOrders = orders[AppSettings.BuyRegion][TypeId].marketOrders.Where(rec => rec.IsBuyOrder && rec.Price <= SetMaxBuy());
+				List<MarketOrder> marketOrders = orders[AppSettings.BuyRegion][TypeId].marketOrders;
+				var buyOrders = marketOrders.FindAll(rec => rec.IsBuyOrder && rec.Price <= MaxBuyPrice && 
+				!((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3")));
 
-				if (buyOrders != null && buyOrders.Count() > 0)
+				if (buyOrders != null)
 				{
 					foreach (var order in buyOrders)
 					{
@@ -108,6 +110,18 @@ namespace EveMarket
 						if (StaticData.RangeStringToInt[order.Range] >= distance && order.Price > highestPice)
 							highestPice = order.Price;
 					}
+				}
+			}
+
+			if (highestPice > 0)
+			{
+				if (ReprocessType == ReprocessType.Ice)
+				{
+					highestPice += 100;
+				}
+				else
+				{
+					highestPice += 0.01;
 				}
 			}
 
@@ -166,6 +180,9 @@ namespace EveMarket
 				case "Loparite":
 				case "Ytterbite":
 					ReprocessType = ReprocessType.Exceptional;
+					break;
+				case "White Glaze":
+					ReprocessType = ReprocessType.Ice;
 					break;
 				case "Mercoxite":
 					ReprocessType = ReprocessType.Mercoxit;

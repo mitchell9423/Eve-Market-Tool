@@ -17,10 +17,10 @@ namespace EveMarket
 			SellRegion
 		}
 
-		public static int MarginPercentage { get; set; }
+		public static int MarginPercentage { get; set; } = 10;
 		public static string BuyRange { get; set; } = "4";
 		public static System BuyOrderSystem { get; set; }
-		public static Region BuyRegion { get; set; }
+		public static Region BuyRegion { get; set; } = Region.Lonetrek;
 		public static Region SellRegion { get; set; }
 
 		public static void LoadPlayerPrefs()
