@@ -55,7 +55,7 @@ namespace EveMarket
 					if (!asyncOp.isDone)
 					{
 						asyncOp.webRequest.Abort();
-						NetworkManager.CompleteStaticUpdateTask();
+						NetworkManager.CompleteUpdateTask();
 					}
 				}
 			}

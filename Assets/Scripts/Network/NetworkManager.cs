@@ -2,11 +2,8 @@
 using EveMarket.Util;
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -20,6 +17,7 @@ namespace EveMarket.Network
 
 	public static class NetworkManager
 	{
+		public static int pendingMarketGroups = 0;
 		public static int pendingRequests = 0;
 		public static int completedRequests = 0;
 		public static int totalRequests = 0;
@@ -35,7 +33,7 @@ namespace EveMarket.Network
 			{ typeof(List<int>), NetworkSettings.ROUTE_URI}
 		};
 
-		public static void AsyncRequest<T>(string extension = "", Region region = Region.The_Forge, int type_id = 0, RouteData data = new RouteData())
+		public static async Task AsyncRequest<T>(string extension = "", Region region = Region.The_Forge, int type_id = 0, RouteData data = new RouteData())
 		{
 			try
 			{
@@ -50,7 +48,7 @@ namespace EveMarket.Network
 
 				string url = baseUri + extension;
 
-				_ = HttpHandler.instance.AsyncGetRequest<T>(url, StaticData.HandleResponse<T>, region, type_id);
+				await HttpHandler.instance.AsyncGetRequest<T>(url, StaticData.HandleResponse<T>, region, type_id);
 			}
 			catch (Exception ex)
 			{
@@ -58,26 +56,43 @@ namespace EveMarket.Network
 			}
 		}
 
-		public static void CompleteStaticUpdateTask()
+		public static void CompleteGroupUpdate()
 		{
-			Interlocked.Increment(ref completedRequests);
-			if (Interlocked.Decrement(ref pendingRequests) == 0)  // Decrement counter and check
+			if (Interlocked.Decrement(ref pendingMarketGroups) == 0)
 			{
-				Status = UpdateStatus.Idle;
-				completedRequests = 0;
-				totalRequests = 0;
-
-				HttpHandler.instance.ClearRequestList();
-				Debug.Log($"All requests have completed.");
-				EveDelegate.StaticUpdateComplete?.Invoke();
+				Debug.Log($"All market group(s) have completed.");
+				EveDelegate.MarketUpdateComplete?.Invoke();
+				ChangeUpdateStateToIdle();
+			}
+			else
+			{
+				Debug.Log($"{pendingMarketGroups} market group(s) pending.");
 			}
 
-			Debug.Log($"Completed {completedRequests} requests with {pendingRequests} of {totalRequests} requests pending.");
+		}
+
+		public static void CompleteUpdateTask()
+		{
+			Interlocked.Increment(ref completedRequests);
+			if (Interlocked.Decrement(ref pendingRequests) == 0 && pendingMarketGroups == 0)  // Decrement counter and check
+			{
+				EveDelegate.StaticUpdateComplete?.Invoke();
+				ChangeUpdateStateToIdle();
+			}
 		}
 
 		public static void JobsComplete()
 		{
-			EveDelegate.StaticUpdateComplete -= JobsComplete;
+			EveDelegate.Unsubscribe(ref EveDelegate.StaticUpdateComplete, JobsComplete);
+			StaticData.IsSubscribed = false;
+		}
+
+		public static void ChangeUpdateStateToIdle()
+		{
+			HttpHandler.instance.ClearRequestList();
+			completedRequests = 0;
+			totalRequests = 0;
+			Status = UpdateStatus.Idle;
 		}
 	}
 }

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using static UnityEditor.Progress;
 using static UnityEngine.UI.Image;
 using static System.Collections.Specialized.BitVector32;
+using System.Threading;
 
 namespace EveMarket
 {
@@ -94,7 +95,8 @@ namespace EveMarket
 	{
 		Tunttaras,
 		Ylandoki,
-		Umokka
+		Umokka,
+		None
 	}
 
 	public enum Range
@@ -221,9 +223,19 @@ namespace EveMarket
 			{ Region.Lonetrek, 10000016 }
 		};
 
+		public static bool IsSubscribed { get; set; } = false;
+
 		public static async Task WaitForPendingRequestsToComplete()
 		{
 			while (NetworkManager.pendingRequests > 0)
+			{
+				await Task.Delay(100); // Wait for 100 milliseconds before checking again
+			}
+		}
+
+		public static async Task WaitForPendingGroupRequestsToComplete()
+		{
+			while (NetworkManager.pendingMarketGroups > 1)
 			{
 				await Task.Delay(100); // Wait for 100 milliseconds before checking again
 			}
@@ -235,14 +247,14 @@ namespace EveMarket
 
 			lock (sb) { sb.Clear(); }
 
-			NetworkManager.AsyncRequest<List<MarketPrice>>();
+			await NetworkManager.AsyncRequest<List<MarketPrice>>();
 
 			var marketGroupIds = GroupIdsToName.Keys.ToArray();
 
 			for (int i = 0; i < marketGroupIds.Length; i++)
 			{
 				await WaitForPendingRequestsToComplete();
-				NetworkManager.AsyncRequest<MarketGroup>(marketGroupIds[i].ToString());
+				await NetworkManager.AsyncRequest<MarketGroup>(marketGroupIds[i].ToString());
 			}
 
 			ConstructMarketObjects();
@@ -250,13 +262,22 @@ namespace EveMarket
 
 		public static async void UpdateMarketData(List<int> ids)
 		{
-			EveDelegate.Subscribe(ref EveDelegate.StaticUpdateComplete, SaveMarketData);
+			Interlocked.Increment(ref NetworkManager.pendingMarketGroups);
+
+			if (!IsSubscribed)
+			{
+				EveDelegate.Subscribe(ref EveDelegate.MarketUpdateComplete, SaveMarketData);
+				IsSubscribed = true;
+			}
 
 			foreach (var id in ids)
 			{
 				await WaitForPendingRequestsToComplete();
 				RequestMarketOrders(id);
 			}
+
+			await WaitForPendingRequestsToComplete();
+			NetworkManager.CompleteGroupUpdate();
 		}
 
 		public static void LoadStaticData()
@@ -464,16 +485,16 @@ namespace EveMarket
 					str = sb.ToString();
 				}
 
-				UnityMainThreadDispatcher.Instance.Enqueue(() =>
-				{
-					Debug.Log(typeof(T));
-				});
+				//UnityMainThreadDispatcher.Instance.Enqueue(() =>
+				//{
+				//	Debug.Log(typeof(T));
+				//});
 
-				NetworkManager.CompleteStaticUpdateTask();
+				NetworkManager.CompleteUpdateTask();
 			}
 		}
 
-		public static void RequestMarketOrders(int typeId)
+		public static async void RequestMarketOrders(int typeId)
 		{
 			lock (OrderRecords)
 			{
@@ -481,7 +502,7 @@ namespace EveMarket
 					OrderRecords[AppSettings.SellRegion] = new Dictionary<int, OrderRecord>();
 			}
 
-			NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.SellRegion, type_id: typeId);
+			await NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.SellRegion, type_id: typeId);
 
 			if (AppSettings.BuyRegion != AppSettings.SellRegion)
 			{
@@ -491,7 +512,7 @@ namespace EveMarket
 						OrderRecords[AppSettings.BuyRegion] = new Dictionary<int, OrderRecord>();
 				}
 
-				NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.BuyRegion, type_id: typeId);
+				await NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.BuyRegion, type_id: typeId);
 			}
 		}
 
@@ -514,7 +535,11 @@ namespace EveMarket
 		{
 			Debug.Log($"Saving Market Data");
 
-			EveDelegate.Unsubscribe(ref EveDelegate.StaticUpdateComplete, SaveMarketData);
+			if (IsSubscribed)
+			{
+				EveDelegate.Unsubscribe(ref EveDelegate.MarketUpdateComplete, SaveMarketData);
+				IsSubscribed = false;
+			}
 
 			lock (MarketPrices)
 			{

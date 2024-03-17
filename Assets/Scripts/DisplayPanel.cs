@@ -11,6 +11,7 @@ using UnityEngine.Rendering;
 using EveMarket.Network;
 using UnityEditor.Sprites;
 using UnityEditor;
+using static UnityEditor.Progress;
 
 namespace EveMarket
 {
@@ -49,6 +50,7 @@ namespace EveMarket
 			}
 		}
 
+		private System preset = System.None;
 		private PanelState panelState = PanelState.CurrentSellPrice;
 		private Dictionary<PanelState, Action> Panels;
 		private Dictionary<PanelState, string> PriceLayoutLabel = new Dictionary<PanelState, string>()
@@ -61,6 +63,7 @@ namespace EveMarket
 		private string tempMargin = null;
 		private string tempBuyRange = null;
 		private string tempBuySystem = null;
+		private System tempPreset = System.None;
 
 		private Vector2 scrollPos;
 		public float scrollPosX;
@@ -68,6 +71,13 @@ namespace EveMarket
 
 		LayoutPropertyBlock props = new LayoutPropertyBlock();
 		public static bool ShowGUI => EveMarket.ShowGUI;
+
+
+		private bool showDropdown = false;
+		private int selectedIndex = 0;
+		private string[] options = Enum.GetNames(typeof(System));
+		private string selectedOption => options[selectedIndex];
+
 
 		private void OnEnable()
 		{
@@ -145,6 +155,29 @@ namespace EveMarket
 						if (tempMargin == null) tempMargin = AppSettings.MarginPercentage.ToString();
 						tempMargin = GUILayout.TextField(tempMargin, GUILayout.Width(props.compressedLabelWidth));
 
+						GUILayout.Space(10);
+						GUILayout.Label($"Preset: ", GUILayout.Width(props.compressedLabelWidth));
+						if (!showDropdown)
+						{
+							if (GUILayout.Button(tempPreset.ToString(), GUILayout.Width(props.compressedLabelWidth)))
+							{
+								showDropdown = !showDropdown;
+							}
+						}
+
+						if (showDropdown)
+						{
+							for (int i = 0; i < options.Length; i++)
+							{
+								if (GUILayout.Button(options[i]))
+								{
+									tempPreset = preset = (System)i;
+									ApplyPreset();
+									showDropdown = false;
+								}
+							}
+						}
+
 						if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Return)
 						{
 							if (Enum.TryParse(typeof(Region), tempBuyRegion, true, out object newRegion))
@@ -174,6 +207,17 @@ namespace EveMarket
 			scrollPos = GUILayout.BeginScrollView(scrollPos);
 			Panels[panelState].Invoke();
 			GUILayout.EndScrollView();
+		}
+
+		private void ApplyPreset()
+		{
+			if (preset == System.None) return;
+
+			tempBuyRegion = (AppSettings.BuyRegion = AppSettings.Presets[preset].buyRegion).ToString();
+			tempBuySystem = (AppSettings.BuyOrderSystem = AppSettings.Presets[preset].buySystem).ToString();
+			tempBuyRange = AppSettings.BuyRange = AppSettings.Presets[preset].buyRange;
+			tempMargin = (AppSettings.MarginPercentage = AppSettings.Presets[preset].profitMargin).ToString();
+			UpdateMarketObjects();
 		}
 
 		private void UpdateMarketObjects() => StaticData.UpdateMarketObjects();

@@ -10,6 +10,7 @@ namespace EveMarket.Util
 	{
 		public delegate void JobStatus();
 		public static JobStatus StaticUpdateComplete;
+		public static JobStatus MarketUpdateComplete;
 		public static JobStatus StaticLoadComplete;
 
 		public static void Subscribe(ref JobStatus _delegate, Action action)

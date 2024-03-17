@@ -6,6 +6,22 @@ using UnityEngine;
 
 namespace EveMarket
 {
+	public struct BuyPreset
+	{
+		public Region buyRegion;
+		public System buySystem;
+		public string buyRange;
+		public int profitMargin;
+
+		public BuyPreset(Region buyRegion, System buySystem, string buyRange, int profitMargin)
+		{
+			this.buyRegion = buyRegion;
+			this.buySystem = buySystem;
+			this.buyRange = buyRange;
+			this.profitMargin = profitMargin;
+		}
+	}
+
 	public static class AppSettings
 	{
 		private enum Prefs
@@ -22,6 +38,13 @@ namespace EveMarket
 		public static System BuyOrderSystem { get; set; }
 		public static Region BuyRegion { get; set; } = Region.Lonetrek;
 		public static Region SellRegion { get; set; }
+
+		public static Dictionary<System, BuyPreset> Presets = new Dictionary<System, BuyPreset>()
+		{
+			{ System.Tunttaras, new BuyPreset(Region.Lonetrek, System.Tunttaras, "4", 10) },
+			{ System.Umokka, new BuyPreset(Region.Lonetrek, System.Umokka, "3", 10) },
+			{ System.Ylandoki, new BuyPreset(Region.Lonetrek, System.Ylandoki, "1", 10) }
+		};
 
 		public static void LoadPlayerPrefs()
 		{
