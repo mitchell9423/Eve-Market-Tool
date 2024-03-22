@@ -21,6 +21,7 @@ namespace EveMarket
 		SerializedProperty unityMainThreadDispatcher;
 		SerializedProperty httpHandler;
 		SerializedProperty displayPanel;
+		SerializedProperty ui;
 
 		Dictionary<Type, string> TypeLabel = new Dictionary<Type, string>()
 		{
@@ -36,6 +37,7 @@ namespace EveMarket
 			unityMainThreadDispatcher = serializedObject.FindProperty("unityMainThreadDispatcher");
 			httpHandler = serializedObject.FindProperty("httpHandler");
 			displayPanel = serializedObject.FindProperty("displayPanel");
+			ui = serializedObject.FindProperty("ui");
 		}
 
 		public override void OnInspectorGUI()
@@ -45,6 +47,7 @@ namespace EveMarket
 			EditorGUILayout.PropertyField(unityMainThreadDispatcher);
 			EditorGUILayout.PropertyField(httpHandler);
 			EditorGUILayout.PropertyField(displayPanel);
+			EditorGUILayout.PropertyField(ui);
 
 			EditorGUILayout.Space(10);
 

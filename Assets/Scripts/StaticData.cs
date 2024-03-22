@@ -88,14 +88,19 @@ namespace EveMarket
 	public enum Region
 	{
 		The_Forge,
-		Lonetrek
+		Lonetrek,
+		The_Citadel,
+		None
 	}
 
 	public enum System
 	{
+		Inaro,
+		Jita,
 		Tunttaras,
-		Ylandoki,
 		Umokka,
+		Urlen,
+		Ylandoki,
 		None
 	}
 
@@ -118,11 +123,14 @@ namespace EveMarket
 	public static class StaticData
 	{
 		private static StringBuilder sb = new StringBuilder();
-		public static Dictionary<System, int> BuyOrderSystems { get; set; } = new Dictionary<System, int>()
+		public static Dictionary<System, int> SystemIds { get; set; } = new Dictionary<System, int>()
 		{
-			{ System.Ylandoki, 30001395 },
+			{ System.Jita, 30000142 },
+			{ System.Inaro, 30002788 },
 			{ System.Tunttaras, 30001379 },
-			{ System.Umokka, 30001409 }
+			{ System.Umokka, 30001409 },
+			{ System.Urlen, 30000139 },
+			{ System.Ylandoki, 30001395 }
 		};
 
 		public static Dictionary<Range, string> RangeStringName = new Dictionary<Range, string>()
@@ -138,7 +146,7 @@ namespace EveMarket
 			{ Range.Jump_20, "20" },
 			{ Range.Jump_30, "30" },
 			{ Range.Jump_40, "40" },
-			{ Range.Region, "Region" },
+			{ Range.Region, "region" },
 		};
 
 		public static Dictionary<string, int> RangeStringToInt = new Dictionary<string, int>()
@@ -186,6 +194,7 @@ namespace EveMarket
 
 		private static Dictionary<int, string> GroupIdsToName = new Dictionary<int, string>()
 		{
+			{ 1857, "Mineral" },
 			{ 512, "Arkonor" },
 			{ 514, "Bistot" },
 			{ 515, "Pyroxeres" },
@@ -206,9 +215,8 @@ namespace EveMarket
 			{ 2539, "Rakovene" },
 			{ 2540, "Talassonite" },
 			{ 3487, "Mordunium" },
-			{ 1857, "Mineral" },
-			{ 1855, "Ice Ores"},
-			{ 1033, "Ice Products" }
+			{ 1033, "Ice Products" },
+			{ 1855, "Ice Ores"}
 		};
 
 		public static Dictionary<int, List<RouteData>> Routes = new Dictionary<int, List<RouteData>>();
@@ -220,7 +228,8 @@ namespace EveMarket
 		public static Dictionary<Region, int> RegionId = new Dictionary<Region, int>()
 		{
 			{ Region.The_Forge, 10000002 },
-			{ Region.Lonetrek, 10000016 }
+			{ Region.Lonetrek, 10000016 },
+			{ Region.The_Citadel, 10000033 }
 		};
 
 		public static bool IsSubscribed { get; set; } = false;
@@ -337,6 +346,9 @@ namespace EveMarket
 
 		private static void ConstructMarketObjects()
 		{
+			MarketObjects[StaticData.GroupObjects[1857].TypeId] = new MarketObject(StaticData.GroupObjects[1857]);
+			MarketObjects[StaticData.GroupObjects[1033].TypeId] = new MarketObject(StaticData.GroupObjects[1033]);
+
 			lock (StaticData.GroupObjects)
 			{
 				foreach (var group in StaticData.GroupObjects.Values)
@@ -422,7 +434,7 @@ namespace EveMarket
 
 					lock (Routes)
 					{
-						int origin = StaticData.BuyOrderSystems[AppSettings.BuyOrderSystem];
+						int origin = StaticData.SystemIds[AppSettings.BuyOrderSystem];
 
 						foreach (var order in marketOrders)
 						{
@@ -512,7 +524,10 @@ namespace EveMarket
 						OrderRecords[AppSettings.BuyRegion] = new Dictionary<int, OrderRecord>();
 				}
 
-				await NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.BuyRegion, type_id: typeId);
+				for (int i = 0; i < Enum.GetValues(typeof(Region)).Length - 1; i++)
+				{
+					await NetworkManager.AsyncRequest<List<MarketOrder>>(region: (Region)i, type_id: typeId);
+				}
 			}
 		}
 

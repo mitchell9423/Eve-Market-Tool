@@ -43,7 +43,8 @@ namespace EveMarket
 		{
 			{ System.Tunttaras, new BuyPreset(Region.Lonetrek, System.Tunttaras, "4", 10) },
 			{ System.Umokka, new BuyPreset(Region.Lonetrek, System.Umokka, "3", 10) },
-			{ System.Ylandoki, new BuyPreset(Region.Lonetrek, System.Ylandoki, "1", 10) }
+			{ System.Ylandoki, new BuyPreset(Region.Lonetrek, System.Ylandoki, "1", 10) },
+			{ System.Inaro, new BuyPreset(Region.The_Citadel, System.Inaro, "3", 10) }
 		};
 
 		public static void LoadPlayerPrefs()

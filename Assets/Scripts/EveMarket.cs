@@ -16,6 +16,7 @@ namespace EveMarket
 		[SerializeField] UnityMainThreadDispatcher unityMainThreadDispatcher;
 		[SerializeField] HttpHandler httpHandler;
 		[SerializeField] DisplayPanel displayPanel;
+		[SerializeField] DisplayPanel ui;
 
 		public static bool ShowGUI { get; set; }
 
@@ -50,6 +51,7 @@ namespace EveMarket
 		{
 			StaticData.LoadStaticData();
 			BuildDisplayString();
+			ui.CreateGroupContainers();
 		}
 
 		public void UpdateStaticData()
@@ -58,9 +60,9 @@ namespace EveMarket
 			BuildDisplayString();
 		}
 
-		public void UpdateMarketData()
+		public void UpdateMarketData(Component sender, object obj)
 		{
-			StaticData.UpdateMarketData(new List<int>());
+			StaticData.UpdateMarketData(obj as List<int>);
 			BuildDisplayString();
 		}
 

@@ -1,17 +1,15 @@
-using System.Collections;
+
 using System.Collections.Generic;
 using UnityEngine;
-using System.Threading.Tasks;
-using UnityEngine.Windows;
-using GameEvent;
 using System.Linq;
 using System;
-using UnityEngine.UIElements;
-using UnityEngine.Rendering;
 using EveMarket.Network;
-using UnityEditor.Sprites;
 using UnityEditor;
-using static UnityEditor.Progress;
+using TMPro;
+using Unity.VisualScripting;
+using UnityEngine.UI;
+using System.ComponentModel;
+using System.Text.RegularExpressions;
 
 namespace EveMarket
 {
@@ -50,6 +48,14 @@ namespace EveMarket
 			}
 		}
 
+		[Header("Prefab Refs")]
+		public UnityEngine.Object groupContainerPrefab;
+		public UnityEngine.Object itemInfoPanelPrefab;
+
+		[Header("UI Elements")]
+		public Transform contentGrid;
+		public TMP_Dropdown presetDropdown;
+
 		private System preset = System.None;
 		private PanelState panelState = PanelState.CurrentSellPrice;
 		private Dictionary<PanelState, Action> Panels;
@@ -77,7 +83,7 @@ namespace EveMarket
 		private int selectedIndex = 0;
 		private string[] options = Enum.GetNames(typeof(System));
 		private string selectedOption => options[selectedIndex];
-
+		[SerializeField] private List<GameObject> groupContainers = new List<GameObject>();
 
 		private void OnEnable()
 		{
@@ -89,6 +95,62 @@ namespace EveMarket
 			};
 
 			DisplayBuySellPrice();
+		}
+
+		private void Start()
+		{
+			if (presetDropdown == null || options == null) return;
+
+			presetDropdown.ClearOptions();
+			List<TMP_Dropdown.OptionData> dropdownOptions = new List<TMP_Dropdown.OptionData>();
+			foreach (var option in options)
+			{
+				TMP_Dropdown.OptionData newOption = new TMP_Dropdown.OptionData(option);
+				dropdownOptions.Add(newOption);
+			}
+			presetDropdown.options = dropdownOptions;
+			presetDropdown.value = 0;
+			presetDropdown.RefreshShownValue();
+		}
+
+		public void CreateGroupContainers()
+		{
+			foreach (MarketObject marketObject in StaticData.MarketObjects.Values)
+			{
+				CreateGroupContainer(marketObject);
+			}
+		}
+
+		public void CreateGroupContainer(MarketObject marketObject)
+		{
+			GameObject groupContainer;
+
+			int index = 0;
+			if ((index = groupContainers.FindIndex(Container => Container.GetComponentInChildren<GroupHeader>().GetTitle() == marketObject.GroupName)) < 0)
+			{
+				groupContainer = PrefabUtility.InstantiatePrefab(groupContainerPrefab, contentGrid) as GameObject;
+				groupContainers.Add(groupContainer);
+			}
+			else
+			{
+				groupContainer = groupContainers[index];
+			}
+
+			GroupHeader groupHeader = groupContainer.GetComponentInChildren<GroupHeader>();
+			if (groupHeader)
+			{
+				groupHeader.SetHeader(marketObject);
+
+				ItemContianer itemContianer = groupContainer.GetComponentInChildren<ItemContianer>();
+				itemContianer.PopulateItemContainer(marketObject);
+			}
+
+		}
+
+		public void UpdatePreset(int val)
+		{
+			preset = (System)val;
+			ApplyPreset();
 		}
 
 		private void OnGUI()
@@ -125,80 +187,128 @@ namespace EveMarket
 			{
 				GUILayout.Space(10);
 
-				using (new GUILayout.HorizontalScope(GUI.skin.box))
+				using (new GUILayout.VerticalScope())
 				{
-					Button("Average Price", "Tool Tip", DisplayAveragePrice);
-
-					GUILayout.Space(10);
-
-					Button("Current Sell Price", "Tool Tip", DisplayBuySellPrice);
-
-					if (panelState == PanelState.CurrentSellPrice)
+					using (new GUILayout.HorizontalScope(GUI.skin.box))
 					{
-						GUILayout.Space(10);
-						GUILayout.Label($"Buy Region: ", GUILayout.Width(props.compressedLabelWidth));
-						if (tempBuyRegion == null) tempBuyRegion = AppSettings.BuyRegion.ToString();
-						tempBuyRegion = GUILayout.TextField(tempBuyRegion, GUILayout.Width(props.compressedLabelWidth));
+						Button("Average Price", "Tool Tip", DisplayAveragePrice);
 
 						GUILayout.Space(10);
-						GUILayout.Label($"Buy System: ", GUILayout.Width(props.compressedLabelWidth));
-						if (tempBuySystem == null) tempBuySystem = AppSettings.BuyOrderSystem.ToString();
-						tempBuySystem = GUILayout.TextField(tempBuySystem, GUILayout.Width(props.compressedLabelWidth));
 
-						GUILayout.Space(10);
-						GUILayout.Label($"Buy Range: ", GUILayout.Width(props.compressedLabelWidth));
-						if (tempBuyRange == null) tempBuyRange = AppSettings.BuyRange;
-						tempBuyRange = GUILayout.TextField(tempBuyRange, GUILayout.Width(props.compressedLabelWidth));
+						Button("Current Sell Price", "Tool Tip", DisplayBuySellPrice);
 
-						GUILayout.Space(10);
-						GUILayout.Label($"Margin %: ", GUILayout.Width(props.compressedLabelWidth));
-						if (tempMargin == null) tempMargin = AppSettings.MarginPercentage.ToString();
-						tempMargin = GUILayout.TextField(tempMargin, GUILayout.Width(props.compressedLabelWidth));
-
-						GUILayout.Space(10);
-						GUILayout.Label($"Preset: ", GUILayout.Width(props.compressedLabelWidth));
-						if (!showDropdown)
+						if (panelState == PanelState.CurrentSellPrice)
 						{
-							if (GUILayout.Button(tempPreset.ToString(), GUILayout.Width(props.compressedLabelWidth)))
-							{
-								showDropdown = !showDropdown;
-							}
-						}
+							GUILayout.Space(10);
+							GUILayout.Label($"Buy Region: ", GUILayout.Width(props.compressedLabelWidth));
+							if (tempBuyRegion == null) tempBuyRegion = AppSettings.BuyRegion.ToString();
+							tempBuyRegion = GUILayout.TextField(tempBuyRegion, GUILayout.Width(props.compressedLabelWidth));
 
-						if (showDropdown)
-						{
-							for (int i = 0; i < options.Length; i++)
+							GUILayout.Space(10);
+							GUILayout.Label($"Buy System: ", GUILayout.Width(props.compressedLabelWidth));
+							if (tempBuySystem == null) tempBuySystem = AppSettings.BuyOrderSystem.ToString();
+							tempBuySystem = GUILayout.TextField(tempBuySystem, GUILayout.Width(props.compressedLabelWidth));
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Buy Range: ", GUILayout.Width(props.compressedLabelWidth));
+							if (tempBuyRange == null) tempBuyRange = AppSettings.BuyRange;
+							tempBuyRange = GUILayout.TextField(tempBuyRange, GUILayout.Width(props.compressedLabelWidth));
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Margin %: ", GUILayout.Width(props.compressedLabelWidth));
+							if (tempMargin == null) tempMargin = AppSettings.MarginPercentage.ToString();
+							tempMargin = GUILayout.TextField(tempMargin, GUILayout.Width(props.compressedLabelWidth));
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Preset: ", GUILayout.Width(props.compressedLabelWidth));
+							if (!showDropdown)
 							{
-								if (GUILayout.Button(options[i]))
+								if (GUILayout.Button(tempPreset.ToString(), GUILayout.Width(props.compressedLabelWidth)))
 								{
-									tempPreset = preset = (System)i;
-									ApplyPreset();
-									showDropdown = false;
+									showDropdown = !showDropdown;
 								}
 							}
+
+							if (showDropdown)
+							{
+								for (int i = 0; i < options.Length; i++)
+								{
+									if (GUILayout.Button(options[i]))
+									{
+										tempPreset = preset = (System)i;
+										ApplyPreset();
+										showDropdown = false;
+									}
+								}
+							}
+
+							if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Return)
+							{
+								if (Enum.TryParse(typeof(Region), tempBuyRegion, true, out object newRegion))
+								{
+									AppSettings.BuyRegion = (Region)newRegion;
+								}
+
+								if (Enum.TryParse(typeof(System), tempBuySystem, true, out object newSystem))
+								{
+									AppSettings.BuyOrderSystem = (System)newSystem;
+								}
+
+								AppSettings.BuyRange = tempBuyRange;
+
+								if (int.TryParse(tempMargin, out int newValue))
+								{
+									AppSettings.MarginPercentage = newValue;
+								}
+
+								AppSettings.SavePlayerPrefs();
+								UpdateMarketObjects();
+							}
 						}
+					}
 
-						if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Return)
+					using (new GUILayout.HorizontalScope(GUI.skin.box))
+					{
+						if (panelState == PanelState.CurrentSellPrice)
 						{
-							if (Enum.TryParse(typeof(Region), tempBuyRegion, true, out object newRegion))
+							EditorGUI.BeginChangeCheck();
+							GUILayout.Label($"Skills: ", GUILayout.Width(props.compressedLabelWidth));
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Reprocessing: ", GUILayout.Width(props.compressedLabelWidth + 5));
+							if (Int32.TryParse(GUILayout.TextField(Reprocess.ReprocessingSkillLvl.ToString(), GUILayout.Width(props.compressedLabelWidth)), out Reprocess.ReprocessingSkillLvl)) { }
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Efficiency: ", GUILayout.Width(props.compressedLabelWidth));
+							if (Int32.TryParse(GUILayout.TextField(Reprocess.ReprocessingEfficiencySkillLvl.ToString(), GUILayout.Width(props.compressedLabelWidth)), out Reprocess.ReprocessingEfficiencySkillLvl)) { }
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Simple: ", GUILayout.Width(props.compressedLabelWidth - 30));
+							if (Int32.TryParse(GUILayout.TextField(Reprocess.SimpleOreProcessingSkillLvl.ToString(), GUILayout.Width(props.compressedLabelWidth)), out Reprocess.SimpleOreProcessingSkillLvl)) { }
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Ice: ", GUILayout.Width(props.compressedLabelWidth - 55));
+							if (Int32.TryParse(GUILayout.TextField(Reprocess.IceProcessingSkillLvl.ToString(), GUILayout.Width(props.compressedLabelWidth)), out Reprocess.IceProcessingSkillLvl)) { }
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Common: ", GUILayout.Width(props.compressedLabelWidth - 20));
+							if (Int32.TryParse(GUILayout.TextField(Reprocess.CommonOreProcessingSkillLvl.ToString(), GUILayout.Width(props.compressedLabelWidth)), out Reprocess.CommonOreProcessingSkillLvl)) { }
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Coherent: ", GUILayout.Width(props.compressedLabelWidth));
+							if (Int32.TryParse(GUILayout.TextField(Reprocess.CoherentOreProcessingSkillLvl.ToString(), GUILayout.Width(props.compressedLabelWidth)), out Reprocess.CoherentOreProcessingSkillLvl)) { }
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Variegated: ", GUILayout.Width(props.compressedLabelWidth));
+							if (Int32.TryParse(GUILayout.TextField(Reprocess.VariegatedOreProcessingSkillLvl.ToString(), GUILayout.Width(props.compressedLabelWidth)), out Reprocess.VariegatedOreProcessingSkillLvl)) { }
+
+							GUILayout.Space(10);
+							GUILayout.Label($"Mercoxite: ", GUILayout.Width(props.compressedLabelWidth));
+							if (Int32.TryParse(GUILayout.TextField(Reprocess.MercoxiteOreProcessingSkillLvl.ToString(), GUILayout.Width(props.compressedLabelWidth)), out Reprocess.MercoxiteOreProcessingSkillLvl)) { }
+							if (EditorGUI.EndChangeCheck())
 							{
-								AppSettings.BuyRegion = (Region)newRegion;
+								StaticData.UpdateMarketObjects();
 							}
-
-							if (Enum.TryParse(typeof(System), tempBuySystem, true, out object newSystem))
-							{
-								AppSettings.BuyOrderSystem = (System)newSystem;
-							}
-
-							AppSettings.BuyRange = tempBuyRange;
-
-							if (int.TryParse(tempMargin, out int newValue))
-							{
-								AppSettings.MarginPercentage = newValue;
-							}
-
-							AppSettings.SavePlayerPrefs();
-							UpdateMarketObjects();
 						}
 					}
 				}
@@ -220,7 +330,14 @@ namespace EveMarket
 			UpdateMarketObjects();
 		}
 
-		private void UpdateMarketObjects() => StaticData.UpdateMarketObjects();
+		private void UpdateMarketObjects()
+		{
+			StaticData.UpdateMarketObjects();
+			foreach (var marketObject in StaticData.MarketObjects.Values)
+			{
+				CreateGroupContainer(marketObject);
+			}
+		}
 
 		private void Button(string text, string toolTip, Action action)
 		{
@@ -238,7 +355,6 @@ namespace EveMarket
 		{
 			panelState = PanelState.CurrentSellPrice;
 
-			StaticData.LoadStaticData();
 
 			// Item block widths
 			props.nameWidth = 200;

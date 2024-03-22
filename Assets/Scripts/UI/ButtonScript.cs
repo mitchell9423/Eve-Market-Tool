@@ -7,18 +7,20 @@ namespace EveMarket
 {
 	public class ButtonScript : MonoBehaviour
 	{
-		public ScriptableObject GameEvent;
+		private Component sender;
+		private object data;
 
-		// Start is called before the first frame update
-		void Start()
+		public GameEvent.GameEvent buttonEvent;
+
+		public void InitButtonEvent(Component sender = null, object data = null)
 		{
-
+			this.sender = sender??this;
+			this.data = data;
 		}
 
-		// Update is called once per frame
-		void Update()
+		public void RaiseEvent()
 		{
-
+			buttonEvent?.Invoke(sender, data);
 		}
 	}
 }

@@ -70,7 +70,13 @@ public static class Reprocess
 					name = name.Replace(" ", "");
 					Product product = (Product)Enum.Parse(typeof(Product), name);
 
-					netValue += marketItem.CurrentSellPrice * Mathf.FloorToInt(BaseYield[product] * netYield);
+					if (BaseYield[product] > 0)
+					{
+						float amountProduct = BaseYield[product];
+						float netProduct = Mathf.Floor(BaseYield[product] * netYield);
+						double netPrice = marketItem.CurrentSellPrice * Mathf.Round(BaseYield[product] * netYield);
+						netValue += marketItem.CurrentSellPrice * Mathf.Floor(BaseYield[product] * netYield);
+					}
 				}
 			}
 			
@@ -80,61 +86,61 @@ public static class Reprocess
 
 	static float baseYield = .54f;
 
-	static int ReprocessingSkillLvl = 5;
-	static float ReprocessingSkillPercentage = 1 + (.03f * ReprocessingSkillLvl);
+	public static int ReprocessingSkillLvl = 5;
+	static float ReprocessingSkillPercentage => 1 + (.03f * ReprocessingSkillLvl);
 
-	static int ReprocessingEfficiencySkillLvl = 5;
-	static float ReprocessingEfficiencySkillPercentage = 1 + (.02f * ReprocessingEfficiencySkillLvl);
+	public static int ReprocessingEfficiencySkillLvl = 5;
+	static float ReprocessingEfficiencySkillPercentage => 1 + (.02f * ReprocessingEfficiencySkillLvl);
 
-	static int ScrapmetalProcessingSkillLvl = 4;
-	static float ScrapmetalProcessingSkillPercentage = 1 + (.02f * ScrapmetalProcessingSkillLvl);
+	public static int ScrapmetalProcessingSkillLvl = 4;
+	static float ScrapmetalProcessingSkillPercentage => 1 + (.02f * ScrapmetalProcessingSkillLvl);
 
-	static int IceProcessingSkillLvl = 5;
-	static float IceProcessingSkillPercentage = 1 + (.02f * IceProcessingSkillLvl);
+	public static int IceProcessingSkillLvl = 5;
+	static float IceProcessingSkillPercentage => 1 + (.02f * IceProcessingSkillLvl);
 
 	// 2% bonus to Bezdnacine, Rakovene, and Talassonite reprocessing yield per skill level.
-	static int AbyssalOreProcessingSkillLvl = 0;
-	static float AbyssalOreProcessingSkillPercentage = 1 + (.02f * AbyssalOreProcessingSkillLvl);
+	public static int AbyssalOreProcessingSkillLvl = 0;
+	static float AbyssalOreProcessingSkillPercentage => 1 + (.02f * AbyssalOreProcessingSkillLvl);
 
 	// 2% bonus to Hedbergite, Hemorphite, Jaspet, Kernite, Omber, and Ytirium reprocessing yield per skill level.
-	static int CoherentOreProcessingSkillLvl = 4;
-	static float CoherentOreProcessingSkillPercentage = 1 + (.02f * CoherentOreProcessingSkillLvl);
+	public static int CoherentOreProcessingSkillLvl = 4;
+	static float CoherentOreProcessingSkillPercentage => 1 + (.02f * CoherentOreProcessingSkillLvl);
 
 	// 2% bonus to Cobaltite, Euxenite, Titanite, and Scheelite reprocessing yield per skill level.
-	static int CommonOreProcessingSkillLvl = 0;
-	static float CommonOreProcessingSkillPercentage = 1 + (.02f * CommonOreProcessingSkillLvl);
+	public static int CommonOreProcessingSkillLvl = 0;
+	static float CommonOreProcessingSkillPercentage => 1 + (.02f * CommonOreProcessingSkillLvl);
 
 	// 2% bonus to Arkonor, Bistot, Spodumain, Eifyrium, and Ducinium reprocessing yield per skill level.
-	static int ComplexOreProcessingSkillLvl = 0;
-	static float ComplexOreProcessingSkillPercentage = 1 + (.02f * ComplexOreProcessingSkillLvl);
+	public static int ComplexOreProcessingSkillLvl = 0;
+	static float ComplexOreProcessingSkillPercentage => 1 + (.02f * ComplexOreProcessingSkillLvl);
 
 	// 2% bonus to Xenotime, Monazite, Loparite, and Ytterbite reprocessing yield per skill level.
-	static int ExceptionalOreProcessingSkillLvl = 0;
-	static float ExceptionalOreProcessingSkillPercentage = 1 + (.02f * ExceptionalOreProcessingSkillLvl);
+	public static int ExceptionalOreProcessingSkillLvl = 0;
+	static float ExceptionalOreProcessingSkillPercentage => 1 + (.02f * ExceptionalOreProcessingSkillLvl);
 
 	// 2% bonus to Mercoxite reprocessing yield per skill level.
-	static int MercoxiteOreProcessingSkillLvl = 4;
-	static float MercoxiteOreProcessingSkillPercentage = 1 + (.02f * MercoxiteOreProcessingSkillLvl);
+	public static int MercoxiteOreProcessingSkillLvl = 4;
+	static float MercoxiteOreProcessingSkillPercentage => 1 + (.02f * MercoxiteOreProcessingSkillLvl);
 
 	// 2% bonus to Carnotite, Zircon, Pollucite, and Cinnabar reprocessing yield per skill level.
-	static int RareOreProcessingSkillLvl = 0;
-	static float RareOreProcessingSkillPercentage = 1 + (.02f * RareOreProcessingSkillLvl);
+	public static int RareOreProcessingSkillLvl = 0;
+	static float RareOreProcessingSkillPercentage => 1 + (.02f * RareOreProcessingSkillLvl);
 
 	// 2% bonus to Plagioclase, Pyroxeres, Scordite, Veldspar, and Mordunium reprocessing yield per skill level.
-	static int SimpleOreProcessingSkillLvl = 4;
-	static float SimpleOreProcessingSkillPercentage = 1 + (.02f * SimpleOreProcessingSkillLvl);
+	public static int SimpleOreProcessingSkillLvl = 5;
+	static float SimpleOreProcessingSkillPercentage => 1 + (.02f * SimpleOreProcessingSkillLvl);
 
 	// 2% bonus to Zeolites, Sylvite, Bitumens, and Coesite reprocessing yield per skill level.
-	static int UbiquitousOreProcessingSkillLvl = 0;
-	static float UbiquitousOreProcessingSkillPercentage = 1 + (.02f * UbiquitousOreProcessingSkillLvl);
+	public static int UbiquitousOreProcessingSkillLvl = 0;
+	static float UbiquitousOreProcessingSkillPercentage => 1 + (.02f * UbiquitousOreProcessingSkillLvl);
 
 	// 2% bonus to Otavite, Sperrylite, Vanadinite, and Chromite reprocessing yield per skill level.
-	static int UncommonOreProcessingSkillLvl = 0;
-	static float UncommonOreProcessingSkillPercentage = 1 + (.02f * UncommonOreProcessingSkillLvl);
+	public static int UncommonOreProcessingSkillLvl = 0;
+	static float UncommonOreProcessingSkillPercentage => 1 + (.02f * UncommonOreProcessingSkillLvl);
 
 	// 2% bonus to Crokite, Dark Ochre, and Gneiss reprocessing yield per skill level.
-	static int VariegatedOreProcessingSkillLvl = 4;
-	static float VariegatedOreProcessingSkillPercentage = 1 + (.02f * VariegatedOreProcessingSkillLvl);
+	public static int VariegatedOreProcessingSkillLvl = 4;
+	static float VariegatedOreProcessingSkillPercentage => 1 + (.02f * VariegatedOreProcessingSkillLvl);
 
 	static float implantsBonus = 1.04f;
 
@@ -476,11 +482,13 @@ public static class Reprocess
 		if (OreOutputs.ContainsKey(item.ItemName))
 		{
 			float val = (float)OreOutputs[item.ItemName].GetNetValue(item.ReprocessType);
-			val = Mathf.Round(val);
+
 			if (item.ReprocessType != ReprocessType.Ice)
 			{
 				val /= 100;
 			}
+
+			val = Mathf.Round(val * 100)/100;
 
 			return val;
 		}
