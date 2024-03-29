@@ -126,6 +126,9 @@ namespace EveMarket
 			GameObject groupContainer;
 
 			int index = 0;
+
+			if (groupContainers == null || groupContainers.Count() <= 0) return;
+
 			if ((index = groupContainers.FindIndex(Container => Container.GetComponentInChildren<GroupHeader>().GetTitle() == marketObject.GroupName)) < 0)
 			{
 				groupContainer = PrefabUtility.InstantiatePrefab(groupContainerPrefab, contentGrid) as GameObject;
@@ -135,6 +138,8 @@ namespace EveMarket
 			{
 				groupContainer = groupContainers[index];
 			}
+
+			if (!groupContainer) return;
 
 			GroupHeader groupHeader = groupContainer.GetComponentInChildren<GroupHeader>();
 			if (groupHeader)

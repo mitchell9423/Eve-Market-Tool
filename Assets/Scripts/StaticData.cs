@@ -271,6 +271,7 @@ namespace EveMarket
 
 		public static async void UpdateMarketData(List<int> ids)
 		{
+			if (ids == null) return;
 			Interlocked.Increment(ref NetworkManager.pendingMarketGroups);
 
 			if (!IsSubscribed)

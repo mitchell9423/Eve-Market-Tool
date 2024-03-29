@@ -91,7 +91,7 @@ namespace EveMarket
 				var buyOrders = marketOrders.FindAll(rec => 
 				rec.IsBuyOrder
 				&& rec.Price <= MaxBuyPrice
-				&& !(rec.Range == StaticData.RangeStringName[Range.Region] || rec.Range == StaticData.RangeStringName[Range.Jump_40])
+				//&& !(rec.Range == StaticData.RangeStringName[Range.Region] || rec.Range == StaticData.RangeStringName[Range.Jump_40])
 				&& !((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
 				);
 
