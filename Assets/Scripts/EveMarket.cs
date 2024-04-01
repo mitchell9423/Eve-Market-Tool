@@ -6,6 +6,8 @@ using Unity.VisualScripting;
 using UnityEditor;
 using System.Text;
 using System.Linq;
+using System;
+using UnityEngine.PlayerLoop;
 
 namespace EveMarket
 {
@@ -15,8 +17,10 @@ namespace EveMarket
 
 		[SerializeField] UnityMainThreadDispatcher unityMainThreadDispatcher;
 		[SerializeField] HttpHandler httpHandler;
-		[SerializeField] DisplayPanel displayPanel;
 		[SerializeField] DisplayPanel ui;
+
+		public delegate void AppEvent();
+		public static AppEvent UpdateUI;
 
 		public static bool ShowGUI { get; set; }
 
@@ -24,7 +28,9 @@ namespace EveMarket
 
 		private void Awake()
 		{
-			AppSettings.LoadPlayerPrefs();
+			UpdateUI += ui.CreateGroupContainers;
+
+			AppSettings.LoadAppSettings();
 
 			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
 			{
@@ -35,11 +41,11 @@ namespace EveMarket
 			{
 				httpHandler = gameObject.AddComponent<HttpHandler>();
 			}
+		}
 
-			if (!gameObject.TryGetComponent(out displayPanel))
-			{
-				displayPanel = gameObject.AddComponent<DisplayPanel>();
-			}
+		private void OnDestroy()
+		{
+			UpdateUI -= ui.CreateGroupContainers;
 		}
 
 		private void Start()

@@ -15,6 +15,10 @@ namespace EveMarket.Util
 
 		public static void Subscribe(ref JobStatus _delegate, Action action)
 		{
+			// Unsubscribe the action to ensure it's not added if it already exists.
+			Unsubscribe(ref _delegate, action);
+
+			// Subscribe the action.
 			_delegate += new JobStatus(action);
 		}
 

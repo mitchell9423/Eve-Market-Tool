@@ -234,9 +234,9 @@ namespace EveMarket
 
 		public static bool IsSubscribed { get; set; } = false;
 
-		public static async Task WaitForPendingRequestsToComplete()
+		public static async Task WaitForPendingMarketRequestsToComplete()
 		{
-			while (NetworkManager.pendingRequests > 0)
+			while (NetworkManager.pendingMarketRequests > 10)
 			{
 				await Task.Delay(100); // Wait for 100 milliseconds before checking again
 			}
@@ -244,7 +244,7 @@ namespace EveMarket
 
 		public static async Task WaitForPendingGroupRequestsToComplete()
 		{
-			while (NetworkManager.pendingMarketGroups > 1)
+			while (NetworkManager.pendingMarketGroups > 2)
 			{
 				await Task.Delay(100); // Wait for 100 milliseconds before checking again
 			}
@@ -262,7 +262,7 @@ namespace EveMarket
 
 			for (int i = 0; i < marketGroupIds.Length; i++)
 			{
-				await WaitForPendingRequestsToComplete();
+				await WaitForPendingMarketRequestsToComplete();
 				await NetworkManager.AsyncRequest<MarketGroup>(marketGroupIds[i].ToString());
 			}
 
@@ -272,7 +272,8 @@ namespace EveMarket
 		public static async void UpdateMarketData(List<int> ids)
 		{
 			if (ids == null) return;
-			Interlocked.Increment(ref NetworkManager.pendingMarketGroups);
+
+			await WaitForPendingGroupRequestsToComplete();
 
 			if (!IsSubscribed)
 			{
@@ -280,64 +281,60 @@ namespace EveMarket
 				IsSubscribed = true;
 			}
 
+			Interlocked.Increment(ref NetworkManager.pendingMarketGroups);
+
+			Debug.Log($"{NetworkManager.pendingMarketGroups} market group requests started.");
+
 			foreach (var id in ids)
 			{
-				await WaitForPendingRequestsToComplete();
-				RequestMarketOrders(id);
+				await RequestMarketOrders(id);
 			}
 
-			await WaitForPendingRequestsToComplete();
 			NetworkManager.CompleteGroupUpdate();
 		}
 
 		public static void LoadStaticData()
 		{
-			if (MarketPrices != null)
+			Dictionary<int, MarketPrice> marketPrices = FileManager.DeserializeFromFile<Dictionary<int, MarketPrice>>();
+			if (marketPrices != null)
 			{
 				lock (MarketPrices)
 				{
-					MarketPrices = FileManager.DeserializeFromFile<Dictionary<int, MarketPrice>>();
+					MarketPrices = marketPrices;
 				}
 			}
 
-			if (GroupObjects != null)
+			Dictionary<int, MarketGroup> groupObjects = FileManager.DeserializeFromFile<Dictionary<int, MarketGroup>>();
+			if (groupObjects != null)
 			{
 				lock (GroupObjects)
 				{
-					GroupObjects = FileManager.DeserializeFromFile<Dictionary<int, MarketGroup>>();
+					GroupObjects = groupObjects;
 				}
 			}
 
-			if (ItemObjects != null)
+			Dictionary<int, UniverseItem> itemObjects = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>>();
+			if (itemObjects != null)
 			{
 				lock (ItemObjects)
 				{
-					ItemObjects = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>>();
+					ItemObjects = itemObjects;
 				}
 			}
 
-			if (OrderRecords != null)
+			Dictionary <Region, Dictionary<int, OrderRecord>> orderRecords = FileManager.DeserializeFromFile<Dictionary<Region, Dictionary<int, OrderRecord>>>();
+			if (orderRecords != null)
 			{
 				lock (OrderRecords)
 				{
-					try
-					{
-						OrderRecords = FileManager.DeserializeFromFile<Dictionary<Region, Dictionary<int, OrderRecord>>>();
-					}
-					catch { }
+					OrderRecords = orderRecords;
 				}
 			}
 
-			lock (Routes)
+			Dictionary<int, List<RouteData>> routes = FileManager.DeserializeFromFile<Dictionary<int, List<RouteData>>>();
+			if (routes != null)
 			{
-				try
-				{
-					Routes = FileManager.DeserializeFromFile<Dictionary<int, List<RouteData>>>();
-				}
-				catch
-				{
-					Routes = new Dictionary<int, List<RouteData>>();
-				}
+				Routes = routes;
 			}
 
 			ConstructMarketObjects();
@@ -345,22 +342,25 @@ namespace EveMarket
 			Debug.Log("Static Data Loaded.");
 		}
 
-		private static void ConstructMarketObjects()
+		public static void ConstructMarketObjects()
 		{
-			MarketObjects[StaticData.GroupObjects[1857].TypeId] = new MarketObject(StaticData.GroupObjects[1857]);
-			MarketObjects[StaticData.GroupObjects[1033].TypeId] = new MarketObject(StaticData.GroupObjects[1033]);
 
 			lock (StaticData.GroupObjects)
 			{
-				foreach (var group in StaticData.GroupObjects.Values)
+				lock (MarketObjects)
 				{
-					MarketObjects[group.TypeId] = new MarketObject(group);
+					MarketObjects[StaticData.GroupObjects[1857].TypeId] = new MarketObject(StaticData.GroupObjects[1857]);
+					MarketObjects[StaticData.GroupObjects[1033].TypeId] = new MarketObject(StaticData.GroupObjects[1033]);
+
+					foreach (var group in StaticData.GroupObjects.Values)
+					{
+						MarketObjects[group.TypeId] = new MarketObject(group);
+					}
 				}
 			}
-
 		}
 
-		public static void HandleResponse<T>(string response, Region region = Region.The_Forge, int type_id = 0)
+		public static async void HandleResponse<T>(string response, Region region = Region.The_Forge, int type_id = 0)
 		{
 			string str;
 
@@ -397,7 +397,7 @@ namespace EveMarket
 
 					foreach (var typeId in marketGroup.Types)
 					{
-						NetworkManager.AsyncRequest<UniverseItem>(typeId.ToString());
+						await NetworkManager.AsyncRequest<UniverseItem>(typeId.ToString());
 					}
 				}
 				else if (objectModel is UniverseItem universeItem)
@@ -429,15 +429,15 @@ namespace EveMarket
 						}
 
 						OrderRecords[region][type_id] = new OrderRecord(marketOrders);
+
+						NetworkManager.CompleteMarketUpdateTask();
 					}
 
-					if (Routes == null) Routes = new Dictionary<int, List<RouteData>>();
+					int origin = SystemIds[AppSettings.BuyOrderSystem];
 
-					lock (Routes)
+					foreach (var order in marketOrders)
 					{
-						int origin = StaticData.SystemIds[AppSettings.BuyOrderSystem];
-
-						foreach (var order in marketOrders)
+						lock (Routes)
 						{
 							if (Routes.ContainsKey(origin))
 							{
@@ -449,10 +449,13 @@ namespace EveMarket
 									}
 								}
 							}
-
-							NetworkManager.AsyncRequest<List<int>>(data: new RouteData(origin: origin, destination: order.SystemId));
-							break;
 						}
+
+						await WaitForPendingMarketRequestsToComplete();
+						Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
+						Debug.Log($"{NetworkManager.pendingMarketRequests} market request(s) pending.");
+						NetworkManager.AsyncRequest<List<int>>(data: new RouteData(origin: origin, destination: order.SystemId));
+						break;
 					}
 				}
 				else if (objectModel is List<int> route)
@@ -478,6 +481,8 @@ namespace EveMarket
 										));
 							}
 						}
+
+						NetworkManager.CompleteMarketUpdateTask();
 					}
 				}
 
@@ -507,7 +512,7 @@ namespace EveMarket
 			}
 		}
 
-		public static async void RequestMarketOrders(int typeId)
+		public static async Task RequestMarketOrders(int typeId)
 		{
 			lock (OrderRecords)
 			{
@@ -515,10 +520,14 @@ namespace EveMarket
 					OrderRecords[AppSettings.SellRegion] = new Dictionary<int, OrderRecord>();
 			}
 
-			await NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.SellRegion, type_id: typeId);
+			await WaitForPendingMarketRequestsToComplete();
+			Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
+			Debug.Log($"{NetworkManager.pendingMarketRequests} market request(s) pending.");
+			NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.SellRegion, type_id: typeId);
 
 			if (AppSettings.BuyRegion != AppSettings.SellRegion)
 			{
+
 				lock (OrderRecords)
 				{
 					if (!OrderRecords.ContainsKey(AppSettings.BuyRegion))
@@ -527,7 +536,10 @@ namespace EveMarket
 
 				for (int i = 0; i < Enum.GetValues(typeof(Region)).Length - 1; i++)
 				{
-					await NetworkManager.AsyncRequest<List<MarketOrder>>(region: (Region)i, type_id: typeId);
+					await WaitForPendingMarketRequestsToComplete();
+					Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
+					Debug.Log($"{NetworkManager.pendingMarketRequests} market request(s) pending.");
+					NetworkManager.AsyncRequest<List<MarketOrder>>(region: (Region)i, type_id: typeId);
 				}
 			}
 		}
@@ -547,15 +559,9 @@ namespace EveMarket
 			}
 		}
 
-		private static void SaveMarketData()
+		public static void SaveMarketData()
 		{
 			Debug.Log($"Saving Market Data");
-
-			if (IsSubscribed)
-			{
-				EveDelegate.Unsubscribe(ref EveDelegate.MarketUpdateComplete, SaveMarketData);
-				IsSubscribed = false;
-			}
 
 			lock (MarketPrices)
 			{
@@ -576,6 +582,8 @@ namespace EveMarket
 			{
 				marketObject.UpdateMarketData();
 			}
+
+			IsSubscribed = false;
 		}
 
 		public static void UpdateMarketObjects()

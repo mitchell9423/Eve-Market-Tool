@@ -22,6 +22,15 @@ namespace EveMarket
 		}
 	}
 
+	public class Settings
+	{
+		public static int MarginPercentage { get; set; } = 10;
+		public static string BuyRange { get; set; } = "4";
+		public static System BuyOrderSystem { get; set; } = System.Tunttaras;
+		public static Region BuyRegion { get; set; } = Region.Lonetrek;
+		public static Region SellRegion { get; set; } = Region.The_Forge;
+	}
+
 	public static class AppSettings
 	{
 		private enum Prefs
@@ -33,11 +42,13 @@ namespace EveMarket
 			SellRegion
 		}
 
+		public static Settings Settings { get; set; }
+
 		public static int MarginPercentage { get; set; } = 10;
 		public static string BuyRange { get; set; } = "4";
-		public static System BuyOrderSystem { get; set; }
+		public static System BuyOrderSystem { get; set; } = System.Tunttaras;
 		public static Region BuyRegion { get; set; } = Region.Lonetrek;
-		public static Region SellRegion { get; set; }
+		public static Region SellRegion { get; set; } = Region.The_Forge;
 
 		public static Dictionary<System, BuyPreset> Presets = new Dictionary<System, BuyPreset>()
 		{
@@ -47,22 +58,24 @@ namespace EveMarket
 			{ System.Inaro, new BuyPreset(Region.The_Citadel, System.Inaro, "3", 10) }
 		};
 
-		public static void LoadPlayerPrefs()
+		public static void LoadAppSettings()
 		{
-			MarginPercentage = PlayerPrefs.GetInt(MarginPercentage.ToString(), 15);
-			BuyRange = PlayerPrefs.GetString(BuyRange.ToString(), "station");
-			BuyOrderSystem = (System)PlayerPrefs.GetInt(BuyOrderSystem.ToString(), (int)System.Tunttaras);
-			BuyRegion = (Region)PlayerPrefs.GetInt(BuyRegion.ToString(), (int)Region.Lonetrek);
-			SellRegion = (Region)PlayerPrefs.GetInt(SellRegion.ToString(), (int)Region.The_Forge);
+			Settings = FileManager.DeserializeFromFile<Settings>();
+			//MarginPercentage = PlayerPrefs.GetInt(MarginPercentage.ToString(), 15);
+			//BuyRange = PlayerPrefs.GetString(BuyRange.ToString(), "station");
+			//BuyOrderSystem = (System)PlayerPrefs.GetInt(BuyOrderSystem.ToString(), (int)System.Tunttaras);
+			//BuyRegion = (Region)PlayerPrefs.GetInt(BuyRegion.ToString(), (int)Region.Lonetrek);
+			//SellRegion = (Region)PlayerPrefs.GetInt(SellRegion.ToString(), (int)Region.The_Forge);
 		}
 
-		public static void SavePlayerPrefs()
+		public static void SaveAppSettings()
 		{
-			PlayerPrefs.SetInt(MarginPercentage.ToString(), MarginPercentage);
-			PlayerPrefs.SetString(BuyRange.ToString(), BuyRange);
-			PlayerPrefs.SetInt(BuyOrderSystem.ToString(), (int)BuyOrderSystem);
-			PlayerPrefs.SetInt(BuyRegion.ToString(), (int)BuyRegion);
-			PlayerPrefs.SetInt(SellRegion.ToString(), (int)SellRegion);
+			FileManager.SerializeObject(Settings);
+			//PlayerPrefs.SetInt(MarginPercentage.ToString(), MarginPercentage);
+			//PlayerPrefs.SetString(BuyRange.ToString(), BuyRange);
+			//PlayerPrefs.SetInt(BuyOrderSystem.ToString(), (int)BuyOrderSystem);
+			//PlayerPrefs.SetInt(BuyRegion.ToString(), (int)BuyRegion);
+			//PlayerPrefs.SetInt(SellRegion.ToString(), (int)SellRegion);
 		}
 	}
 }

@@ -18,6 +18,7 @@ namespace EveMarket.Network
 	public static class NetworkManager
 	{
 		public static int pendingMarketGroups = 0;
+		public static int pendingMarketRequests = 0;
 		public static int pendingRequests = 0;
 		public static int completedRequests = 0;
 		public static int totalRequests = 0;
@@ -62,19 +63,29 @@ namespace EveMarket.Network
 			{
 				Debug.Log($"All market group(s) have completed.");
 				EveDelegate.MarketUpdateComplete?.Invoke();
+				EveDelegate.Unsubscribe(ref EveDelegate.MarketUpdateComplete, StaticData.SaveMarketData);
 				ChangeUpdateStateToIdle();
 			}
 			else
 			{
 				Debug.Log($"{pendingMarketGroups} market group(s) pending.");
 			}
+		}
 
+		public static void CompleteMarketUpdateTask()
+		{
+			if (Interlocked.Decrement(ref pendingMarketRequests) == 0)  // Decrement counter and check
+			{
+				EveDelegate.StaticUpdateComplete?.Invoke();
+				EveMarket.UpdateUI?.Invoke();
+				ChangeUpdateStateToIdle();
+			}
 		}
 
 		public static void CompleteUpdateTask()
 		{
 			Interlocked.Increment(ref completedRequests);
-			if (Interlocked.Decrement(ref pendingRequests) == 0 && pendingMarketGroups == 0)  // Decrement counter and check
+			if (Interlocked.Decrement(ref pendingRequests) == 0)  // Decrement counter and check
 			{
 				EveDelegate.StaticUpdateComplete?.Invoke();
 				ChangeUpdateStateToIdle();

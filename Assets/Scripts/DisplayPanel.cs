@@ -10,6 +10,7 @@ using Unity.VisualScripting;
 using UnityEngine.UI;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using EveMarket.UI;
 
 namespace EveMarket
 {
@@ -50,7 +51,6 @@ namespace EveMarket
 
 		[Header("Prefab Refs")]
 		public UnityEngine.Object groupContainerPrefab;
-		public UnityEngine.Object itemInfoPanelPrefab;
 
 		[Header("UI Elements")]
 		public Transform contentGrid;
@@ -83,7 +83,7 @@ namespace EveMarket
 		private int selectedIndex = 0;
 		private string[] options = Enum.GetNames(typeof(System));
 		private string selectedOption => options[selectedIndex];
-		[SerializeField] private List<GameObject> groupContainers = new List<GameObject>();
+		[SerializeField] private List<GroupContainer> groupContainers = new List<GroupContainer>();
 
 		private void OnEnable()
 		{
@@ -123,15 +123,14 @@ namespace EveMarket
 
 		public void CreateGroupContainer(MarketObject marketObject)
 		{
-			GameObject groupContainer;
+			GroupContainer groupContainer;
 
 			int index = 0;
 
-			if (groupContainers == null || groupContainers.Count() <= 0) return;
-
-			if ((index = groupContainers.FindIndex(Container => Container.GetComponentInChildren<GroupHeader>().GetTitle() == marketObject.GroupName)) < 0)
+			// Find container in container list or add if does not exist.
+			if ((index = groupContainers.FindIndex(Container => Container.name == marketObject.GroupName)) < 0)
 			{
-				groupContainer = PrefabUtility.InstantiatePrefab(groupContainerPrefab, contentGrid) as GameObject;
+				groupContainer = (PrefabUtility.InstantiatePrefab(groupContainerPrefab, contentGrid) as GameObject).GetComponent<GroupContainer>();
 				groupContainers.Add(groupContainer);
 			}
 			else
@@ -139,17 +138,21 @@ namespace EveMarket
 				groupContainer = groupContainers[index];
 			}
 
-			if (!groupContainer) return;
-
-			GroupHeader groupHeader = groupContainer.GetComponentInChildren<GroupHeader>();
-			if (groupHeader)
+			if (!groupContainer)
 			{
-				groupHeader.SetHeader(marketObject);
-
-				ItemContianer itemContianer = groupContainer.GetComponentInChildren<ItemContianer>();
-				itemContianer.PopulateItemContainer(marketObject);
+				return;
+			}
+			else
+			{
+				groupContainer.name = marketObject.GroupName;
 			}
 
+			if (groupContainer.GroupHeader)
+			{
+				groupContainer.GroupHeader.SetHeader(marketObject);
+
+				groupContainer.ItemContianer.PopulateItemContainer(marketObject);
+			}
 		}
 
 		public void UpdatePreset(int val)
@@ -266,7 +269,7 @@ namespace EveMarket
 									AppSettings.MarginPercentage = newValue;
 								}
 
-								AppSettings.SavePlayerPrefs();
+								AppSettings.SaveAppSettings();
 								UpdateMarketObjects();
 							}
 						}

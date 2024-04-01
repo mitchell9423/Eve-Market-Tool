@@ -20,6 +20,7 @@ namespace EveMarket
 		const string MARKET_PRICES_PATH = "Assets\\StaticData\\MarketPrices.json";
 		const string ITEM_ORDERS_PATH = "Assets\\StaticData\\ItemOrders.json";
 		const string ROUTES_PATH = "Assets\\StaticData\\Routes.json";
+		const string APP_SETTINGS = "Assets\\StaticData\\Settings.json";
 
 		static readonly Dictionary<Type, string> TypeFilePath = new Dictionary<Type, string>()
 		{
@@ -27,7 +28,8 @@ namespace EveMarket
 			{ typeof(Dictionary<int, MarketGroup>), MARKET_GROUPS_PATH },
 			{ typeof(Dictionary<int, UniverseItem>), UNIVERSE_TYPES_PATH },
 			{ typeof(Dictionary<Region, Dictionary<int, OrderRecord>>), ITEM_ORDERS_PATH },
-			{ typeof(Dictionary<int, List<RouteData>>), ROUTES_PATH }
+			{ typeof(Dictionary<int, List<RouteData>>), ROUTES_PATH },
+			{ typeof(Settings), APP_SETTINGS }
 		};
 
 		private static string GetFilePath<T>()
