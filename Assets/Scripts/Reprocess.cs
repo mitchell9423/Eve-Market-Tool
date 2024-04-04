@@ -1,205 +1,205 @@
 using EveMarket;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using static Unity.Burst.Intrinsics.Arm;
 
-public static class Reprocess
+
+namespace EveMarket.Util
 {
-	public struct MineralOutput
+	public static class Reprocess
 	{
-		Dictionary<Product, int> BaseYield;
-
-		public MineralOutput(
-			int HeavyWater = 0,
-			int LiquidOzone = 0,
-			int StrontiumClathrates = 0,
-			int HeliumIsotopes = 0,
-			int NitrogenIsotopes = 0,
-			int OxygenIsotopes = 0,
-			int HydrogenIsotopes = 0,
-			int Tritanium = 0,
-			int Pyerite = 0,
-			int Mexallon = 0,
-			int Isogen = 0,
-			int Nocxium = 0,
-			int Megacyte = 0,
-			int Zydrine = 0,
-			int Morphite = 0,
-			int NeoJadarite = 0,
-			int ChromodynamicTricarboxyls = 0
-			)
+		public struct MineralOutput
 		{
-			BaseYield = new Dictionary<Product, int>();
-			BaseYield[Product.HeavyWater] = HeavyWater;
-			BaseYield[Product.LiquidOzone] = LiquidOzone;
-			BaseYield[Product.StrontiumClathrates] = StrontiumClathrates;
-			BaseYield[Product.HeliumIsotopes] = HeliumIsotopes;
-			BaseYield[Product.NitrogenIsotopes] = NitrogenIsotopes;
-			BaseYield[Product.OxygenIsotopes] = OxygenIsotopes;
-			BaseYield[Product.HydrogenIsotopes] = HydrogenIsotopes;
-			BaseYield[Product.Tritanium] = Tritanium;
-			BaseYield[Product.Pyerite] = Pyerite;
-			BaseYield[Product.Mexallon] = Mexallon;
-			BaseYield[Product.Isogen] = Isogen;
-			BaseYield[Product.Nocxium] = Nocxium;
-			BaseYield[Product.Megacyte] = Megacyte;
-			BaseYield[Product.Morphite] = Morphite;
-			BaseYield[Product.Zydrine] = Zydrine;
-			BaseYield[Product.NeoJadarite] = NeoJadarite;
-			BaseYield[Product.ChromodynamicTricarboxyls] = ChromodynamicTricarboxyls;
-		}
+			Dictionary<Product, int> BaseYield;
 
-		public double GetNetValue(ReprocessType reprocessType)
-		{
-			double netValue = 0;
-			float netYield = CalcNetYield(reprocessType);
-
-			if (!StaticData.MarketObjects.ContainsKey(1857)) return 0;
-
-			var productTypeID = reprocessType == ReprocessType.Ice ? 1033 : 1857;
-
-			if (StaticData.MarketObjects.ContainsKey(productTypeID))
+			public MineralOutput(
+				int HeavyWater = 0,
+				int LiquidOzone = 0,
+				int StrontiumClathrates = 0,
+				int HeliumIsotopes = 0,
+				int NitrogenIsotopes = 0,
+				int OxygenIsotopes = 0,
+				int HydrogenIsotopes = 0,
+				int Tritanium = 0,
+				int Pyerite = 0,
+				int Mexallon = 0,
+				int Isogen = 0,
+				int Nocxium = 0,
+				int Megacyte = 0,
+				int Zydrine = 0,
+				int Morphite = 0,
+				int NeoJadarite = 0,
+				int ChromodynamicTricarboxyls = 0
+				)
 			{
-				foreach (var marketItem in StaticData.MarketObjects[productTypeID].Items)
-				{
-					string name = marketItem.ItemName;
-					name = name.Replace("-", "");
-					name = name.Replace(" ", "");
-					Product product = (Product)Enum.Parse(typeof(Product), name);
+				BaseYield = new Dictionary<Product, int>();
+				BaseYield[Product.HeavyWater] = HeavyWater;
+				BaseYield[Product.LiquidOzone] = LiquidOzone;
+				BaseYield[Product.StrontiumClathrates] = StrontiumClathrates;
+				BaseYield[Product.HeliumIsotopes] = HeliumIsotopes;
+				BaseYield[Product.NitrogenIsotopes] = NitrogenIsotopes;
+				BaseYield[Product.OxygenIsotopes] = OxygenIsotopes;
+				BaseYield[Product.HydrogenIsotopes] = HydrogenIsotopes;
+				BaseYield[Product.Tritanium] = Tritanium;
+				BaseYield[Product.Pyerite] = Pyerite;
+				BaseYield[Product.Mexallon] = Mexallon;
+				BaseYield[Product.Isogen] = Isogen;
+				BaseYield[Product.Nocxium] = Nocxium;
+				BaseYield[Product.Megacyte] = Megacyte;
+				BaseYield[Product.Morphite] = Morphite;
+				BaseYield[Product.Zydrine] = Zydrine;
+				BaseYield[Product.NeoJadarite] = NeoJadarite;
+				BaseYield[Product.ChromodynamicTricarboxyls] = ChromodynamicTricarboxyls;
+			}
 
-					if (BaseYield[product] > 0)
+			public double GetNetValue(ReprocessType reprocessType)
+			{
+				double netValue = 0;
+				float netYield = CalcNetYield(reprocessType);
+
+				if (!StaticData.MarketObjects.ContainsKey(1857)) return 0;
+
+				var productTypeID = reprocessType == ReprocessType.Ice ? 1033 : 1857;
+
+				if (StaticData.MarketObjects.ContainsKey(productTypeID))
+				{
+					foreach (var marketItem in StaticData.MarketObjects[productTypeID].Items)
 					{
-						float amountProduct = BaseYield[product];
-						float netProduct = Mathf.Floor(BaseYield[product] * netYield);
-						double netPrice = marketItem.CurrentSellPrice * Mathf.Round(BaseYield[product] * netYield);
-						netValue += marketItem.CurrentSellPrice * Mathf.Floor(BaseYield[product] * netYield);
+						string name = marketItem.ItemName;
+						name = name.Replace("-", "");
+						name = name.Replace(" ", "");
+						Product product = (Product)Enum.Parse(typeof(Product), name);
+
+						if (BaseYield[product] > 0)
+						{
+							float amountProduct = BaseYield[product];
+							float netProduct = Mathf.Floor(BaseYield[product] * netYield);
+							double netPrice = marketItem.CurrentSellPrice * Mathf.Round(BaseYield[product] * netYield);
+							netValue += marketItem.CurrentSellPrice * Mathf.Floor(BaseYield[product] * netYield);
+						}
 					}
 				}
+
+				return netValue;
 			}
-			
-			return netValue;
 		}
-	}
 
-	static float baseYield = .54f;
+		static float baseYield = .54f;
 
-	public static int ReprocessingSkillLvl = 5;
-	static float ReprocessingSkillPercentage => 1 + (.03f * ReprocessingSkillLvl);
+		public static int ReprocessingSkillLvl = 5;
+		static float ReprocessingSkillPercentage => 1 + (.03f * ReprocessingSkillLvl);
 
-	public static int ReprocessingEfficiencySkillLvl = 5;
-	static float ReprocessingEfficiencySkillPercentage => 1 + (.02f * ReprocessingEfficiencySkillLvl);
+		public static int ReprocessingEfficiencySkillLvl = 5;
+		static float ReprocessingEfficiencySkillPercentage => 1 + (.02f * ReprocessingEfficiencySkillLvl);
 
-	public static int ScrapmetalProcessingSkillLvl = 4;
-	static float ScrapmetalProcessingSkillPercentage => 1 + (.02f * ScrapmetalProcessingSkillLvl);
+		public static int ScrapmetalProcessingSkillLvl = 4;
+		static float ScrapmetalProcessingSkillPercentage => 1 + (.02f * ScrapmetalProcessingSkillLvl);
 
-	public static int IceProcessingSkillLvl = 5;
-	static float IceProcessingSkillPercentage => 1 + (.02f * IceProcessingSkillLvl);
+		public static int IceProcessingSkillLvl = 5;
+		static float IceProcessingSkillPercentage => 1 + (.02f * IceProcessingSkillLvl);
 
-	// 2% bonus to Bezdnacine, Rakovene, and Talassonite reprocessing yield per skill level.
-	public static int AbyssalOreProcessingSkillLvl = 0;
-	static float AbyssalOreProcessingSkillPercentage => 1 + (.02f * AbyssalOreProcessingSkillLvl);
+		// 2% bonus to Bezdnacine, Rakovene, and Talassonite reprocessing yield per skill level.
+		public static int AbyssalOreProcessingSkillLvl = 0;
+		static float AbyssalOreProcessingSkillPercentage => 1 + (.02f * AbyssalOreProcessingSkillLvl);
 
-	// 2% bonus to Hedbergite, Hemorphite, Jaspet, Kernite, Omber, and Ytirium reprocessing yield per skill level.
-	public static int CoherentOreProcessingSkillLvl = 4;
-	static float CoherentOreProcessingSkillPercentage => 1 + (.02f * CoherentOreProcessingSkillLvl);
+		// 2% bonus to Hedbergite, Hemorphite, Jaspet, Kernite, Omber, and Ytirium reprocessing yield per skill level.
+		public static int CoherentOreProcessingSkillLvl = 4;
+		static float CoherentOreProcessingSkillPercentage => 1 + (.02f * CoherentOreProcessingSkillLvl);
 
-	// 2% bonus to Cobaltite, Euxenite, Titanite, and Scheelite reprocessing yield per skill level.
-	public static int CommonOreProcessingSkillLvl = 0;
-	static float CommonOreProcessingSkillPercentage => 1 + (.02f * CommonOreProcessingSkillLvl);
+		// 2% bonus to Cobaltite, Euxenite, Titanite, and Scheelite reprocessing yield per skill level.
+		public static int CommonOreProcessingSkillLvl = 0;
+		static float CommonOreProcessingSkillPercentage => 1 + (.02f * CommonOreProcessingSkillLvl);
 
-	// 2% bonus to Arkonor, Bistot, Spodumain, Eifyrium, and Ducinium reprocessing yield per skill level.
-	public static int ComplexOreProcessingSkillLvl = 0;
-	static float ComplexOreProcessingSkillPercentage => 1 + (.02f * ComplexOreProcessingSkillLvl);
+		// 2% bonus to Arkonor, Bistot, Spodumain, Eifyrium, and Ducinium reprocessing yield per skill level.
+		public static int ComplexOreProcessingSkillLvl = 0;
+		static float ComplexOreProcessingSkillPercentage => 1 + (.02f * ComplexOreProcessingSkillLvl);
 
-	// 2% bonus to Xenotime, Monazite, Loparite, and Ytterbite reprocessing yield per skill level.
-	public static int ExceptionalOreProcessingSkillLvl = 0;
-	static float ExceptionalOreProcessingSkillPercentage => 1 + (.02f * ExceptionalOreProcessingSkillLvl);
+		// 2% bonus to Xenotime, Monazite, Loparite, and Ytterbite reprocessing yield per skill level.
+		public static int ExceptionalOreProcessingSkillLvl = 0;
+		static float ExceptionalOreProcessingSkillPercentage => 1 + (.02f * ExceptionalOreProcessingSkillLvl);
 
-	// 2% bonus to Mercoxite reprocessing yield per skill level.
-	public static int MercoxiteOreProcessingSkillLvl = 4;
-	static float MercoxiteOreProcessingSkillPercentage => 1 + (.02f * MercoxiteOreProcessingSkillLvl);
+		// 2% bonus to Mercoxite reprocessing yield per skill level.
+		public static int MercoxiteOreProcessingSkillLvl = 4;
+		static float MercoxiteOreProcessingSkillPercentage => 1 + (.02f * MercoxiteOreProcessingSkillLvl);
 
-	// 2% bonus to Carnotite, Zircon, Pollucite, and Cinnabar reprocessing yield per skill level.
-	public static int RareOreProcessingSkillLvl = 0;
-	static float RareOreProcessingSkillPercentage => 1 + (.02f * RareOreProcessingSkillLvl);
+		// 2% bonus to Carnotite, Zircon, Pollucite, and Cinnabar reprocessing yield per skill level.
+		public static int RareOreProcessingSkillLvl = 0;
+		static float RareOreProcessingSkillPercentage => 1 + (.02f * RareOreProcessingSkillLvl);
 
-	// 2% bonus to Plagioclase, Pyroxeres, Scordite, Veldspar, and Mordunium reprocessing yield per skill level.
-	public static int SimpleOreProcessingSkillLvl = 5;
-	static float SimpleOreProcessingSkillPercentage => 1 + (.02f * SimpleOreProcessingSkillLvl);
+		// 2% bonus to Plagioclase, Pyroxeres, Scordite, Veldspar, and Mordunium reprocessing yield per skill level.
+		public static int SimpleOreProcessingSkillLvl = 5;
+		static float SimpleOreProcessingSkillPercentage => 1 + (.02f * SimpleOreProcessingSkillLvl);
 
-	// 2% bonus to Zeolites, Sylvite, Bitumens, and Coesite reprocessing yield per skill level.
-	public static int UbiquitousOreProcessingSkillLvl = 0;
-	static float UbiquitousOreProcessingSkillPercentage => 1 + (.02f * UbiquitousOreProcessingSkillLvl);
+		// 2% bonus to Zeolites, Sylvite, Bitumens, and Coesite reprocessing yield per skill level.
+		public static int UbiquitousOreProcessingSkillLvl = 0;
+		static float UbiquitousOreProcessingSkillPercentage => 1 + (.02f * UbiquitousOreProcessingSkillLvl);
 
-	// 2% bonus to Otavite, Sperrylite, Vanadinite, and Chromite reprocessing yield per skill level.
-	public static int UncommonOreProcessingSkillLvl = 0;
-	static float UncommonOreProcessingSkillPercentage => 1 + (.02f * UncommonOreProcessingSkillLvl);
+		// 2% bonus to Otavite, Sperrylite, Vanadinite, and Chromite reprocessing yield per skill level.
+		public static int UncommonOreProcessingSkillLvl = 0;
+		static float UncommonOreProcessingSkillPercentage => 1 + (.02f * UncommonOreProcessingSkillLvl);
 
-	// 2% bonus to Crokite, Dark Ochre, and Gneiss reprocessing yield per skill level.
-	public static int VariegatedOreProcessingSkillLvl = 4;
-	static float VariegatedOreProcessingSkillPercentage => 1 + (.02f * VariegatedOreProcessingSkillLvl);
+		// 2% bonus to Crokite, Dark Ochre, and Gneiss reprocessing yield per skill level.
+		public static int VariegatedOreProcessingSkillLvl = 4;
+		static float VariegatedOreProcessingSkillPercentage => 1 + (.02f * VariegatedOreProcessingSkillLvl);
 
-	static float implantsBonus = 1.04f;
+		static float implantsBonus = 1.04f;
 
-	public static float CalcNetYield(ReprocessType reprocessType)
-	{
-		float netYield = baseYield;
-		netYield *= ReprocessingSkillPercentage;
-		netYield *= ReprocessingEfficiencySkillPercentage;
-
-		switch (reprocessType)
+		public static float CalcNetYield(ReprocessType reprocessType)
 		{
-			case ReprocessType.None:
-				break;
-			case ReprocessType.Abyssal:
-				netYield *= AbyssalOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Coherent:
-				netYield *= CoherentOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Common:
-				netYield *= CommonOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Complex:
-				netYield *= ComplexOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Exceptional:
-				netYield *= ExceptionalOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Ice:
-				netYield *= IceProcessingSkillPercentage;
-				break;
-			case ReprocessType.Mercoxit:
-				netYield *= MercoxiteOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Rare:
-				netYield *= RareOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Simple:
-				netYield *= SimpleOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Ubiquitous:
-				netYield *= UbiquitousOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Uncommon:
-				netYield *= UncommonOreProcessingSkillPercentage;
-				break;
-			case ReprocessType.Variegated:
-				netYield *= VariegatedOreProcessingSkillPercentage;
-				break;
-			default:
-				break;
+			float netYield = baseYield;
+			netYield *= ReprocessingSkillPercentage;
+			netYield *= ReprocessingEfficiencySkillPercentage;
+
+			switch (reprocessType)
+			{
+				case ReprocessType.None:
+					break;
+				case ReprocessType.Abyssal:
+					netYield *= AbyssalOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Coherent:
+					netYield *= CoherentOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Common:
+					netYield *= CommonOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Complex:
+					netYield *= ComplexOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Exceptional:
+					netYield *= ExceptionalOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Ice:
+					netYield *= IceProcessingSkillPercentage;
+					break;
+				case ReprocessType.Mercoxit:
+					netYield *= MercoxiteOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Rare:
+					netYield *= RareOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Simple:
+					netYield *= SimpleOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Ubiquitous:
+					netYield *= UbiquitousOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Uncommon:
+					netYield *= UncommonOreProcessingSkillPercentage;
+					break;
+				case ReprocessType.Variegated:
+					netYield *= VariegatedOreProcessingSkillPercentage;
+					break;
+				default:
+					break;
+			}
+
+			netYield *= implantsBonus;
+			netYield = Mathf.Ceil(netYield * 1000) / 1000;
+			return netYield;
 		}
 
-		netYield *= implantsBonus;
-		netYield = Mathf.Ceil(netYield * 1000)/1000;
-		return netYield;
-	}
-
-	public static Dictionary<string, MineralOutput> OreOutputs = new Dictionary<string, MineralOutput>()
+		public static Dictionary<string, MineralOutput> OreOutputs = new Dictionary<string, MineralOutput>()
 	{
 		{
 			"Abyssal Bezdnacine",
@@ -477,22 +477,23 @@ public static class Reprocess
 		}
 	};
 
-	public static double CalcReprocessedValue(MarketItem item)
-	{
-		if (OreOutputs.ContainsKey(item.ItemName))
+		public static double CalcReprocessedValue(MarketItem item)
 		{
-			float val = (float)OreOutputs[item.ItemName].GetNetValue(item.ReprocessType);
-
-			if (item.ReprocessType != ReprocessType.Ice)
+			if (OreOutputs.ContainsKey(item.ItemName))
 			{
-				val /= 100;
+				float val = (float)OreOutputs[item.ItemName].GetNetValue(item.ReprocessType);
+
+				if (item.ReprocessType != ReprocessType.Ice)
+				{
+					val /= 100;
+				}
+
+				val = Mathf.Round(val * 100) / 100;
+
+				return val;
 			}
 
-			val = Mathf.Round(val * 100)/100;
-
-			return val;
+			return 0;
 		}
-
-		return 0;
 	}
 }

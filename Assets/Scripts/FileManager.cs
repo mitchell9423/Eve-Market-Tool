@@ -1,17 +1,11 @@
-using EveMarket.Network;
-using EveMarket.Util;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
-using static EveMarket.Util.EveDelegate;
-using static UnityEditor.Progress;
 
-namespace EveMarket
+namespace EveMarket.Util
 {
 	public static class FileManager
 	{

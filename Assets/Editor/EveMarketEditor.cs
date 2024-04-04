@@ -31,6 +31,7 @@ namespace EveMarket
 
 		void OnEnable()
 		{
+			EditorPrefs.DeleteKey("EnableTimedUpdate");
 			EveMarket.ShowGUI = EditorPrefs.GetBool("ShowGUI", false);
 			eveMarket = (EveMarket)target;
 			unityMainThreadDispatcher = serializedObject.FindProperty("unityMainThreadDispatcher");
@@ -62,16 +63,24 @@ namespace EveMarket
 
 			EditorGUILayout.Space(10);
 
+			EditorGUI.BeginChangeCheck();
 			using (new GUILayout.HorizontalScope(EditorStyles.helpBox))
 			{
-				EditorGUILayout.LabelField("Show GUI Display", EditorStyles.boldLabel, GUILayout.Width(120));
+				EditorGUILayout.LabelField("Enable Timed Updates:", EditorStyles.boldLabel, GUILayout.Width(120));
+				EveMarket.EnableTimedUpdate = EditorGUILayout.Toggle(EveMarket.EnableTimedUpdate);
+			}
 
-				EditorGUI.BeginChangeCheck();
+			using (new GUILayout.HorizontalScope(EditorStyles.helpBox))
+			{
+				EditorGUILayout.LabelField("Show GUI Display:", EditorStyles.boldLabel, GUILayout.Width(120));
 				EveMarket.ShowGUI = EditorGUILayout.Toggle(EveMarket.ShowGUI);
-				if (EditorGUI.EndChangeCheck())
-				{
-					EditorPrefs.SetBool("ShowGUI", EveMarket.ShowGUI);
-				}
+			}
+
+			if (EditorGUI.EndChangeCheck())
+			{
+				AppSettings.Settings.EnableTimedUpdate = EveMarket.EnableTimedUpdate;
+				EditorPrefs.SetBool("ShowGUI", EveMarket.ShowGUI);
+				AppSettings.SaveAppSettings();
 			}
 
 			using (new GUILayout.VerticalScope(EditorStyles.helpBox))

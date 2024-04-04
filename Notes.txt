@@ -19,3 +19,30 @@ httpSubsystem
 	
 
 pass: yucky
+
+
+Comparison operation values
+In C#, these values are represented by the Rendering.CompareFunction enum.
+
+Value	Corresponding integer value in Rendering.CompareFunction enum	Function
+Never	1	Never render pixels.
+Less	2	Render pixels when their reference value is less than the current value in the stencil buffer.
+Equal	3	Render pixels when their reference value is equal to the current value in the stencil buffer.
+LEqual	4	Render pixels when their reference value is less than or equal to the current value in the stencil buffer.
+Greater	5	Render pixels when their reference value is greater than the current value in the stencil buffer.
+NotEqual	6	Render pixels when their reference value differs from the current value in the stencil buffer.
+GEqual	7	Render pixels when their reference value is greater than or equal to the current value in the stencil buffer.
+Always	8	Always render pixels.
+
+Stencil operation values
+In C#, these values are represented by the Rendering.Rendering.StencilOp enum.
+
+Value	Corresponding integer value in Rendering.StencilOp enum	Function
+Keep	0	Keep the current contents of the stencil buffer.
+Zero	1	Write 0 into the stencil buffer.
+Replace	2	Write the reference value into the buffer.
+IncrSat	3	Increment the current value in the buffer. If the value is 255 already, it stays at 255.
+DecrSat	4	Decrement the current value in the buffer. If the value is 0 already, it stays at 0.
+Invert	5	Negate all the bits of the current value in the buffer.
+IncrWrap	6	Increment the current value in the buffer. If the value is 255 already, it becomes 0.
+DecrWrap	7	Decrement the current value in the buffer. If the value is 0 already, it becomes 255.

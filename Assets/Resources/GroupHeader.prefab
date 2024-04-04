@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8e50d803e27e7cc4096ebb25479537d5, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8e50d803e27e7cc4096ebb25479537d5, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -195,9 +195,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: c658d10049537544aab07eb2a2e232f4, type: 2}
   m_Color: {r: 0, g: 0.38888884, b: 1, a: 0.9490196}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -261,6 +261,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8086062484630832380}
     m_Modifications:
+    - target: {fileID: 753527877707521306, guid: f3ab3c3b6f2cddc4f842953a38b3b529, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: c658d10049537544aab07eb2a2e232f4, type: 2}
     - target: {fileID: 4202506660385348426, guid: f3ab3c3b6f2cddc4f842953a38b3b529, type: 3}
       propertyPath: m_Name
       value: UpdateButton
@@ -274,6 +278,18 @@ PrefabInstance:
     - target: {fileID: 5859574227799160884, guid: f3ab3c3b6f2cddc4f842953a38b3b529, type: 3}
       propertyPath: m_fontSize
       value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 5859574227799160884, guid: f3ab3c3b6f2cddc4f842953a38b3b529, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8e50d803e27e7cc4096ebb25479537d5, type: 2}
+    - target: {fileID: 5859574227799160884, guid: f3ab3c3b6f2cddc4f842953a38b3b529, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8e50d803e27e7cc4096ebb25479537d5, type: 2}
+    - target: {fileID: 5859574227799160884, guid: f3ab3c3b6f2cddc4f842953a38b3b529, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9120580518569435425, guid: f3ab3c3b6f2cddc4f842953a38b3b529, type: 3}
       propertyPath: m_Pivot.x

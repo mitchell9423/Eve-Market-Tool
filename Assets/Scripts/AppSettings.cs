@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EveMarket.Util;
 
 
 namespace EveMarket
@@ -24,11 +25,13 @@ namespace EveMarket
 
 	public class Settings
 	{
-		public static int MarginPercentage { get; set; } = 10;
-		public static string BuyRange { get; set; } = "4";
-		public static System BuyOrderSystem { get; set; } = System.Tunttaras;
-		public static Region BuyRegion { get; set; } = Region.Lonetrek;
-		public static Region SellRegion { get; set; } = Region.The_Forge;
+		public bool EnableTimedUpdate { get; set; } = false;
+		public int MarginPercentage { get; set; } = 15;
+		public string BuyRange { get; set; } = "4";
+		public System BuyOrderSystem { get; set; } = System.Tunttaras;
+		public Region BuyRegion { get; set; } = Region.Lonetrek;
+		public Region SellRegion { get; set; } = Region.The_Forge;
+		public System ActivePreset { get; set; } = System.None;
 	}
 
 	public static class AppSettings
@@ -44,11 +47,11 @@ namespace EveMarket
 
 		public static Settings Settings { get; set; }
 
-		public static int MarginPercentage { get; set; } = 10;
-		public static string BuyRange { get; set; } = "4";
-		public static System BuyOrderSystem { get; set; } = System.Tunttaras;
-		public static Region BuyRegion { get; set; } = Region.Lonetrek;
-		public static Region SellRegion { get; set; } = Region.The_Forge;
+		//public static int MarginPercentage { get; set; } = 15;
+		//public static string BuyRange { get; set; } = "4";
+		//public static System BuyOrderSystem { get; set; } = System.Tunttaras;
+		//public static Region BuyRegion { get; set; } = Region.Lonetrek;
+		//public static Region SellRegion { get; set; } = Region.The_Forge;
 
 		public static Dictionary<System, BuyPreset> Presets = new Dictionary<System, BuyPreset>()
 		{
@@ -61,6 +64,9 @@ namespace EveMarket
 		public static void LoadAppSettings()
 		{
 			Settings = FileManager.DeserializeFromFile<Settings>();
+
+			if (Settings == null) Settings = new Settings();
+			EveMarket.SettingsLoadComplete?.Invoke();
 			//MarginPercentage = PlayerPrefs.GetInt(MarginPercentage.ToString(), 15);
 			//BuyRange = PlayerPrefs.GetString(BuyRange.ToString(), "station");
 			//BuyOrderSystem = (System)PlayerPrefs.GetInt(BuyOrderSystem.ToString(), (int)System.Tunttaras);

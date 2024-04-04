@@ -823,6 +823,7 @@ GameObject:
   - component: {fileID: 3211219006198052243}
   - component: {fileID: 1578578162546126329}
   - component: {fileID: 913410658251095116}
+  - component: {fileID: 2058928513774790073}
   m_Layer: 5
   m_Name: PresetDropdown
   m_TagString: Untagged
@@ -950,6 +951,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_AlphaFadeSpeed: 0.15
+--- !u!114 &2058928513774790073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5509594323837486113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d31618456240b634fb1cce5de0f3cd28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dropdown: {fileID: 913410658251095116}
 --- !u!1 &5665332271700820942
 GameObject:
   m_ObjectHideFlags: 0

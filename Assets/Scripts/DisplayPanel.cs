@@ -4,15 +4,14 @@ using UnityEngine;
 using System.Linq;
 using System;
 using EveMarket.Network;
-using UnityEditor;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEngine.UI;
-using System.ComponentModel;
-using System.Text.RegularExpressions;
-using EveMarket.UI;
+using EveMarket.Util;
 
-namespace EveMarket
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+namespace EveMarket.UI
 {
 	public class DisplayPanel : MonoBehaviour
 	{
@@ -99,18 +98,6 @@ namespace EveMarket
 
 		private void Start()
 		{
-			if (presetDropdown == null || options == null) return;
-
-			presetDropdown.ClearOptions();
-			List<TMP_Dropdown.OptionData> dropdownOptions = new List<TMP_Dropdown.OptionData>();
-			foreach (var option in options)
-			{
-				TMP_Dropdown.OptionData newOption = new TMP_Dropdown.OptionData(option);
-				dropdownOptions.Add(newOption);
-			}
-			presetDropdown.options = dropdownOptions;
-			presetDropdown.value = 0;
-			presetDropdown.RefreshShownValue();
 		}
 
 		public void CreateGroupContainers()
@@ -130,7 +117,7 @@ namespace EveMarket
 			// Find container in container list or add if does not exist.
 			if ((index = groupContainers.FindIndex(Container => Container.name == marketObject.GroupName)) < 0)
 			{
-				groupContainer = (PrefabUtility.InstantiatePrefab(groupContainerPrefab, contentGrid) as GameObject).GetComponent<GroupContainer>();
+				groupContainer = ((GameObject)Instantiate(groupContainerPrefab, contentGrid)).GetComponent<GroupContainer>();
 				groupContainers.Add(groupContainer);
 			}
 			else
@@ -159,6 +146,7 @@ namespace EveMarket
 		{
 			preset = (System)val;
 			ApplyPreset();
+			AppSettings.SaveAppSettings();
 		}
 
 		private void OnGUI()
@@ -209,22 +197,22 @@ namespace EveMarket
 						{
 							GUILayout.Space(10);
 							GUILayout.Label($"Buy Region: ", GUILayout.Width(props.compressedLabelWidth));
-							if (tempBuyRegion == null) tempBuyRegion = AppSettings.BuyRegion.ToString();
+							if (tempBuyRegion == null) tempBuyRegion = AppSettings.Settings.BuyRegion.ToString();
 							tempBuyRegion = GUILayout.TextField(tempBuyRegion, GUILayout.Width(props.compressedLabelWidth));
 
 							GUILayout.Space(10);
 							GUILayout.Label($"Buy System: ", GUILayout.Width(props.compressedLabelWidth));
-							if (tempBuySystem == null) tempBuySystem = AppSettings.BuyOrderSystem.ToString();
+							if (tempBuySystem == null) tempBuySystem = AppSettings.Settings.BuyOrderSystem.ToString();
 							tempBuySystem = GUILayout.TextField(tempBuySystem, GUILayout.Width(props.compressedLabelWidth));
 
 							GUILayout.Space(10);
 							GUILayout.Label($"Buy Range: ", GUILayout.Width(props.compressedLabelWidth));
-							if (tempBuyRange == null) tempBuyRange = AppSettings.BuyRange;
+							if (tempBuyRange == null) tempBuyRange = AppSettings.Settings.BuyRange;
 							tempBuyRange = GUILayout.TextField(tempBuyRange, GUILayout.Width(props.compressedLabelWidth));
 
 							GUILayout.Space(10);
 							GUILayout.Label($"Margin %: ", GUILayout.Width(props.compressedLabelWidth));
-							if (tempMargin == null) tempMargin = AppSettings.MarginPercentage.ToString();
+							if (tempMargin == null) tempMargin = AppSettings.Settings.MarginPercentage.ToString();
 							tempMargin = GUILayout.TextField(tempMargin, GUILayout.Width(props.compressedLabelWidth));
 
 							GUILayout.Space(10);
@@ -254,19 +242,19 @@ namespace EveMarket
 							{
 								if (Enum.TryParse(typeof(Region), tempBuyRegion, true, out object newRegion))
 								{
-									AppSettings.BuyRegion = (Region)newRegion;
+									AppSettings.Settings.BuyRegion = (Region)newRegion;
 								}
 
 								if (Enum.TryParse(typeof(System), tempBuySystem, true, out object newSystem))
 								{
-									AppSettings.BuyOrderSystem = (System)newSystem;
+									AppSettings.Settings.BuyOrderSystem = (System)newSystem;
 								}
 
-								AppSettings.BuyRange = tempBuyRange;
+								AppSettings.Settings.BuyRange = tempBuyRange;
 
 								if (int.TryParse(tempMargin, out int newValue))
 								{
-									AppSettings.MarginPercentage = newValue;
+									AppSettings.Settings.MarginPercentage = newValue;
 								}
 
 								AppSettings.SaveAppSettings();
@@ -275,6 +263,7 @@ namespace EveMarket
 						}
 					}
 
+#if UNITY_EDITOR
 					using (new GUILayout.HorizontalScope(GUI.skin.box))
 					{
 						if (panelState == PanelState.CurrentSellPrice)
@@ -319,6 +308,7 @@ namespace EveMarket
 							}
 						}
 					}
+#endif
 				}
 			}
 
@@ -331,10 +321,16 @@ namespace EveMarket
 		{
 			if (preset == System.None) return;
 
-			tempBuyRegion = (AppSettings.BuyRegion = AppSettings.Presets[preset].buyRegion).ToString();
-			tempBuySystem = (AppSettings.BuyOrderSystem = AppSettings.Presets[preset].buySystem).ToString();
-			tempBuyRange = AppSettings.BuyRange = AppSettings.Presets[preset].buyRange;
-			tempMargin = (AppSettings.MarginPercentage = AppSettings.Presets[preset].profitMargin).ToString();
+			//tempBuyRegion = (AppSettings.Settings.BuyRegion = AppSettings.Presets[preset].buyRegion).ToString();
+			//tempBuySystem = (AppSettings.Settings.BuyOrderSystem = AppSettings.Presets[preset].buySystem).ToString();
+			//tempBuyRange = AppSettings.Settings.BuyRange = AppSettings.Presets[preset].buyRange;
+			//tempMargin = (AppSettings.MarginPercentage = AppSettings.Presets[preset].profitMargin).ToString();
+
+			AppSettings.Settings.BuyRegion = AppSettings.Presets[preset].buyRegion;
+			AppSettings.Settings.BuyOrderSystem = AppSettings.Presets[preset].buySystem;
+			AppSettings.Settings.BuyRange = AppSettings.Presets[preset].buyRange;
+
+			AppSettings.Settings.ActivePreset = preset;
 			UpdateMarketObjects();
 		}
 

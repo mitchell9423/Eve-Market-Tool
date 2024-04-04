@@ -1,13 +1,11 @@
 
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using EveMarket.Util;
-using Unity.VisualScripting;
-using UnityEditor;
 using System.Text;
 using System.Linq;
-using System;
-using UnityEngine.PlayerLoop;
+using EveMarket.UI;
 
 namespace EveMarket
 {
@@ -21,7 +19,9 @@ namespace EveMarket
 
 		public delegate void AppEvent();
 		public static AppEvent UpdateUI;
+		public static AppEvent SettingsLoadComplete;
 
+		public static bool EnableTimedUpdate { get; set; }
 		public static bool ShowGUI { get; set; }
 
 		StringBuilder sb = new StringBuilder();
@@ -29,8 +29,7 @@ namespace EveMarket
 		private void Awake()
 		{
 			UpdateUI += ui.CreateGroupContainers;
-
-			AppSettings.LoadAppSettings();
+			SettingsLoadComplete += UpdateSettings;
 
 			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
 			{
@@ -46,11 +45,42 @@ namespace EveMarket
 		private void OnDestroy()
 		{
 			UpdateUI -= ui.CreateGroupContainers;
+			SettingsLoadComplete -= UpdateSettings;
 		}
 
 		private void Start()
 		{
+			AppSettings.LoadAppSettings();
 			LoadStaticData();
+
+			StartCoroutine(TimedUpdate());
+		}
+
+		public IEnumerator TimedUpdate()
+		{
+			if (EnableTimedUpdate)
+			{
+				lock (StaticData.MarketObjects)
+				{
+					var mos = StaticData.MarketObjects.Values.ToArray();
+
+					for (int i = 0; i < StaticData.MarketObjects.Count; i++)
+					{
+						MarketObject mo = StaticData.MarketObjects.Values.ToArray()[i];
+
+						lock (StaticData.GroupObjects)
+						{
+							StaticData.UpdateMarketData(StaticData.GroupObjects[mo.Group.TypeId].Types);
+						}
+
+						yield return null;
+					}
+				}
+			}
+
+			yield return new WaitForSeconds(600);
+
+			StartCoroutine(TimedUpdate());
 		}
 
 		public void LoadStaticData()
@@ -72,7 +102,7 @@ namespace EveMarket
 			BuildDisplayString();
 		}
 
-		void BuildDisplayString()
+		private void BuildDisplayString()
 		{
 			sb.Clear();
 
@@ -91,6 +121,11 @@ namespace EveMarket
 
 				sb.Append($"\n\n");
 			}
+		}
+
+		private void UpdateSettings()
+		{
+			EnableTimedUpdate = AppSettings.Settings.EnableTimedUpdate;
 		}
 	}
 }

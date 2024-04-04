@@ -5,19 +5,23 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GroupHeader : MonoBehaviour
+
+namespace EveMarket.UI
 {
-    [SerializeField] private TMP_Text Title;
-    [SerializeField] private Button updateButton;
+	public class GroupHeader : MonoBehaviour
+	{
+		[SerializeField] private TMP_Text Title;
+		[SerializeField] private Button updateButton;
 
-    public string GetTitle()
-    {
-        return Title.text;
-    }
+		public string GetTitle()
+		{
+			return Title.text;
+		}
 
-    public void SetHeader(MarketObject marketObject)
-    {
-        Title.text = marketObject.GroupName;
-        updateButton.GetComponent<ButtonScript>().InitButtonEvent(data: marketObject.Group.Types);
+		public void SetHeader(MarketObject marketObject)
+		{
+			Title.text = marketObject.GroupName;
+			updateButton.GetComponent<ButtonScript>().InitButtonEvent(data: marketObject.Group.Types);
+		}
 	}
 }

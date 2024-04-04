@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
@@ -8,9 +7,6 @@ using EveMarket.Util;
 using EveMarket.Network;
 using System.Linq;
 using System.Threading.Tasks;
-using static UnityEditor.Progress;
-using static UnityEngine.UI.Image;
-using static System.Collections.Specialized.BitVector32;
 using System.Threading;
 
 namespace EveMarket
@@ -75,7 +71,9 @@ namespace EveMarket
 		Rakovene,
 		Talassonite,
 		Mordunium,
-		Mineral
+		Minerals,
+		Ice_Products,
+		Ice_Ores
 	}
 
 	public enum ObjectType
@@ -95,13 +93,13 @@ namespace EveMarket
 
 	public enum System
 	{
+		None,
 		Inaro,
 		Jita,
 		Tunttaras,
 		Umokka,
 		Urlen,
-		Ylandoki,
-		None
+		Ylandoki
 	}
 
 	public enum Range
@@ -282,15 +280,16 @@ namespace EveMarket
 			}
 
 			Interlocked.Increment(ref NetworkManager.pendingMarketGroups);
+			int groupRequestId = Interlocked.Increment(ref NetworkManager.totalMarketGroups);
 
-			Debug.Log($"{NetworkManager.pendingMarketGroups} market group requests started.");
+			Debug.Log($"Starting market group request {NetworkManager.totalMarketGroups}...");
 
 			foreach (var id in ids)
 			{
 				await RequestMarketOrders(id);
 			}
 
-			NetworkManager.CompleteGroupUpdate();
+			NetworkManager.CompleteGroupUpdate(groupRequestId);
 		}
 
 		public static void LoadStaticData()
@@ -354,7 +353,17 @@ namespace EveMarket
 
 					foreach (var group in StaticData.GroupObjects.Values)
 					{
-						MarketObjects[group.TypeId] = new MarketObject(group);
+						if (
+							group.Name == EnumToString(Group.Ice_Ores)
+							|| group.Name == Group.Veldspar.ToString()
+							|| group.Name == Group.Plagioclase.ToString()
+							|| group.Name == Group.Pyroxeres.ToString()
+							|| group.Name == Group.Scordite.ToString()
+							|| group.Name == Group.Kernite.ToString()
+							)
+						{
+							MarketObjects[group.TypeId] = new MarketObject(group);
+						}
 					}
 				}
 			}
@@ -371,7 +380,7 @@ namespace EveMarket
 					sb.Append($"Error receiving data.\n");
 				}
 
-				Debug.Log("Error receiving data.");
+				Debug.LogWarning("Error receiving data.");
 				return;
 			}
 
@@ -381,7 +390,7 @@ namespace EveMarket
 
 				if (objectModel == null)
 				{
-					Debug.Log("Error receiving data.");
+					Debug.LogWarning("Error receiving data.");
 					return;
 				}
 
@@ -433,29 +442,24 @@ namespace EveMarket
 						NetworkManager.CompleteMarketUpdateTask();
 					}
 
-					int origin = SystemIds[AppSettings.BuyOrderSystem];
+					int origin = SystemIds[AppSettings.Settings.BuyOrderSystem];
 
 					foreach (var order in marketOrders)
 					{
 						lock (Routes)
 						{
-							if (Routes.ContainsKey(origin))
+							if (Routes.ContainsKey(origin) && Routes[origin] != null)
 							{
-								if (Routes[origin] != null)
+								if (Routes[origin].Exists(route => route.Destination == order.SystemId))
 								{
-									if (Routes[origin].Exists(route => route.Destination == order.SystemId))
-									{
-										continue;
-									}
+									continue;
 								}
 							}
 						}
 
 						await WaitForPendingMarketRequestsToComplete();
 						Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
-						Debug.Log($"{NetworkManager.pendingMarketRequests} market request(s) pending.");
-						NetworkManager.AsyncRequest<List<int>>(data: new RouteData(origin: origin, destination: order.SystemId));
-						break;
+						_ = NetworkManager.AsyncRequest<List<int>>(data: new RouteData(origin: origin, destination: order.SystemId));
 					}
 				}
 				else if (objectModel is List<int> route)
@@ -493,8 +497,7 @@ namespace EveMarket
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError($"Error deserializing type {typeof(T)} object.");
-				Debug.Log($"{ex}");
+				Debug.LogError($"Error deserializing type {typeof(T)} object.\n\n{ex}");
 			}
 			finally
 			{
@@ -503,12 +506,7 @@ namespace EveMarket
 					str = sb.ToString();
 				}
 
-				//UnityMainThreadDispatcher.Instance.Enqueue(() =>
-				//{
-				//	Debug.Log(typeof(T));
-				//});
-
-				NetworkManager.CompleteUpdateTask();
+				NetworkManager.CompleteNetworkTask();
 			}
 		}
 
@@ -516,30 +514,28 @@ namespace EveMarket
 		{
 			lock (OrderRecords)
 			{
-				if (!OrderRecords.ContainsKey(AppSettings.SellRegion))
-					OrderRecords[AppSettings.SellRegion] = new Dictionary<int, OrderRecord>();
+				if (!OrderRecords.ContainsKey(AppSettings.Settings.SellRegion))
+					OrderRecords[AppSettings.Settings.SellRegion] = new Dictionary<int, OrderRecord>();
 			}
 
 			await WaitForPendingMarketRequestsToComplete();
 			Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
-			Debug.Log($"{NetworkManager.pendingMarketRequests} market request(s) pending.");
-			NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.SellRegion, type_id: typeId);
+			_ = NetworkManager.AsyncRequest<List<MarketOrder>>(region: AppSettings.Settings.SellRegion, type_id: typeId);
 
-			if (AppSettings.BuyRegion != AppSettings.SellRegion)
+			if (AppSettings.Settings.BuyRegion != AppSettings.Settings.SellRegion)
 			{
 
 				lock (OrderRecords)
 				{
-					if (!OrderRecords.ContainsKey(AppSettings.BuyRegion))
-						OrderRecords[AppSettings.BuyRegion] = new Dictionary<int, OrderRecord>();
+					if (!OrderRecords.ContainsKey(AppSettings.Settings.BuyRegion))
+						OrderRecords[AppSettings.Settings.BuyRegion] = new Dictionary<int, OrderRecord>();
 				}
 
 				for (int i = 0; i < Enum.GetValues(typeof(Region)).Length - 1; i++)
 				{
 					await WaitForPendingMarketRequestsToComplete();
 					Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
-					Debug.Log($"{NetworkManager.pendingMarketRequests} market request(s) pending.");
-					NetworkManager.AsyncRequest<List<MarketOrder>>(region: (Region)i, type_id: typeId);
+					_ = NetworkManager.AsyncRequest<List<MarketOrder>>(region: (Region)i, type_id: typeId);
 				}
 			}
 		}
@@ -557,12 +553,12 @@ namespace EveMarket
 			{
 				FileManager.SerializeObject(ItemObjects);
 			}
+
+			Debug.Log($"Static Data Saved!");
 		}
 
 		public static void SaveMarketData()
 		{
-			Debug.Log($"Saving Market Data");
-
 			lock (MarketPrices)
 			{
 				FileManager.SerializeObject(MarketPrices);
@@ -583,7 +579,10 @@ namespace EveMarket
 				marketObject.UpdateMarketData();
 			}
 
+			EveMarket.UpdateUI?.Invoke();
 			IsSubscribed = false;
+
+			Debug.Log($"Market Data Saved!");
 		}
 
 		public static void UpdateMarketObjects()
@@ -595,6 +594,12 @@ namespace EveMarket
 					marketItem.UpdateOrders();
 				}
 			}
+		}
+
+		public static string EnumToString(Enum @enum)
+		{
+			string str = @enum.ToString().Replace("_", " ");
+			return str;
 		}
 	}
 }

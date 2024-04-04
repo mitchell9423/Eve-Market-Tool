@@ -18,6 +18,7 @@ namespace EveMarket.Network
 	public static class NetworkManager
 	{
 		public static int pendingMarketGroups = 0;
+		public static int totalMarketGroups = 0;
 		public static int pendingMarketRequests = 0;
 		public static int pendingRequests = 0;
 		public static int completedRequests = 0;
@@ -57,35 +58,31 @@ namespace EveMarket.Network
 			}
 		}
 
-		public static void CompleteGroupUpdate()
+		public static void CompleteGroupUpdate(int groupRequestId)
 		{
-			if (Interlocked.Decrement(ref pendingMarketGroups) == 0)
+			Debug.Log($"Market group request {groupRequestId} complete!");
+
+			if (Interlocked.Decrement(ref pendingMarketGroups) <= 0)
 			{
-				Debug.Log($"All market group(s) have completed.");
+				pendingMarketGroups = 0;
+				totalMarketGroups = 0;
 				EveDelegate.MarketUpdateComplete?.Invoke();
 				EveDelegate.Unsubscribe(ref EveDelegate.MarketUpdateComplete, StaticData.SaveMarketData);
-				ChangeUpdateStateToIdle();
-			}
-			else
-			{
-				Debug.Log($"{pendingMarketGroups} market group(s) pending.");
 			}
 		}
 
 		public static void CompleteMarketUpdateTask()
 		{
-			if (Interlocked.Decrement(ref pendingMarketRequests) == 0)  // Decrement counter and check
+			if(Interlocked.Decrement(ref pendingMarketRequests) <= 0)
 			{
-				EveDelegate.StaticUpdateComplete?.Invoke();
-				EveMarket.UpdateUI?.Invoke();
-				ChangeUpdateStateToIdle();
+				pendingMarketRequests = 0;
 			}
 		}
 
-		public static void CompleteUpdateTask()
+		public static void CompleteNetworkTask()
 		{
 			Interlocked.Increment(ref completedRequests);
-			if (Interlocked.Decrement(ref pendingRequests) == 0)  // Decrement counter and check
+			if (Interlocked.Decrement(ref pendingRequests) <= 0)  // Decrement counter and check
 			{
 				EveDelegate.StaticUpdateComplete?.Invoke();
 				ChangeUpdateStateToIdle();

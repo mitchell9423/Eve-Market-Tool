@@ -11,7 +11,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace EveMarket
+namespace EveMarket.Util
 {
 	public class HttpHandler : MonoBehaviour
 	{
@@ -55,7 +55,7 @@ namespace EveMarket
 					if (!asyncOp.isDone)
 					{
 						asyncOp.webRequest.Abort();
-						NetworkManager.CompleteUpdateTask();
+						NetworkManager.CompleteNetworkTask();
 					}
 				}
 			}

@@ -1,19 +1,22 @@
-using EveMarket;
-using EveMarket.Network;
 using EveMarket.Util;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 
 namespace EveMarket
 {
 	[Serializable]
-	public class MarketItem
+	public class MarketItem : IComparer<MarketItem>
 	{
+		public enum EItemStatus
+		{
+			Updated,
+			Outdated,
+			Completed
+		}
+
 		UniverseItem item;
 		MarketPrice price;
 		Dictionary<Region, Dictionary<int, OrderRecord>> orders;
@@ -38,6 +41,7 @@ namespace EveMarket
 		public double MaxBuyPrice { get; set; }
 		public double CompressedPrice { get; set; }
 		public double ReprocessPrice { get; set; }
+		public EItemStatus ItemStatus { get; private set; }
 		public ReprocessType ReprocessType { get; private set; } = ReprocessType.None;
 
 		private Color textColor;
@@ -49,14 +53,14 @@ namespace EveMarket
 
 		private double SetMaxBuy()
 		{
-			return MaxBuyPrice = (double)Math.Round(SetReprocessPrice() * ((100 - (double)AppSettings.MarginPercentage) / 100), 2);
+			return MaxBuyPrice = (double)Math.Round(SetReprocessPrice() * ((100 - (double)AppSettings.Settings.MarginPercentage) / 100), 2);
 		}
 
 		private void SetCurrentSellPrice()
 		{
-			if (orders.ContainsKey(AppSettings.SellRegion) && orders[AppSettings.SellRegion][TypeId].marketOrders != null && orders[AppSettings.SellRegion][TypeId].marketOrders.Count() > 0)
+			if (orders.ContainsKey(AppSettings.Settings.SellRegion) && orders[AppSettings.Settings.SellRegion][TypeId].marketOrders != null && orders[AppSettings.Settings.SellRegion][TypeId].marketOrders.Count() > 0)
 			{
-				List<MarketOrder> sellOrders = orders[AppSettings.SellRegion][TypeId].marketOrders.Where(rec =>
+				List<MarketOrder> sellOrders = orders[AppSettings.Settings.SellRegion][TypeId].marketOrders.Where(rec =>
 				!rec.IsBuyOrder
 				&& rec.LocationId == 60003760
 				&& (rec.SystemId == 30000142 || rec.SystemId == 30000144)
@@ -84,16 +88,41 @@ namespace EveMarket
 		private void SetCurrentBuyPrice()
 		{
 			double highestPice = 0.00d;
+			double currentSetBuyPrice = 0.00d;
+			double epsilon = 1e-2;
+			double modifier = 0.00d;
 
-			if (orders.ContainsKey(AppSettings.BuyRegion) && orders[AppSettings.BuyRegion][TypeId].marketOrders != null)
+			if (ReprocessType == ReprocessType.Ice)
 			{
-				List<MarketOrder> marketOrders = orders[AppSettings.BuyRegion][TypeId].marketOrders;
+				modifier = 100.00d;
+			}
+			else
+			{
+				modifier = 0.01d;
+			}
+
+			if (orders.ContainsKey(AppSettings.Settings.BuyRegion) && orders[AppSettings.Settings.BuyRegion][TypeId].marketOrders != null)
+			{
+				List<MarketOrder> marketOrders = orders[AppSettings.Settings.BuyRegion][TypeId].marketOrders;
 				var buyOrders = marketOrders.FindAll(rec => 
 				rec.IsBuyOrder
-				&& rec.Price <= MaxBuyPrice
-				//&& !(rec.Range == StaticData.RangeStringName[Range.Region] || rec.Range == StaticData.RangeStringName[Range.Jump_40])
+				&& (MaxBuyPrice - (rec.Price + modifier)) > epsilon
 				&& !((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
 				);
+
+				var myOrder = marketOrders.Find(rec => rec.SystemId == StaticData.SystemIds[AppSettings.Settings.BuyOrderSystem]
+				&& ((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
+				);
+
+				if (myOrder != null)
+				{
+					ItemStatus = EItemStatus.Updated;
+					currentSetBuyPrice = myOrder.Price;
+				}
+				else
+				{
+					ItemStatus = EItemStatus.Completed;
+				}
 
 				if (buyOrders != null)
 				{
@@ -105,11 +134,11 @@ namespace EveMarket
 						{
 							lock (StaticData.Routes)
 							{
-								if (StaticData.SystemIds.ContainsKey(AppSettings.BuyOrderSystem) && StaticData.Routes.TryGetValue(StaticData.SystemIds[AppSettings.BuyOrderSystem], out List<RouteData> routes))
+								if (StaticData.SystemIds.ContainsKey(AppSettings.Settings.BuyOrderSystem) && StaticData.Routes.TryGetValue(StaticData.SystemIds[AppSettings.Settings.BuyOrderSystem], out List<RouteData> routes))
 								{
-									if (StaticData.RangeStringToInt.ContainsKey(AppSettings.BuyRange))
+									if (StaticData.RangeStringToInt.ContainsKey(AppSettings.Settings.BuyRange))
 									{
-										distance = routes.Find(route => route.Destination == order.SystemId).NumJumps - StaticData.RangeStringToInt[AppSettings.BuyRange];
+										distance = routes.Find(route => route.Destination == order.SystemId).NumJumps - StaticData.RangeStringToInt[AppSettings.Settings.BuyRange];
 									}
 								}
 							}
@@ -121,28 +150,21 @@ namespace EveMarket
 				}
 			}
 
-			if (highestPice > 0)
-			{
-				if (ReprocessType == ReprocessType.Ice)
-				{
-					highestPice += 100;
-				}
-				else
-				{
-					highestPice += 0.01;
-				}
-			}
+			CurrentBuyPrice = highestPice > 0 ? highestPice + modifier : highestPice;
 
-			CurrentBuyPrice =  highestPice;
+			if (ItemStatus != EItemStatus.Completed && Math.Abs(CurrentBuyPrice - currentSetBuyPrice) >= epsilon)
+			{
+				ItemStatus = EItemStatus.Outdated;
+			}
 		}
 
 		public void UpdateOrders()
 		{
-			var region = AppSettings.SellRegion;
+			var region = AppSettings.Settings.SellRegion;
 			orders[region][TypeId] = new OrderRecord(StaticData.OrderRecords[region][TypeId].marketOrders);
 			SetCurrentSellPrice();
 
-			region = AppSettings.BuyRegion;
+			region = AppSettings.Settings.BuyRegion;
 			if (orders.ContainsKey(region) && orders[region].ContainsKey(TypeId))
 			{
 				orders[region][TypeId] = new OrderRecord(StaticData.OrderRecords[region][TypeId].marketOrders);
@@ -153,7 +175,7 @@ namespace EveMarket
 
 		public void ClearOrders(int TypeId)
 		{
-			orders[AppSettings.SellRegion][TypeId].marketOrders.Clear();
+			orders[AppSettings.Settings.SellRegion][TypeId].marketOrders.Clear();
 		}
 
 		private void SetReprocessType()
@@ -231,6 +253,14 @@ namespace EveMarket
 				default:
 					break;
 			}
+		}
+
+		public int Compare(MarketItem item1, MarketItem item2)
+		{
+			if (item1 == null) return (item2 == null) ? 0 : -1;
+			if (item2 == null) return 1;
+
+			return item1.ItemName.CompareTo(item2.ItemName);
 		}
 	}
 }
