@@ -6,6 +6,7 @@ using EveMarket.Util;
 using System.Text;
 using System.Linq;
 using EveMarket.UI;
+using System;
 
 namespace EveMarket
 {
@@ -23,6 +24,9 @@ namespace EveMarket
 
 		public static bool EnableTimedUpdate { get; set; }
 		public static bool ShowGUI { get; set; }
+		private static DateTime LastUpdate { get; set; }
+		public static TimeSpan TimeSinceLastUpdate { get; set; }
+		public static TimeSpan RemainingTime { get; set; }
 
 		StringBuilder sb = new StringBuilder();
 
@@ -50,10 +54,17 @@ namespace EveMarket
 
 		private void Start()
 		{
+			Application.runInBackground = true;
 			AppSettings.LoadAppSettings();
 			LoadStaticData();
 
 			StartCoroutine(TimedUpdate());
+		}
+
+		private void Update()
+		{
+			TimeSinceLastUpdate = DateTime.Now - LastUpdate;
+			RemainingTime = new TimeSpan(0, 10, 0) - TimeSinceLastUpdate;
 		}
 
 		public IEnumerator TimedUpdate()
@@ -76,6 +87,8 @@ namespace EveMarket
 						yield return null;
 					}
 				}
+
+				LastUpdate = DateTime.Now;
 			}
 
 			yield return new WaitForSeconds(600);
