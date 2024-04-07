@@ -12,6 +12,7 @@ namespace EveMarket.Util
 		public static JobStatus StaticUpdateComplete;
 		public static JobStatus MarketUpdateComplete;
 		public static JobStatus StaticLoadComplete;
+		public static JobStatus ResetAutoUpdateTimer;
 
 		public static void Subscribe(ref JobStatus _delegate, Action action)
 		{

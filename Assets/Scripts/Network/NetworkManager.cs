@@ -67,6 +67,7 @@ namespace EveMarket.Network
 				pendingMarketGroups = 0;
 				totalMarketGroups = 0;
 				EveDelegate.MarketUpdateComplete?.Invoke();
+				EveDelegate.ResetAutoUpdateTimer?.Invoke();
 				EveDelegate.Unsubscribe(ref EveDelegate.MarketUpdateComplete, StaticData.SaveMarketData);
 			}
 		}

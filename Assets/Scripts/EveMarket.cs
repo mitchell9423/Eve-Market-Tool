@@ -25,6 +25,7 @@ namespace EveMarket
 		public static bool EnableTimedUpdate { get; set; }
 		public static bool ShowGUI { get; set; }
 		private static DateTime LastUpdate { get; set; }
+		public static TimeSpan TimerInterval { get; set; } = new TimeSpan(0, 10, 0);
 		public static TimeSpan TimeSinceLastUpdate { get; set; }
 		public static TimeSpan RemainingTime { get; set; }
 
@@ -34,6 +35,7 @@ namespace EveMarket
 		{
 			UpdateUI += ui.CreateGroupContainers;
 			SettingsLoadComplete += UpdateSettings;
+			EveDelegate.Subscribe(ref EveDelegate.ResetAutoUpdateTimer, ResetTimer);
 
 			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
 			{
@@ -50,6 +52,7 @@ namespace EveMarket
 		{
 			UpdateUI -= ui.CreateGroupContainers;
 			SettingsLoadComplete -= UpdateSettings;
+			EveDelegate.Unsubscribe(ref EveDelegate.ResetAutoUpdateTimer, ResetTimer);
 		}
 
 		private void Start()
@@ -64,7 +67,7 @@ namespace EveMarket
 		private void Update()
 		{
 			TimeSinceLastUpdate = DateTime.Now - LastUpdate;
-			RemainingTime = new TimeSpan(0, 10, 0) - TimeSinceLastUpdate;
+			RemainingTime = TimerInterval - TimeSinceLastUpdate;
 		}
 
 		public IEnumerator TimedUpdate()
@@ -87,13 +90,16 @@ namespace EveMarket
 						yield return null;
 					}
 				}
-
-				LastUpdate = DateTime.Now;
 			}
 
 			yield return new WaitForSeconds(600);
 
 			StartCoroutine(TimedUpdate());
+		}
+
+		private void ResetTimer()
+		{
+			LastUpdate = DateTime.Now;
 		}
 
 		public void LoadStaticData()

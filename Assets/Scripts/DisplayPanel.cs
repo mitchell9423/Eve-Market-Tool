@@ -144,9 +144,16 @@ namespace EveMarket.UI
 
 		public void UpdatePreset(int val)
 		{
-			preset = (System)val;
-			ApplyPreset();
-			AppSettings.SaveAppSettings();
+			if (AppSettings.Presets.ContainsKey((System)val))
+			{
+				preset = (System)val;
+				ApplyPreset();
+				AppSettings.SaveAppSettings();
+			}
+			else
+			{
+				presetDropdown.value = (int)preset;
+			}
 		}
 
 		private void OnGUI()

@@ -12,7 +12,7 @@ namespace EveMarket.UI
 
 		private void Start()
 		{
-			MatchRect();
+			//MatchRect();
 		}
 
 		private void OnRectTransformDimensionsChange()

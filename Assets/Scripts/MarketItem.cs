@@ -106,7 +106,7 @@ namespace EveMarket
 				List<MarketOrder> marketOrders = orders[AppSettings.Settings.BuyRegion][TypeId].marketOrders;
 				var buyOrders = marketOrders.FindAll(rec => 
 				rec.IsBuyOrder
-				&& (MaxBuyPrice - (rec.Price + modifier)) > epsilon
+				&& (MaxBuyPrice - rec.Price) >= modifier
 				&& !((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
 				);
 
