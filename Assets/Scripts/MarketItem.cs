@@ -63,7 +63,7 @@ namespace EveMarket
 				List<MarketOrder> sellOrders = orders[AppSettings.Settings.SellRegion][TypeId].marketOrders.Where(rec =>
 				!rec.IsBuyOrder
 				&& rec.LocationId == 60003760
-				&& (rec.SystemId == 30000142 || rec.SystemId == 30000144)
+				//&& (rec.SystemId == 30000142 || rec.SystemId == 30000144)
 				).ToList();
 
 				double lowestPice = 0;

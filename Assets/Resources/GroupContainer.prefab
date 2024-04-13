@@ -59,7 +59,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: c658d10049537544aab07eb2a2e232f4, type: 2}
   m_Color: {r: 0.3019608, g: 0.28627452, b: 0.28627452, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -446,6 +446,10 @@ PrefabInstance:
     - target: {fileID: 4888833214075085559, guid: 4c7113f7abf2f2f4ab1a3b8e4fe08293, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7789877127939029986, guid: 4c7113f7abf2f2f4ab1a3b8e4fe08293, type: 3}
+      propertyPath: m_fontSize
+      value: 17.9
       objectReference: {fileID: 0}
     - target: {fileID: 8086062484630832380, guid: 4c7113f7abf2f2f4ab1a3b8e4fe08293, type: 3}
       propertyPath: m_Pivot.x
