@@ -54,6 +54,7 @@ namespace EveMarket.UI
 		[Header("UI Elements")]
 		public Transform contentGrid;
 		public TMP_Dropdown presetDropdown;
+		[SerializeField] TMP_InputField ProfitMargin;
 
 		private System preset = System.None;
 		private PanelState panelState = PanelState.CurrentSellPrice;
@@ -139,6 +140,22 @@ namespace EveMarket.UI
 				groupContainer.GroupHeader.SetHeader(marketObject);
 
 				groupContainer.ItemContianer.PopulateItemContainer(marketObject);
+			}
+		}
+
+		public void SetProfitMargin()
+		{
+			ProfitMargin.text = AppSettings.Settings.MarginPercentage.ToString();
+		}
+
+		public void UpdateProfitMargin()
+		{
+			if (Int32.TryParse(ProfitMargin.text, out int val))
+			{
+				AppSettings.Settings.MarginPercentage = val;
+				AppSettings.SaveAppSettings();
+				StaticData.UpdateMarketObjects();
+				CreateGroupContainers();
 			}
 		}
 

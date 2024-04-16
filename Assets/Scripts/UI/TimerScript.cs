@@ -25,8 +25,8 @@ namespace EveMarket.UI
 		// Update is called once per frame
 		void Update()
 		{
-			int minutes = Math.Clamp(EveMarket.RemainingTime.Minutes, 0, 59);
-			int seconds = Math.Clamp(EveMarket.RemainingTime.Seconds, 0, 59);
+			int minutes = Math.Clamp(EveMarket.TimeSinceLastUpdate.Minutes, 0, 59);
+			int seconds = Math.Clamp(EveMarket.TimeSinceLastUpdate.Seconds, 0, 59);
 
 			double percentage = minutes / (double)EveMarket.TimerInterval.Minutes;
 
@@ -34,11 +34,11 @@ namespace EveMarket.UI
 			{
 				text.faceColor = disabledColor;
 			}
-			else if (percentage >= 0.5f)
+			else if (percentage <= 0.5f)
 			{
 				text.faceColor = startColor;
 			}
-			else if (percentage <= 0.05f)
+			else if (percentage <= .9f)
 			{
 				text.faceColor = stopColor;
 			}
@@ -50,7 +50,7 @@ namespace EveMarket.UI
 			string secondsStr = seconds < 10 ? $"0{seconds}" : $"{seconds}";
 			string minutesStr = minutes < 10 ? $"0{minutes}" : $"{minutes}";
 
-			text.text = $"{minutesStr}:{secondsStr} - Till Next Update";
+			text.text = $"{minutesStr}:{secondsStr} - Since Last Update";
 		}
 	}
 }

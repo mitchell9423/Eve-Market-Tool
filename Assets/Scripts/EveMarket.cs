@@ -36,6 +36,7 @@ namespace EveMarket
 			UpdateUI += ui.CreateGroupContainers;
 			SettingsLoadComplete += UpdateSettings;
 			EveDelegate.Subscribe(ref EveDelegate.ResetAutoUpdateTimer, ResetTimer);
+			EveDelegate.Subscribe(ref EveDelegate.ItemMarketUpdateComplete, StaticData.SaveMarketData);
 
 			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
 			{
@@ -53,6 +54,7 @@ namespace EveMarket
 			UpdateUI -= ui.CreateGroupContainers;
 			SettingsLoadComplete -= UpdateSettings;
 			EveDelegate.Unsubscribe(ref EveDelegate.ResetAutoUpdateTimer, ResetTimer);
+			EveDelegate.Unsubscribe(ref EveDelegate.ItemMarketUpdateComplete, StaticData.SaveMarketData);
 		}
 
 		private void Start()
@@ -60,6 +62,21 @@ namespace EveMarket
 			Application.runInBackground = true;
 			AppSettings.LoadAppSettings();
 			LoadStaticData();
+
+			lock (StaticData.MarketObjects)
+			{
+				var mos = StaticData.MarketObjects.Values.ToArray();
+
+				for (int i = 0; i < StaticData.MarketObjects.Count; i++)
+				{
+					MarketObject mo = StaticData.MarketObjects.Values.ToArray()[i];
+
+					lock (StaticData.GroupObjects)
+					{
+						StaticData.UpdateMarketData(StaticData.GroupObjects[mo.Group.TypeId].Types);
+					}
+				}
+			}
 
 			StartCoroutine(TimedUpdate());
 		}
@@ -74,26 +91,49 @@ namespace EveMarket
 		{
 			if (EnableTimedUpdate)
 			{
-				lock (StaticData.MarketObjects)
+				lock (StaticData.OrderRecordExpirations)
 				{
-					var mos = StaticData.MarketObjects.Values.ToArray();
-
-					for (int i = 0; i < StaticData.MarketObjects.Count; i++)
+					var regions = StaticData.OrderRecordExpirations.Keys.ToArray();
+					for (int i = 0; i < regions.Length; i++)
 					{
-						MarketObject mo = StaticData.MarketObjects.Values.ToArray()[i];
-
-						lock (StaticData.GroupObjects)
+						var itemTypes = StaticData.OrderRecordExpirations[regions[i]].Keys.ToArray();
+						for (int j = 0; j < itemTypes.Length; j++)
 						{
-							StaticData.UpdateMarketData(StaticData.GroupObjects[mo.Group.TypeId].Types);
-						}
+							if (DateTime.TryParse(StaticData.OrderRecordExpirations[regions[i]][itemTypes[j]], out DateTime expiration))
+							{
+								bool isExpired = DateTime.Now >= expiration;
 
-						yield return null;
+								if (isExpired)
+								{
+									StaticData.UpdateItemMarketData(itemTypes[j]);
+								}
+							}
+
+							yield return null;
+						}
 					}
 				}
+
+				//lock (StaticData.MarketObjects)
+				//{
+				//	var mos = StaticData.MarketObjects.Values.ToArray();
+
+				//	for (int i = 0; i < StaticData.MarketObjects.Count; i++)
+				//	{
+				//		MarketObject mo = StaticData.MarketObjects.Values.ToArray()[i];
+
+				//		lock (StaticData.GroupObjects)
+				//		{
+				//			StaticData.UpdateMarketData(StaticData.GroupObjects[mo.Group.TypeId].Types);
+				//		}
+
+				//		yield return null;
+				//	}
+				//}
 			}
 
-			yield return new WaitForSeconds(600);
-
+			yield return new WaitForSeconds(60);
+			EveDelegate.ItemMarketUpdateComplete?.Invoke();
 			StartCoroutine(TimedUpdate());
 		}
 
@@ -145,6 +185,7 @@ namespace EveMarket
 		private void UpdateSettings()
 		{
 			EnableTimedUpdate = AppSettings.Settings.EnableTimedUpdate;
+			ui.SetProfitMargin();
 		}
 	}
 }

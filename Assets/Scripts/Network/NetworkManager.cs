@@ -76,6 +76,7 @@ namespace EveMarket.Network
 		{
 			if(Interlocked.Decrement(ref pendingMarketRequests) <= 0)
 			{
+				EveDelegate.ResetAutoUpdateTimer?.Invoke();
 				pendingMarketRequests = 0;
 			}
 		}

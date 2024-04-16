@@ -61,7 +61,7 @@ namespace EveMarket.Util
 			}
 		}
 
-		public async Task AsyncGetRequest<T>(string url, global::System.Action<string, Region, int> callback, Region region, int type_id = 0)
+		public async Task AsyncGetRequest<T>(string url, global::System.Action<string, string, Region, int> callback, Region region, int type_id = 0)
 		{
 			NetworkManager.Status = UpdateStatus.Updating;
 			Interlocked.Increment(ref NetworkManager.totalRequests);
@@ -81,7 +81,7 @@ namespace EveMarket.Util
 						Debug.LogError($"Web Protocol Error: {webRequest.error}\n{url}");
 						UnityMainThreadDispatcher.Instance.Enqueue(() =>
 						{
-							callback(null, region, 0);
+							callback(null, null, region, 0);
 						});
 					}
 					else if (webRequest.result == UnityWebRequest.Result.ConnectionError)
@@ -90,14 +90,14 @@ namespace EveMarket.Util
 						Debug.LogError($"Web request Error: {webRequest.error}\n{url}[{itemName}]");
 						UnityMainThreadDispatcher.Instance.Enqueue(() =>
 						{
-							callback(null, region, 0);
+							callback(null, null, region, 0);
 						});
 					}
 					else
 					{
 						UnityMainThreadDispatcher.Instance.Enqueue(() =>
 						{
-							callback(webRequest.downloadHandler.text, region, type_id);
+							callback(webRequest.GetResponseHeader("expires"), webRequest.downloadHandler.text, region, type_id);
 						});
 					}
 

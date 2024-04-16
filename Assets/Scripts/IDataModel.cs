@@ -153,6 +153,55 @@ namespace EveMarket
 	}
 
 	[Serializable]
+	public class CorpOrder : IDataModel
+	{
+		[JsonProperty("duration")]
+		public int Duration { get; set; }
+
+		[JsonProperty("escrow")]
+		public double Escrow { get; set; }
+
+		[JsonProperty("is_buy_order")]
+		public bool IsBuyOrder { get; set; }
+
+		[JsonProperty("issued")]
+		public DateTime Issued { get; set; }
+
+		[JsonProperty("issued_by")]
+		public int IssuedBy { get; set; }
+
+		[JsonProperty("location_id")]
+		public Int64 LocationId { get; set; }
+
+		[JsonProperty("min_volume")]
+		public int MinVolume { get; set; }
+
+		[JsonProperty("order_id")]
+		public Int64 OrderId { get; set; }
+
+		[JsonProperty("price")]
+		public double Price { get; set; }
+
+		[JsonProperty("range")]
+		public string Range { get; set; }
+
+		[JsonProperty("region_id")]
+		public int RegionId { get; set; }
+
+		[JsonProperty("type_id")]
+		public int TypeId { get; set; }
+
+		[JsonProperty("volume_remain")]
+		public int VolumeRemain { get; set; }
+
+		[JsonProperty("volume_total")]
+		public int VolumeTotal { get; set; }
+
+		[JsonProperty("wallet_division")]
+		public int WalletDivision { get; set; }
+	}
+
+	[Serializable]
 	public class DogmaAttribute
 	{
 		[JsonProperty("attribute_id")]

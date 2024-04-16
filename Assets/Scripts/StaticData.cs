@@ -221,7 +221,9 @@ namespace EveMarket
 		public static Dictionary<int, MarketPrice> MarketPrices = new Dictionary<int, MarketPrice>();
 		public static Dictionary<int, MarketGroup> GroupObjects = new Dictionary<int, MarketGroup>();
 		public static Dictionary<int, UniverseItem> ItemObjects = new Dictionary<int, UniverseItem>();
+		public static List<CorpOrder> CorpOrders = new List<CorpOrder>();
 		public static Dictionary<Region, Dictionary<int, OrderRecord>> OrderRecords = new Dictionary<Region, Dictionary<int, OrderRecord>>();
+		public static Dictionary<Region, Dictionary<int, string>> OrderRecordExpirations = new Dictionary<Region, Dictionary<int, string>>();
 		public static Dictionary<int, MarketObject> MarketObjects = new Dictionary<int, MarketObject>();
 		public static Dictionary<Region, int> RegionId = new Dictionary<Region, int>()
 		{
@@ -292,8 +294,22 @@ namespace EveMarket
 			NetworkManager.CompleteGroupUpdate(groupRequestId);
 		}
 
+		public static async void UpdateItemMarketData(int itemType)
+		{
+			await RequestMarketOrders(itemType);
+		}
+
 		public static void LoadStaticData()
 		{
+			List<CorpOrder> corpOrders = FileManager.DeserializeFromFile<List<CorpOrder>>();
+			if (corpOrders != null)
+			{
+				lock (CorpOrders)
+				{
+					CorpOrders = corpOrders;
+				}
+			}
+
 			Dictionary<int, MarketPrice> marketPrices = FileManager.DeserializeFromFile<Dictionary<int, MarketPrice>>();
 			if (marketPrices != null)
 			{
@@ -369,7 +385,7 @@ namespace EveMarket
 			}
 		}
 
-		public static async void HandleResponse<T>(string response, Region region = Region.The_Forge, int type_id = 0)
+		public static async void HandleResponse<T>(string expiration, string response, Region region = Region.The_Forge, int type_id = 0)
 		{
 			string str;
 
@@ -430,6 +446,16 @@ namespace EveMarket
 				}
 				else if (objectModel is List<MarketOrder> marketOrders)
 				{
+					lock (OrderRecordExpirations)
+					{
+						if (!OrderRecordExpirations.ContainsKey(region))
+						{
+							OrderRecordExpirations[region] = new Dictionary<int, string>();
+						}
+
+						OrderRecordExpirations[region][type_id] = string.IsNullOrEmpty(expiration) ? "" : expiration;
+					}
+
 					lock (OrderRecords)
 					{
 						if (!OrderRecords.ContainsKey(region))

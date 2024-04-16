@@ -61,7 +61,8 @@ namespace EveMarket
 			if (orders.ContainsKey(AppSettings.Settings.SellRegion) && orders[AppSettings.Settings.SellRegion][TypeId].marketOrders != null && orders[AppSettings.Settings.SellRegion][TypeId].marketOrders.Count() > 0)
 			{
 				List<MarketOrder> sellOrders = orders[AppSettings.Settings.SellRegion][TypeId].marketOrders.Where(rec =>
-				!rec.IsBuyOrder
+				StaticData.CorpOrders.Find(order => order.OrderId == rec.OrderId) == null
+				&& !rec.IsBuyOrder
 				&& rec.LocationId == 60003760
 				//&& (rec.SystemId == 30000142 || rec.SystemId == 30000144)
 				).ToList();
@@ -105,13 +106,15 @@ namespace EveMarket
 			{
 				List<MarketOrder> marketOrders = orders[AppSettings.Settings.BuyRegion][TypeId].marketOrders;
 				var buyOrders = marketOrders.FindAll(rec => 
-				rec.IsBuyOrder
+				StaticData.CorpOrders.Find(order => order.OrderId == rec.OrderId) == null
+				&& rec.IsBuyOrder
 				&& MaxBuyPrice - Math.Round(rec.Price + modifier, 2) >= epsilon
-				&& !((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
+				//&& !((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
 				);
 
 				var myOrder = marketOrders.Find(rec => rec.SystemId == StaticData.SystemIds[AppSettings.Settings.BuyOrderSystem]
-				&& ((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
+				&& StaticData.CorpOrders.Find(order => order.OrderId == rec.OrderId) != null
+				//&& ((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
 				);
 
 				if (myOrder != null)

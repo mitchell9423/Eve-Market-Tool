@@ -12,12 +12,14 @@ namespace EveMarket.Util
 		const string MARKET_GROUPS_PATH = "Assets\\StaticData\\MarketGroups.json";
 		const string UNIVERSE_TYPES_PATH = "Assets\\StaticData\\UniverseItems.json";
 		const string MARKET_PRICES_PATH = "Assets\\StaticData\\MarketPrices.json";
+		const string CORP_ORDERS_PATH = "Assets\\StaticData\\CorpOrders.json";
 		const string ITEM_ORDERS_PATH = "Assets\\StaticData\\ItemOrders.json";
 		const string ROUTES_PATH = "Assets\\StaticData\\Routes.json";
 		const string APP_SETTINGS = "Assets\\StaticData\\Settings.json";
 
 		static readonly Dictionary<Type, string> TypeFilePath = new Dictionary<Type, string>()
 		{
+			{ typeof(List<CorpOrder>), CORP_ORDERS_PATH },
 			{ typeof(Dictionary<int, MarketPrice>), MARKET_PRICES_PATH },
 			{ typeof(Dictionary<int, MarketGroup>), MARKET_GROUPS_PATH },
 			{ typeof(Dictionary<int, UniverseItem>), UNIVERSE_TYPES_PATH },

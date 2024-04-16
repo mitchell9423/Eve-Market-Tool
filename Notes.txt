@@ -1,4 +1,29 @@
-  "corporations": [
+Authorization URL: https://login.eveonline.com/v2/oauth/authorize 
+
+EXAMPLE USE
+Let's take a look at a simple example of using python's requests module to download the ESI spec. But again, just to reiterate, this concept works on every ESI route.
+
+>>> import requests
+>>> spec_url = "https://esi.tech.ccp.is/latest/swagger.json"
+>>> esi_spec = requests.get(spec_url)
+>>> esi_spec.status_code
+200
+>>> len(esi_spec.content)
+921525
+>>> esi_spec.headers["ETag"]
+'"09f8b2541e00231360e70eb9d4d6e6504a298f9c8336277c704509a8"'
+>>> etag = esi_spec.headers["ETag"]
+As you can see, we just downloaded 921525 bytes (after uncompressing) to get a 200 OK response from ESI which came with a strong ETag response header. Assuming you stored this ETag somewhere (we just saved it to etag above), you could use it in the future:
+
+>>> esi_spec_change = requests.get(spec_url, headers={"If-None-Match": etag})
+>>> esi_spec_change.status_code
+304
+>>> len(esi_spec_change.content)
+0
+We know with the second request the content hasn't changed since the first time, so we can keep using the first response we received. This saves us the transfer bandwidth, uncompressing, and JSON loading this response again.
+
+
+ "corporations": [
     {
       "id": 98422411,
       "name": "Forbidden Logistics"
