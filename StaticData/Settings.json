@@ -1,0 +1,9 @@
+{
+  "EnableTimedUpdate": true,
+  "MarginPercentage": 15,
+  "BuyRange": "4",
+  "BuyOrderSystem": 3,
+  "BuyRegion": 1,
+  "SellRegion": 0,
+  "ActivePreset": 3
+}

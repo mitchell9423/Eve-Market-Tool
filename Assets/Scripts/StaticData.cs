@@ -1,13 +1,13 @@
-using System.Collections.Generic;
-using UnityEngine;
+using EveMarket.Network;
+using EveMarket.Util;
 using Newtonsoft.Json;
 using System;
-using System.Text;
-using EveMarket.Util;
-using EveMarket.Network;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace EveMarket
 {
@@ -37,10 +37,10 @@ namespace EveMarket
 		NitrogenIsotopes,
 		OxygenIsotopes,
 		HydrogenIsotopes,
-		Tritanium, 
-		Pyerite, 
+		Tritanium,
+		Pyerite,
 		Mexallon,
-		Isogen, 
+		Isogen,
 		Nocxium,
 		Megacyte,
 		Morphite,
@@ -118,6 +118,18 @@ namespace EveMarket
 		Region
 	}
 
+	public struct OrderRecordMeta
+	{
+		public string Expiration;
+		public string ETag;
+
+		public OrderRecordMeta(string exp, string tag)
+		{
+			Expiration = exp;
+			ETag = tag;
+		}
+	}
+
 	public static class StaticData
 	{
 		private static StringBuilder sb = new StringBuilder();
@@ -185,14 +197,14 @@ namespace EveMarket
 			Rakovene,
 			Talassonite,
 			Mordunium,
-			Mineral,
+			Minerals,
 			Ice_Ores,
 			Ice_Products
 		}
 
 		private static Dictionary<int, string> GroupIdsToName = new Dictionary<int, string>()
 		{
-			{ 1857, "Mineral" },
+			{ 1857, "Minerals" },
 			{ 512, "Arkonor" },
 			{ 514, "Bistot" },
 			{ 515, "Pyroxeres" },
@@ -223,7 +235,7 @@ namespace EveMarket
 		public static Dictionary<int, UniverseItem> ItemObjects = new Dictionary<int, UniverseItem>();
 		public static List<CorpOrder> CorpOrders = new List<CorpOrder>();
 		public static Dictionary<Region, Dictionary<int, OrderRecord>> OrderRecords = new Dictionary<Region, Dictionary<int, OrderRecord>>();
-		public static Dictionary<Region, Dictionary<int, string>> OrderRecordExpirations = new Dictionary<Region, Dictionary<int, string>>();
+		public static Dictionary<Region, Dictionary<int, OrderRecordMeta>> OrderRecordMeta = new Dictionary<Region, Dictionary<int, OrderRecordMeta>>();
 		public static Dictionary<int, MarketObject> MarketObjects = new Dictionary<int, MarketObject>();
 		public static Dictionary<Region, int> RegionId = new Dictionary<Region, int>()
 		{
@@ -252,9 +264,13 @@ namespace EveMarket
 
 		public static async void UpdateStaticData()
 		{
+			Debug.Log("Updating Static Data.");
+
 			EveDelegate.Subscribe(ref EveDelegate.StaticUpdateComplete, SaveStaticData);
 
 			lock (sb) { sb.Clear(); }
+
+			Debug.Log("Requesting market prices.");
 
 			await NetworkManager.AsyncRequest<List<MarketPrice>>();
 
@@ -263,13 +279,31 @@ namespace EveMarket
 			for (int i = 0; i < marketGroupIds.Length; i++)
 			{
 				await WaitForPendingMarketRequestsToComplete();
+
+				Debug.Log($"Requesting market group info - {GroupIdsToName[marketGroupIds[i]]}.");
+
 				await NetworkManager.AsyncRequest<MarketGroup>(marketGroupIds[i].ToString());
 			}
 
 			ConstructMarketObjects();
+
+			lock (MarketObjects)
+			{
+				var mos = MarketObjects.Values.ToArray();
+
+				for (int i = 0; i < MarketObjects.Count; i++)
+				{
+					MarketObject mo = MarketObjects.Values.ToArray()[i];
+
+					lock (GroupObjects)
+					{
+						UpdateMarketData(GroupObjects[mo.Group.TypeId].Types);
+					}
+				}
+			}
 		}
 
-		public static async void UpdateMarketData(List<int> ids)
+		public static async void UpdateMarketData(List<int> ids, string tag = "")
 		{
 			if (ids == null) return;
 
@@ -284,23 +318,25 @@ namespace EveMarket
 			Interlocked.Increment(ref NetworkManager.pendingMarketGroups);
 			int groupRequestId = Interlocked.Increment(ref NetworkManager.totalMarketGroups);
 
-			Debug.Log($"Starting market group request {NetworkManager.totalMarketGroups}...");
+			//Debug.Log($"Starting market group request {NetworkManager.totalMarketGroups}...");
 
 			foreach (var id in ids)
 			{
-				await RequestMarketOrders(id);
+				await RequestMarketOrders(id, tag);
 			}
 
 			NetworkManager.CompleteGroupUpdate(groupRequestId);
 		}
 
-		public static async void UpdateItemMarketData(int itemType)
+		public static async void UpdateItemMarketData(int itemType, string tag)
 		{
-			await RequestMarketOrders(itemType);
+			await RequestMarketOrders(itemType, tag);
 		}
 
 		public static void LoadStaticData()
 		{
+			Debug.Log("Loading static data.");
+
 			List<CorpOrder> corpOrders = FileManager.DeserializeFromFile<List<CorpOrder>>();
 			if (corpOrders != null)
 			{
@@ -337,7 +373,7 @@ namespace EveMarket
 				}
 			}
 
-			Dictionary <Region, Dictionary<int, OrderRecord>> orderRecords = FileManager.DeserializeFromFile<Dictionary<Region, Dictionary<int, OrderRecord>>>();
+			Dictionary<Region, Dictionary<int, OrderRecord>> orderRecords = FileManager.DeserializeFromFile<Dictionary<Region, Dictionary<int, OrderRecord>>>();
 			if (orderRecords != null)
 			{
 				lock (OrderRecords)
@@ -352,22 +388,36 @@ namespace EveMarket
 				Routes = routes;
 			}
 
-			ConstructMarketObjects();
-
-			Debug.Log("Static Data Loaded.");
+			if (itemObjects == null)
+			{
+				UpdateStaticData();
+			}
+			else
+			{
+				ConstructMarketObjects();
+				Debug.Log("Static Data Loaded.");
+			}
 		}
 
 		public static void ConstructMarketObjects()
 		{
+			Debug.Log("Constructing Market Objects.");
 
-			lock (StaticData.GroupObjects)
+			lock (GroupObjects)
 			{
 				lock (MarketObjects)
 				{
-					MarketObjects[StaticData.GroupObjects[1857].TypeId] = new MarketObject(StaticData.GroupObjects[1857]);
-					MarketObjects[StaticData.GroupObjects[1033].TypeId] = new MarketObject(StaticData.GroupObjects[1033]);
+					if (GroupObjects.TryGetValue(1857, out MarketGroup Minerals))
+					{
+						MarketObjects[Minerals.TypeId] = new MarketObject(Minerals);
+					}
 
-					foreach (var group in StaticData.GroupObjects.Values)
+					if (GroupObjects.TryGetValue(1033, out MarketGroup IceProducts))
+					{
+						MarketObjects[IceProducts.TypeId] = new MarketObject(IceProducts);
+					}
+
+					foreach (var group in GroupObjects.Values)
 					{
 						if (
 							group.Name == EnumToString(Group.Ice_Ores)
@@ -378,6 +428,7 @@ namespace EveMarket
 							|| group.Name == Group.Kernite.ToString()
 							)
 						{
+							Debug.Log($"Creating Market Group {group.Name}.");
 							MarketObjects[group.TypeId] = new MarketObject(group);
 						}
 					}
@@ -385,20 +436,142 @@ namespace EveMarket
 			}
 		}
 
-		public static async void HandleResponse<T>(string expiration, string response, Region region = Region.The_Forge, int type_id = 0)
+		public static async void HandleMarketOrder(long code, string tag, string expiration, string response, Region region = Region.The_Forge, int type_id = 0)
 		{
-			string str;
+
+			lock (OrderRecordMeta)
+			{
+				if (!OrderRecordMeta.ContainsKey(region))
+				{
+					OrderRecordMeta[region] = new Dictionary<int, OrderRecordMeta>();
+				}
+
+				OrderRecordMeta[region][type_id] = new OrderRecordMeta(string.IsNullOrEmpty(expiration) ? "" : expiration, tag);
+			}
+
+			if (string.IsNullOrEmpty(response))
+			{
+				NetworkManager.CompleteMarketUpdateTask();
+				NetworkManager.CompleteNetworkTask();
+				return;
+			}
+
+			try
+			{
+				List<MarketOrder> marketOrders = JsonConvert.DeserializeObject<List<MarketOrder>>(response);
+
+				if (marketOrders != null && marketOrders.Count > 0)
+				{
+					lock (OrderRecords)
+					{
+						if (!OrderRecords.ContainsKey(region))
+						{
+							OrderRecords[region] = new Dictionary<int, OrderRecord>();
+						}
+
+						OrderRecords[region][type_id] = new OrderRecord(marketOrders);
+					}
+				}
+
+				int origin = SystemIds[AppSettings.Settings.BuyOrderSystem];
+
+				foreach (var order in marketOrders)
+				{
+					lock (Routes)
+					{
+						if (Routes.ContainsKey(origin) && Routes[origin] != null)
+						{
+							if (Routes[origin].Exists(route => route.Destination == order.SystemId))
+							{
+								continue;
+							}
+						}
+					}
+
+					await WaitForPendingMarketRequestsToComplete();
+					Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
+					_ = NetworkManager.AsyncRequest<List<int>>(data: new RouteData(origin: origin, destination: order.SystemId));
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.LogError($"Error deserializing type {typeof(MarketOrder)} object.\n\n{ex}");
+			}
+			finally
+			{
+				NetworkManager.CompleteMarketUpdateTask();
+				NetworkManager.CompleteNetworkTask();
+			}
+		}
+
+		public static void HandleRouteData(long code, string tag, string expiration, string response, Region region = Region.The_Forge, int type_id = 0)
+		{
+			List<int> route = JsonConvert.DeserializeObject<List<int>>(response);
+
+			if (Routes == null) Routes = new Dictionary<int, List<RouteData>>();
+
+			lock (Routes)
+			{
+				if (route.Count > 0)
+				{
+					int origin = route[route.Count - 1];
+					int destination = route[0];
+
+					if (!Routes.ContainsKey(origin)) Routes[origin] = new List<RouteData>();
+
+					if (!Routes[origin].Exists(rte => rte.Destination == destination))
+					{
+						Routes[origin].Add(
+							new RouteData(
+								origin: origin,
+								destination: destination,
+								route: route
+								));
+					}
+				}
+
+				NetworkManager.CompleteMarketUpdateTask();
+			}
+		}
+
+		public static async void HandleResponse<T>(long code, string tag, string expiration, string response, Region region = Region.The_Forge, int type_id = 0) where T : class
+		{
+			if (code != 200 && code != 304)
+			{
+				Debug.LogWarning($"Error receiving data : code {code} : type {typeof(T)}.\n");
+				NetworkManager.CompleteMarketUpdateTask();
+				return;
+			}
+			else if (code == 304)
+			{
+				//Debug.LogWarning($"{code} Response. No new data. : type {typeof(T)}.\n");
+			}
+
+			if (typeof(T) == typeof(List<MarketOrder>))
+			{
+				HandleMarketOrder(code, tag, expiration, response, region, type_id);
+				return;
+			}
 
 			if (string.IsNullOrEmpty(response))
 			{
 				lock (sb)
 				{
-					sb.Append($"Error receiving data.\n");
+					sb.Append($"Error receiving data : code {code} : type {typeof(T)}.\n");
 				}
 
-				Debug.LogWarning("Error receiving data.");
+				Debug.LogWarning($"Error receiving data : code {code} : type {typeof(T)}.\n");
+				NetworkManager.CompleteMarketUpdateTask();
 				return;
 			}
+
+			if (typeof(T) == typeof(List<int>))
+			{
+				HandleRouteData(code, tag, expiration, response, region, type_id);
+				return;
+			}
+
+			string str;
 
 			try
 			{
@@ -417,6 +590,7 @@ namespace EveMarket
 					lock (GroupObjects)
 					{
 						GroupObjects[marketGroup.TypeId] = marketGroup;
+						Debug.Log($"GroupObject {GroupObjects[marketGroup.TypeId].Name} downloaded.");
 						localSb.Append($"{GroupObjects[marketGroup.TypeId].TypeId,5} : {GroupObjects[marketGroup.TypeId].Name}\n");
 					}
 
@@ -430,6 +604,7 @@ namespace EveMarket
 					lock (ItemObjects)
 					{
 						ItemObjects[universeItem.TypeId] = universeItem;
+						Debug.Log($"ItemObject {ItemObjects[universeItem.TypeId].Name} downloaded.");
 						localSb.Append($"{ItemObjects[universeItem.TypeId].TypeId,5} : {ItemObjects[universeItem.TypeId].Name}\n");
 					}
 				}
@@ -444,76 +619,8 @@ namespace EveMarket
 						}
 					}
 				}
-				else if (objectModel is List<MarketOrder> marketOrders)
-				{
-					lock (OrderRecordExpirations)
-					{
-						if (!OrderRecordExpirations.ContainsKey(region))
-						{
-							OrderRecordExpirations[region] = new Dictionary<int, string>();
-						}
-
-						OrderRecordExpirations[region][type_id] = string.IsNullOrEmpty(expiration) ? "" : expiration;
-					}
-
-					lock (OrderRecords)
-					{
-						if (!OrderRecords.ContainsKey(region))
-						{
-							OrderRecords[region] = new Dictionary<int, OrderRecord>();
-						}
-
-						OrderRecords[region][type_id] = new OrderRecord(marketOrders);
-
-						NetworkManager.CompleteMarketUpdateTask();
-					}
-
-					int origin = SystemIds[AppSettings.Settings.BuyOrderSystem];
-
-					foreach (var order in marketOrders)
-					{
-						lock (Routes)
-						{
-							if (Routes.ContainsKey(origin) && Routes[origin] != null)
-							{
-								if (Routes[origin].Exists(route => route.Destination == order.SystemId))
-								{
-									continue;
-								}
-							}
-						}
-
-						await WaitForPendingMarketRequestsToComplete();
-						Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
-						_ = NetworkManager.AsyncRequest<List<int>>(data: new RouteData(origin: origin, destination: order.SystemId));
-					}
-				}
 				else if (objectModel is List<int> route)
 				{
-					if (Routes == null) Routes = new Dictionary<int, List<RouteData>>();
-
-					lock (Routes)
-					{
-						if (route.Count > 0)
-						{
-							int origin = route[route.Count - 1];
-							int destination = route[0];
-
-							if (!Routes.ContainsKey(origin)) Routes[origin] = new List<RouteData>();
-
-							if (!Routes[origin].Exists(rte => rte.Destination == destination))
-							{
-								Routes[origin].Add(
-									new RouteData(
-										origin: origin,
-										destination: destination,
-										route: route
-										));
-							}
-						}
-
-						NetworkManager.CompleteMarketUpdateTask();
-					}
 				}
 
 				lock (sb)
@@ -536,7 +643,7 @@ namespace EveMarket
 			}
 		}
 
-		public static async Task RequestMarketOrders(int typeId)
+		public static async Task RequestMarketOrders(int typeId, string tag = "")
 		{
 			lock (OrderRecords)
 			{
@@ -560,8 +667,22 @@ namespace EveMarket
 				for (int i = 0; i < Enum.GetValues(typeof(Region)).Length - 1; i++)
 				{
 					await WaitForPendingMarketRequestsToComplete();
+
+					lock (OrderRecordMeta)
+					{
+						if (!StaticData.OrderRecordMeta.ContainsKey((Region)i))
+						{
+							StaticData.OrderRecordMeta[(Region)i] = new Dictionary<int, OrderRecordMeta>();
+						}
+
+						if (string.IsNullOrEmpty(tag) && StaticData.OrderRecordMeta[(Region)i].ContainsKey(typeId))
+						{
+							tag = StaticData.OrderRecordMeta[(Region)i][typeId].ETag;
+						}
+					}
+
 					Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
-					_ = NetworkManager.AsyncRequest<List<MarketOrder>>(region: (Region)i, type_id: typeId);
+					_ = NetworkManager.AsyncRequest<List<MarketOrder>>(region: (Region)i, type_id: typeId, ETag: tag);
 				}
 			}
 		}

@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using GameEvent;
 
 namespace EveMarket
 {
@@ -14,7 +11,7 @@ namespace EveMarket
 
 		public void InitButtonEvent(Component sender = null, object data = null)
 		{
-			this.sender = sender??this;
+			this.sender = sender ?? this;
 			this.data = data;
 		}
 

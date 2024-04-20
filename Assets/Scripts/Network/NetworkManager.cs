@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace EveMarket.Network
 {
@@ -35,7 +34,7 @@ namespace EveMarket.Network
 			{ typeof(List<int>), NetworkSettings.ROUTE_URI}
 		};
 
-		public static async Task AsyncRequest<T>(string extension = "", Region region = Region.The_Forge, int type_id = 0, RouteData data = new RouteData())
+		public static async Task AsyncRequest<T>(string extension = "", Region region = Region.The_Forge, int type_id = 0, RouteData data = new RouteData(), string ETag = "") where T : class
 		{
 			try
 			{
@@ -50,7 +49,7 @@ namespace EveMarket.Network
 
 				string url = baseUri + extension;
 
-				await HttpHandler.instance.AsyncGetRequest<T>(url, StaticData.HandleResponse<T>, region, type_id);
+				await HttpHandler.instance.AsyncGetRequest<T>(url, ETag, StaticData.HandleResponse<T>, region, type_id);
 			}
 			catch (Exception ex)
 			{
@@ -60,7 +59,7 @@ namespace EveMarket.Network
 
 		public static void CompleteGroupUpdate(int groupRequestId)
 		{
-			Debug.Log($"Market group request {groupRequestId} complete!");
+			//Debug.Log($"Market group request {groupRequestId} complete!");
 
 			if (Interlocked.Decrement(ref pendingMarketGroups) <= 0)
 			{
@@ -74,11 +73,13 @@ namespace EveMarket.Network
 
 		public static void CompleteMarketUpdateTask()
 		{
-			if(Interlocked.Decrement(ref pendingMarketRequests) <= 0)
+			if (Interlocked.Decrement(ref pendingMarketRequests) <= 0)
 			{
 				EveDelegate.ResetAutoUpdateTimer?.Invoke();
 				pendingMarketRequests = 0;
 			}
+
+			//Debug.Log($"{pendingMarketRequests} Market Requests pending!");
 		}
 
 		public static void CompleteNetworkTask()

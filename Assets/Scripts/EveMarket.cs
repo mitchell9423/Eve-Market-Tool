@@ -1,12 +1,12 @@
 
-using System.Collections.Generic;
-using System.Collections;
-using UnityEngine;
-using EveMarket.Util;
-using System.Text;
-using System.Linq;
 using EveMarket.UI;
+using EveMarket.Util;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UnityEngine;
 
 namespace EveMarket
 {
@@ -22,7 +22,7 @@ namespace EveMarket
 		public static AppEvent UpdateUI;
 		public static AppEvent SettingsLoadComplete;
 
-		public static bool EnableTimedUpdate { get; set; }
+		public static bool EnableTimedUpdate { get; set; } = true;
 		public static bool ShowGUI { get; set; }
 		private static DateTime LastUpdate { get; set; }
 		public static TimeSpan TimerInterval { get; set; } = new TimeSpan(0, 10, 0);
@@ -63,21 +63,6 @@ namespace EveMarket
 			AppSettings.LoadAppSettings();
 			LoadStaticData();
 
-			lock (StaticData.MarketObjects)
-			{
-				var mos = StaticData.MarketObjects.Values.ToArray();
-
-				for (int i = 0; i < StaticData.MarketObjects.Count; i++)
-				{
-					MarketObject mo = StaticData.MarketObjects.Values.ToArray()[i];
-
-					lock (StaticData.GroupObjects)
-					{
-						StaticData.UpdateMarketData(StaticData.GroupObjects[mo.Group.TypeId].Types);
-					}
-				}
-			}
-
 			StartCoroutine(TimedUpdate());
 		}
 
@@ -91,21 +76,21 @@ namespace EveMarket
 		{
 			if (EnableTimedUpdate)
 			{
-				lock (StaticData.OrderRecordExpirations)
+				lock (StaticData.OrderRecordMeta)
 				{
-					var regions = StaticData.OrderRecordExpirations.Keys.ToArray();
+					var regions = StaticData.OrderRecordMeta.Keys.ToArray();
 					for (int i = 0; i < regions.Length; i++)
 					{
-						var itemTypes = StaticData.OrderRecordExpirations[regions[i]].Keys.ToArray();
+						var itemTypes = StaticData.OrderRecordMeta[regions[i]].Keys.ToArray();
 						for (int j = 0; j < itemTypes.Length; j++)
 						{
-							if (DateTime.TryParse(StaticData.OrderRecordExpirations[regions[i]][itemTypes[j]], out DateTime expiration))
+							if (DateTime.TryParse(StaticData.OrderRecordMeta[regions[i]][itemTypes[j]].Expiration, out DateTime expiration))
 							{
 								bool isExpired = DateTime.Now >= expiration;
 
 								if (isExpired)
 								{
-									StaticData.UpdateItemMarketData(itemTypes[j]);
+									StaticData.UpdateItemMarketData(itemTypes[j], StaticData.OrderRecordMeta[regions[i]][itemTypes[j]].ETag);
 								}
 							}
 
@@ -185,6 +170,7 @@ namespace EveMarket
 		private void UpdateSettings()
 		{
 			EnableTimedUpdate = AppSettings.Settings.EnableTimedUpdate;
+			Debug.Log($"EnableTimedUpdate = {EnableTimedUpdate}");
 			ui.SetProfitMargin();
 		}
 	}

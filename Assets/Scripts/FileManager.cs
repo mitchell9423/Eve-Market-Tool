@@ -9,13 +9,13 @@ namespace EveMarket.Util
 {
 	public static class FileManager
 	{
-		const string MARKET_GROUPS_PATH = "Assets\\StaticData\\MarketGroups.json";
-		const string UNIVERSE_TYPES_PATH = "Assets\\StaticData\\UniverseItems.json";
-		const string MARKET_PRICES_PATH = "Assets\\StaticData\\MarketPrices.json";
-		const string CORP_ORDERS_PATH = "Assets\\StaticData\\CorpOrders.json";
-		const string ITEM_ORDERS_PATH = "Assets\\StaticData\\ItemOrders.json";
-		const string ROUTES_PATH = "Assets\\StaticData\\Routes.json";
-		const string APP_SETTINGS = "Assets\\StaticData\\Settings.json";
+		const string MARKET_GROUPS_PATH = "StaticData\\MarketGroups.json";
+		const string UNIVERSE_TYPES_PATH = "StaticData\\UniverseItems.json";
+		const string MARKET_PRICES_PATH = "StaticData\\MarketPrices.json";
+		const string CORP_ORDERS_PATH = "StaticData\\CorpOrders.json";
+		const string ITEM_ORDERS_PATH = "StaticData\\ItemOrders.json";
+		const string ROUTES_PATH = "StaticData\\Routes.json";
+		const string APP_SETTINGS = "StaticData\\Settings.json";
 
 		static readonly Dictionary<Type, string> TypeFilePath = new Dictionary<Type, string>()
 		{
@@ -30,14 +30,15 @@ namespace EveMarket.Util
 
 		private static string GetFilePath<T>()
 		{
-			if (TypeFilePath.TryGetValue(typeof(T), out string path))
+			string path;
+
+			if (!TypeFilePath.TryGetValue(typeof(T), out path))
 			{
-				return $"{Path.GetFullPath(@"./")}{path}";
+				TypeFilePath[typeof(T)] = $"StaticData\\{typeof(T)}.json";
+				Debug.LogWarning($"File path for type {typeof(T)} not found.");
 			}
 
-			Debug.LogWarning($"File path for type {typeof(T)} not found.");
-
-			return null;
+			return $"{Path.GetFullPath(@"./")}{path}";
 		}
 
 		public static void SerializeObject<T>(T @object)
@@ -72,7 +73,14 @@ namespace EveMarket.Util
 			}
 
 			string data = ReadFile(path);
-			return JsonConvert.DeserializeObject<T>(data);
+			T deserializedObject = JsonConvert.DeserializeObject<T>(data);
+
+			if (deserializedObject == null)
+			{
+				Debug.LogWarning($"Failed to deserialize {path} to type {typeof(T)}.");
+			}
+
+			return deserializedObject;
 		}
 
 		static void WriteFile(string path, string data)

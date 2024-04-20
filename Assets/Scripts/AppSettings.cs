@@ -1,8 +1,6 @@
-using System;
-using System.Collections;
+using EveMarket.Util;
 using System.Collections.Generic;
 using UnityEngine;
-using EveMarket.Util;
 
 
 namespace EveMarket
@@ -25,7 +23,7 @@ namespace EveMarket
 
 	public class Settings
 	{
-		public bool EnableTimedUpdate { get; set; } = false;
+		public bool EnableTimedUpdate { get; set; } = true;
 		public int MarginPercentage { get; set; } = 15;
 		public string BuyRange { get; set; } = "4";
 		public System BuyOrderSystem { get; set; } = System.Tunttaras;
@@ -63,9 +61,15 @@ namespace EveMarket
 
 		public static void LoadAppSettings()
 		{
+			Debug.Log($"Loading App Settings.");
 			Settings = FileManager.DeserializeFromFile<Settings>();
 
-			if (Settings == null) Settings = new Settings();
+			if (Settings == null)
+			{
+				Debug.LogWarning($"Creating new settings object.");
+				Settings = new Settings();
+			}
+
 			EveMarket.SettingsLoadComplete?.Invoke();
 			//MarginPercentage = PlayerPrefs.GetInt(MarginPercentage.ToString(), 15);
 			//BuyRange = PlayerPrefs.GetString(BuyRange.ToString(), "station");

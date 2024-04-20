@@ -23,6 +23,8 @@ namespace EveMarket
 
 		public MarketItem(UniverseItem _item, MarketPrice _price, Dictionary<Region, Dictionary<int, OrderRecord>> orders)
 		{
+			Debug.Log($"Creating Market Item {_item.Name}.");
+
 			item = _item;
 			price = _price;
 			this.orders = orders;
@@ -102,29 +104,35 @@ namespace EveMarket
 				modifier = 0.01d;
 			}
 
+			if (!(orders.ContainsKey(AppSettings.Settings.BuyRegion) && orders[AppSettings.Settings.BuyRegion].ContainsKey(TypeId)))
+			{
+				return;
+			}
+
+			List<MarketOrder> marketOrders = orders[AppSettings.Settings.BuyRegion][TypeId].marketOrders;
+
+			var myOrder = marketOrders.Find(rec => rec.SystemId == StaticData.SystemIds[AppSettings.Settings.BuyOrderSystem]
+			&& StaticData.CorpOrders.Find(order => order.OrderId == rec.OrderId) != null
+			//&& ((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
+			);
+
 			if (orders.ContainsKey(AppSettings.Settings.BuyRegion) && orders[AppSettings.Settings.BuyRegion][TypeId].marketOrders != null)
 			{
-				List<MarketOrder> marketOrders = orders[AppSettings.Settings.BuyRegion][TypeId].marketOrders;
-				var buyOrders = marketOrders.FindAll(rec => 
+				var buyOrders = marketOrders.FindAll(rec =>
 				StaticData.CorpOrders.Find(order => order.OrderId == rec.OrderId) == null
 				&& rec.IsBuyOrder
-				&& MaxBuyPrice - Math.Round(rec.Price + modifier, 2) >= epsilon
+				&& MaxBuyPrice - (rec.Price + modifier) >= 0
 				//&& !((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
 				);
 
-				var myOrder = marketOrders.Find(rec => rec.SystemId == StaticData.SystemIds[AppSettings.Settings.BuyOrderSystem]
-				&& StaticData.CorpOrders.Find(order => order.OrderId == rec.OrderId) != null
-				//&& ((rec.LocationId == 60005143 && rec.Range == "1") || (rec.LocationId == 60003826 && rec.Range == "4") || (rec.LocationId == 60000469 && rec.Range == "3") || (rec.LocationId == 60002263 && rec.Range == "3"))
-				);
-
-				if (myOrder != null)
+				if (myOrder == null)
 				{
-					ItemStatus = EItemStatus.Updated;
-					currentSetBuyPrice = myOrder.Price;
+					ItemStatus = EItemStatus.Completed;
 				}
 				else
 				{
-					ItemStatus = EItemStatus.Completed;
+					ItemStatus = EItemStatus.Updated;
+					currentSetBuyPrice = myOrder.Price;
 				}
 
 				if (buyOrders != null)
@@ -155,7 +163,8 @@ namespace EveMarket
 
 			CurrentBuyPrice = highestPice > 0 ? highestPice + modifier : highestPice;
 
-			if (ItemStatus != EItemStatus.Completed && Math.Abs(CurrentBuyPrice - currentSetBuyPrice) >= epsilon)
+			if (ItemStatus != EItemStatus.Completed
+				&& Math.Abs(CurrentBuyPrice - currentSetBuyPrice) >= epsilon)
 			{
 				ItemStatus = EItemStatus.Outdated;
 			}
@@ -164,6 +173,12 @@ namespace EveMarket
 		public void UpdateOrders()
 		{
 			var region = AppSettings.Settings.SellRegion;
+
+			if (!(orders.ContainsKey(region) && orders[region].ContainsKey(TypeId)))
+			{
+				return;
+			}
+
 			orders[region][TypeId] = new OrderRecord(StaticData.OrderRecords[region][TypeId].marketOrders);
 			SetCurrentSellPrice();
 
