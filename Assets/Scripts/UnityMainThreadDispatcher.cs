@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace EveMarket.Util
@@ -10,17 +8,17 @@ namespace EveMarket.Util
 	{
 		private readonly Queue<global::System.Action> _executionQueue = new Queue<global::System.Action>();
 
-		static UnityMainThreadDispatcher instance; 
-		public static UnityMainThreadDispatcher Instance 
-		{ 
-			get
-			{
-				if (instance == null)
-				{
-					instance = FindObjectOfType<UnityMainThreadDispatcher>();
-				}
+		public static UnityMainThreadDispatcher Instance { get; private set; }
 
-				return instance;
+		private void Awake()
+		{
+			if (Instance == null)
+			{
+				Instance = this;
+			}
+			else
+			{
+				Destroy(this);
 			}
 		}
 

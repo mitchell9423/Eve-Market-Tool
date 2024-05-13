@@ -1,48 +1,36 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EveMarket
 {
 	[Serializable]
 	public class MarketObject
 	{
-		public MarketGroup Group { get; private set; }
-		public List<MarketItem> Items { get; private set; } = new List<MarketItem>();
-
+		public int GroupId { get; set; }
+		public MarketGroup Group => StaticData.GetMarketGroup(GroupId);
+		public Dictionary<int, MarketItem> Items { get; private set; } = new Dictionary<int, MarketItem>();
 		public string GroupName { get => Group.Name; }
 		public int ItemCount { get => Items.Count; }
+		public int[] GetMarketItemIds() => Items.Keys.ToArray();
 
-		public MarketObject(MarketGroup _group)
+		public MarketObject(MarketGroup marketGroup)
 		{
-			Group = _group;
-			foreach (var typeId in Group.Types)
-			{
-				lock (StaticData.ItemObjects)
-				{
-					lock (StaticData.MarketPrices)
-					{
-						if (StaticData.ItemObjects.ContainsKey(typeId) && StaticData.MarketPrices.ContainsKey(typeId))
-						{
-							lock (StaticData.OrderRecords)
-							{
-								foreach (var regionOrders in StaticData.OrderRecords.Values)
-								{
-									if (!regionOrders.ContainsKey(typeId)) regionOrders[typeId] = new OrderRecord(new List<MarketOrder>());
-								}
+			GroupId = marketGroup.TypeId;
 
-								Items.Add(new MarketItem(StaticData.ItemObjects[typeId], StaticData.MarketPrices[typeId], StaticData.OrderRecords));
-							}
-						}
-					}
-				}
+			foreach (var typeId in marketGroup.Types)
+			{
+				if (StaticData.UniverseItems[typeId].Name.Contains("Batch") || StaticData.UniverseItems[typeId].Name.Contains("Compressed")) continue;
+
+				Items[typeId] = StaticData.MarketItems[typeId] = new MarketItem(typeId);
 			}
 		}
 
-		public void UpdateMarketData()
+		public void UpdateMaretData()
 		{
-			for (int i = 0; i < Items.Count; i++)
+			foreach (var item in Items.Values)
 			{
-				Items[i].UpdateOrders();
+				item.UpdateMarketData();
 			}
 		}
 

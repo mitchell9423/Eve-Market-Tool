@@ -1,4 +1,5 @@
 
+using EveMarket.StateMachine;
 using EveMarket.Util;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ namespace EveMarket.Network
 
 		static Dictionary<Type, string> ModelTypeToURI = new Dictionary<Type, string>()
 		{
+			{ typeof(CorpOrder), NetworkSettings.CORP_ORDERS_URI},
 			{ typeof(List<MarketPrice>), NetworkSettings.MARKET_PRICES_URI},
 			{ typeof(MarketGroup), NetworkSettings.MARKET_GROUP_URI},
 			{ typeof(UniverseItem), NetworkSettings.UNIVERSE_TYPES_URI},
@@ -65,9 +67,6 @@ namespace EveMarket.Network
 			{
 				pendingMarketGroups = 0;
 				totalMarketGroups = 0;
-				EveDelegate.MarketUpdateComplete?.Invoke();
-				EveDelegate.ResetAutoUpdateTimer?.Invoke();
-				EveDelegate.Unsubscribe(ref EveDelegate.MarketUpdateComplete, StaticData.SaveMarketData);
 			}
 		}
 
@@ -75,7 +74,8 @@ namespace EveMarket.Network
 		{
 			if (Interlocked.Decrement(ref pendingMarketRequests) <= 0)
 			{
-				EveDelegate.ResetAutoUpdateTimer?.Invoke();
+				//EveDelegate.ResetAutoUpdateTimer?.Invoke();
+				EveStateMachine.SetNextState(new SaveMarketData(), AppState.SaveMarketData);
 				pendingMarketRequests = 0;
 			}
 
@@ -104,6 +104,11 @@ namespace EveMarket.Network
 			completedRequests = 0;
 			totalRequests = 0;
 			Status = UpdateStatus.Idle;
+		}
+
+		public static void StartLoginProcess()
+		{
+			HttpHandler.instance.StartLoginProcess();
 		}
 	}
 }

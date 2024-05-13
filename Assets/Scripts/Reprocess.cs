@@ -62,7 +62,7 @@ namespace EveMarket.Util
 
 				if (StaticData.MarketObjects.ContainsKey(productTypeID))
 				{
-					foreach (var marketItem in StaticData.MarketObjects[productTypeID].Items)
+					foreach (var marketItem in StaticData.MarketObjects[productTypeID].Items.Values)
 					{
 						string name = marketItem.ItemName;
 						name = name.Replace("-", "");
@@ -73,8 +73,8 @@ namespace EveMarket.Util
 						{
 							float amountProduct = BaseYield[product];
 							float netProduct = Mathf.Floor(BaseYield[product] * netYield);
-							double netPrice = marketItem.CurrentSellPrice * Mathf.Round(BaseYield[product] * netYield);
-							netValue += marketItem.CurrentSellPrice * Mathf.Floor(BaseYield[product] * netYield);
+							double netPrice = marketItem.CurrentSellPrice[AppSettings.Settings.SellRegion] * Mathf.Round(BaseYield[product] * netYield);
+							netValue += marketItem.CurrentSellPrice[AppSettings.Settings.SellRegion] * Mathf.Floor(BaseYield[product] * netYield);
 						}
 					}
 				}
@@ -478,6 +478,8 @@ namespace EveMarket.Util
 
 		public static double CalcReprocessedValue(MarketItem item)
 		{
+			if (item == null) return 0;
+
 			if (OreOutputs.ContainsKey(item.ItemName))
 			{
 				float val = (float)OreOutputs[item.ItemName].GetNetValue(item.ReprocessType);

@@ -1,3 +1,4 @@
+using EveMarket.Util;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -29,12 +30,12 @@ namespace EveMarket.UI
 		// Start is called before the first frame update
 		void Start()
 		{
-			EveMarket.SettingsLoadComplete += UpdateDropdpwn;
+			EveDelegate.Subscribe(ref EveDelegate.AppSettingsChanged, UpdateDropdpwn);
 		}
 
 		private void OnDestroy()
 		{
-			EveMarket.SettingsLoadComplete -= UpdateDropdpwn;
+			EveDelegate.Unsubscribe(ref EveDelegate.AppSettingsChanged, UpdateDropdpwn);
 		}
 
 		void UpdateDropdpwn()

@@ -15,6 +15,12 @@ namespace EveMarket.UI
 			return Title.text;
 		}
 
+		public void SetHeader(string title)
+		{
+			Title.text = title;
+			updateButton.enabled = false;
+		}
+
 		public void SetHeader(MarketObject marketObject)
 		{
 			Title.text = marketObject.GroupName;

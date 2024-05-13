@@ -1,3 +1,9 @@
+
+ToDo:
+ - Display corp order expiration and time till next update
+ - Override mineral and ice product prices with active market sell order prices.
+
+
 Authorization URL: https://login.eveonline.com/v2/oauth/authorize 
 
 EXAMPLE USE

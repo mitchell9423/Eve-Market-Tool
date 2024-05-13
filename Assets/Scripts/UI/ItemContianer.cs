@@ -1,7 +1,5 @@
-using EveMarket;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
+using System.Linq;
 using UnityEngine;
 
 namespace EveMarket.UI
@@ -12,17 +10,22 @@ namespace EveMarket.UI
 		public UnityEngine.Object itemInfoPanelPrefab;
 
 		[Header("UI Elements")]
-		[SerializeField] private List<InfoPanel> infoPanels = new List<InfoPanel>();
+		[SerializeField] public List<InfoPanel> infoPanels = new List<InfoPanel>();
 
 		public void PopulateItemContainer(MarketObject marketObject)
 		{
 			List<MarketItem> items = null;
 			lock (marketObject)
 			{
-				items = marketObject.Items;
+				items = marketObject.Items.Values.ToList();
 				items.Sort((item1, item2) => item1.ItemName.CompareTo(item2.ItemName));
 			}
-			
+
+			PopulateItemContainer(items, AppSettings.Presets[AppSettings.Settings.ActivePreset]);
+		}
+
+		public void PopulateItemContainer(List<MarketItem> items, BuyPreset buyPreset)
+		{
 			foreach (var item in items)
 			{
 				int index = 0;
@@ -34,6 +37,10 @@ namespace EveMarket.UI
 				{
 					GameObject obj = (GameObject)Instantiate(itemInfoPanelPrefab, transform);
 					infoPanel = obj.GetComponent<InfoPanel>();
+					infoPanel.GroupName = StaticData.MarketGroups[item.GroupId].Name;
+					infoPanel.TypeId = item.TypeId;
+					infoPanel.System = buyPreset.buySystem;
+					infoPanel.Region = buyPreset.buyRegion;
 					infoPanels.Add(infoPanel);
 				}
 				else
@@ -42,6 +49,14 @@ namespace EveMarket.UI
 				}
 
 				infoPanel.UpdateInfoPanel(item);
+			}
+		}
+
+		public void UpdateContainer()
+		{
+			foreach (var panel in infoPanels)
+			{
+				panel.UpdateInfoPanel();
 			}
 		}
 	}

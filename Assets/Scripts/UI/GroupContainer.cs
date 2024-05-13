@@ -17,5 +17,7 @@ namespace EveMarket.UI
 			GroupHeader = GetComponentInChildren<GroupHeader>();
 			ItemContianer = GetComponentInChildren<ItemContianer>();
 		}
+
+		public void UpdateContainer() => ItemContianer.UpdateContainer();
 	}
 }

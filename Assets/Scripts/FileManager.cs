@@ -19,7 +19,7 @@ namespace EveMarket.Util
 
 		static readonly Dictionary<Type, string> TypeFilePath = new Dictionary<Type, string>()
 		{
-			{ typeof(List<CorpOrder>), CORP_ORDERS_PATH },
+			{ typeof(CorpOrderRecord), CORP_ORDERS_PATH },
 			{ typeof(Dictionary<int, MarketPrice>), MARKET_PRICES_PATH },
 			{ typeof(Dictionary<int, MarketGroup>), MARKET_GROUPS_PATH },
 			{ typeof(Dictionary<int, UniverseItem>), UNIVERSE_TYPES_PATH },
@@ -73,14 +73,23 @@ namespace EveMarket.Util
 			}
 
 			string data = ReadFile(path);
-			T deserializedObject = JsonConvert.DeserializeObject<T>(data);
 
-			if (deserializedObject == null)
+			try
 			{
-				Debug.LogWarning($"Failed to deserialize {path} to type {typeof(T)}.");
-			}
+				T deserializedObject = JsonConvert.DeserializeObject<T>(data);
 
-			return deserializedObject;
+				if (deserializedObject == null)
+				{
+					Debug.LogWarning($"Failed to deserialize {path} to type {typeof(T)}.");
+				}
+
+				return deserializedObject;
+			}
+			catch (Exception ex)
+			{
+				Debug.LogException(ex);
+				return null;
+			}
 		}
 
 		static void WriteFile(string path, string data)

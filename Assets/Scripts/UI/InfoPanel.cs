@@ -1,5 +1,4 @@
-using EveMarket;
-using System.Collections;
+using EveMarket.Util;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -11,7 +10,8 @@ namespace EveMarket.UI
 	public class InfoPanel : MonoBehaviour
 	{
 		[SerializeField] private TMP_Text itemName;
-		[SerializeField] private TMP_Text buyPrice;
+		[SerializeField] private TMP_Text buyLabel;
+		[SerializeField] private TMP_InputField buyPrice;
 		[SerializeField] private TMP_Text maxBuyPrice;
 		[SerializeField] private TMP_Text sellPrice;
 
@@ -21,22 +21,70 @@ namespace EveMarket.UI
 		[SerializeField] private Color disabledColor;
 
 		private List<TMP_Text> textObjects;
+		public Region Region { get; set; }
+		public System System { get; set; }
+		public int TypeId { get; set; }
+		public string GroupName { get; set; }
 
 		private void Start()
 		{
+			EveDelegate.Subscribe(ref EveDelegate.UpdateUINotify, UpdateUIHandler);
 			itemName = transform.Find("Name").GetComponent<TMP_Text>();
-			buyPrice = transform.Find("BuyPrice").GetComponent<TMP_Text>();
+			buyPrice = transform.Find("BuyPrice").GetComponent<TMP_InputField>();
 			maxBuyPrice = transform.Find("MaxBuyPrice").GetComponent<TMP_Text>();
 			sellPrice = transform.Find("SellPrice").GetComponent<TMP_Text>();
 			InitMat();
 		}
 
-		public void UpdateInfoPanel(MarketItem item)
+		private void OnDestroy()
 		{
+			EveDelegate.Unsubscribe(ref EveDelegate.UpdateUINotify, UpdateUIHandler);
+		}
+
+		//private void Update()
+		//{
+		//	UpdateInfoPanel();
+		//}
+
+		public void UpdateUIHandler(int typeId)
+		{
+			if (typeId == 0 || typeId == TypeId)
+			{
+				UpdateInfoPanel();
+			}
+		}
+
+		public void UpdateInfoPanel(MarketItem item = null)
+		{
+			if (item == null)
+			{
+				if (TypeId <= 0) return;
+				item = StaticData.GetMarketItem(TypeId);
+			}
+
 			itemName.text = item.ItemName;
-			buyPrice.text = $"Buy: {item.CurrentBuyPrice}";
-			maxBuyPrice.text = $"Max Buy: {item.MaxBuyPrice}";
-			sellPrice.text = StaticData.GroupObjects[item.GroupId].Name == "Minerals" || StaticData.GroupObjects[item.GroupId].Name == "Ice Products" ? $"Sell: {item.CurrentSellPrice}" : $"Sell: {item.ReprocessPrice}";
+
+			if (GroupName == Group.Minerals.ToString()
+				|| GroupName == StaticData.EnumToString(Group.Ice_Products))
+			{
+				if (buyPrice != null) buyPrice.gameObject.SetActive(false);
+				buyLabel.text = "";
+				maxBuyPrice.text = $"";
+
+				CorpOrder corpOrder = StaticData.CorpOrderRecord.CorpOrders.Find(order => order.TypeId == TypeId);
+				if (corpOrder != null)
+				{
+					buyLabel.text = $"Order";
+					maxBuyPrice.text = $"{corpOrder.Price}";
+				}
+			}
+			else
+			{
+				buyPrice.text = $"{item.CurrentBuyPrice[Region][System]}";
+				maxBuyPrice.text = $"Max Buy: {item.MaxBuyPrice}";
+			}
+
+			sellPrice.text = GroupName == "Minerals" || GroupName == "Ice Products" ? $"Sell: {item.CurrentSellPrice[AppSettings.Settings.SellRegion]}" : $"Sell: {item.ReprocessPrice[AppSettings.Settings.SellRegion]}";
 			UpdateInfoColor(item);
 		}
 
@@ -49,20 +97,20 @@ namespace EveMarket.UI
 		{
 			Image image = GetComponent<Image>();
 
-			if (StaticData.MarketObjects[item.GroupId].GroupName == Group.Minerals.ToString()
-				|| StaticData.MarketObjects[item.GroupId].GroupName == StaticData.EnumToString(Group.Ice_Products))
+			if (GroupName == Group.Minerals.ToString()
+				|| GroupName == StaticData.EnumToString(Group.Ice_Products))
 			{
 				image.color = defaultColor;
 				return;
 			}
 
-			if (item.CurrentBuyPrice == 0.00d)
+			if (item.CurrentBuyPrice[Region][System] == 0.00d)
 			{
 				image.color = disabledColor;
 				return;
 			}
 
-			switch (item.ItemStatus)
+			switch (item.ItemStatus[Region][System])
 			{
 				case MarketItem.EItemStatus.Updated:
 					image.color = defaultColor;
@@ -80,7 +128,8 @@ namespace EveMarket.UI
 
 		private void InitMat()
 		{
-			List<TMP_Text> textObjects = new List<TMP_Text>() { itemName, buyPrice, maxBuyPrice, sellPrice };
+			List<TMP_Text> textObjects = new List<TMP_Text>() { itemName, maxBuyPrice, sellPrice };
+			if (buyPrice != null) textObjects.AddRange(buyPrice.GetComponentsInChildren<TMP_Text>());
 
 			for (int i = 0; i < textObjects.Count; i++)
 			{

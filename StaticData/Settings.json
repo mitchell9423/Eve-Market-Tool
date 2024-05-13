@@ -1,9 +1,19 @@
 {
   "EnableTimedUpdate": true,
-  "MarginPercentage": 15,
+  "MarginPercentage": 18,
   "BuyRange": "4",
   "BuyOrderSystem": 3,
   "BuyRegion": 1,
   "SellRegion": 0,
-  "ActivePreset": 3
+  "ActivePreset": 3,
+  "IskAmount": 500000000.0,
+  "UnitPrice": 13.01,
+  "CorpId": 98422411,
+  "RefreshExpiration": "2027-08-24T14:09:19.9430874-04:00",
+  "TokenResponse": {
+    "access_token": "1|CfDJ8MPsLMx2Xs1MiRxchPasXaoV8iJJqW2JMRYV0GhCtG5i+KCSK2E0kbNCvH5rVoG0ZMghw7Zn3Af/L09FvrTDVswTQAajC2H9GC5yFpu9+wJBgm+1GBKxL6rY7ZQuI0qAcVS4RFHIQBaMmUR0089qbZGdW7GTLnH6ti4kwfhWOp6v",
+    "token_type": "Bearer",
+    "expires_in": "1199",
+    "refresh_token": "xrkwADwbhiejXNQ9-FkGfryDYjNm8Deb_aDUQKB6_nQWbbkmqeyZ-jWWPstpazBAFLq4png8wL742A2o1HQ_ABWqhj1y-Mr8pf5f8V9rHUZA8eU_ppETcQvSnxw8COVWVMt4_y7LkyPW4EI40kROOdLzLUAb1kS9XyZZWJdpw53crLSrM7IyVaqKE-WbI56nKAgl1LtOE-R0QiFn8rxN2GDpNoFBHwINkYPYZ2YsS8X6ueZ6yYqnzclEDaTcg7C0AVjPkAQDFzwwvapxfU6x7nzkxHrBzlI6oEZ44xnxO4qNvLqjDAq-0HHHFSB0qFR4eFpNUeQMCiML5WDn5ydb8SLbRnJVwEo4QHO4WLvHFovzKFI3KkzRtHZm6S8tJwrUN2nyBpo4XVcb1W1yDVGcnJALZQcwvk0lR5sN7M7G21o"
+  }
 }

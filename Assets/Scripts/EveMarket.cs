@@ -1,10 +1,11 @@
 
+using EveMarket.Network;
+using EveMarket.StateMachine;
 using EveMarket.UI;
 using EveMarket.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -16,11 +17,9 @@ namespace EveMarket
 
 		[SerializeField] UnityMainThreadDispatcher unityMainThreadDispatcher;
 		[SerializeField] HttpHandler httpHandler;
-		[SerializeField] DisplayPanel ui;
-
-		public delegate void AppEvent();
-		public static AppEvent UpdateUI;
-		public static AppEvent SettingsLoadComplete;
+		[SerializeField] EveSSOAuthenticator Authenticator;
+		[SerializeField] EveStateMachine stateMachine;
+		[SerializeField] DisplayPanel displayPanel;
 
 		public static bool EnableTimedUpdate { get; set; } = true;
 		public static bool ShowGUI { get; set; }
@@ -31,12 +30,21 @@ namespace EveMarket
 
 		StringBuilder sb = new StringBuilder();
 
-		private void Awake()
+		private void Start()
 		{
-			UpdateUI += ui.CreateGroupContainers;
-			SettingsLoadComplete += UpdateSettings;
-			EveDelegate.Subscribe(ref EveDelegate.ResetAutoUpdateTimer, ResetTimer);
-			EveDelegate.Subscribe(ref EveDelegate.ItemMarketUpdateComplete, StaticData.SaveMarketData);
+			Application.runInBackground = true;
+
+			EveDelegate.Subscribe(ref EveDelegate.CreateUI, displayPanel.CreateGroupContainers);
+
+			if (displayPanel == null)
+			{
+				displayPanel = FindObjectOfType<DisplayPanel>();
+			}
+
+			if (!gameObject.TryGetComponent(out stateMachine))
+			{
+				stateMachine = gameObject.AddComponent<EveStateMachine>();
+			}
 
 			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
 			{
@@ -47,23 +55,32 @@ namespace EveMarket
 			{
 				httpHandler = gameObject.AddComponent<HttpHandler>();
 			}
+
+			if (!gameObject.TryGetComponent(out Authenticator))
+			{
+				Authenticator = gameObject.AddComponent<EveSSOAuthenticator>();
+			}
+
+			Authenticator.SetCodeReceivedCallback((code) =>
+			{
+				Debug.Log("Received OAuth code: " + code);
+				// Further processing like exchanging the code for a token
+				httpHandler.OnAuthorizationCodeReceived(code);
+			});
+
+			EveStateMachine.SetNextState(new LoadAppSettings(), AppState.LoadAppSettings);
+
+			StartCoroutine(TimedUpdate());
 		}
 
 		private void OnDestroy()
 		{
-			UpdateUI -= ui.CreateGroupContainers;
-			SettingsLoadComplete -= UpdateSettings;
+			EveDelegate.Unsubscribe(ref EveDelegate.CreateUI, displayPanel.CreateGroupContainers);
+
+			EveDelegate.Unsubscribe(ref EveDelegate.StaticLoadComplete, ConstructMarketObjects);
+			EveDelegate.Unsubscribe(ref EveDelegate.PresetChanged, UpdateMarketObjects);
+			//EveDelegate.Unsubscribe(ref EveDelegate.AppSettingsChanged, UpdateSettings);
 			EveDelegate.Unsubscribe(ref EveDelegate.ResetAutoUpdateTimer, ResetTimer);
-			EveDelegate.Unsubscribe(ref EveDelegate.ItemMarketUpdateComplete, StaticData.SaveMarketData);
-		}
-
-		private void Start()
-		{
-			Application.runInBackground = true;
-			AppSettings.LoadAppSettings();
-			LoadStaticData();
-
-			StartCoroutine(TimedUpdate());
 		}
 
 		private void Update()
@@ -72,54 +89,22 @@ namespace EveMarket
 			RemainingTime = TimerInterval - TimeSinceLastUpdate;
 		}
 
+		public void UpdateMarketObjects() => StaticData.UpdateMarketObjects();
+		public void ConstructMarketObjects() => StaticData.ConstructMarketObjects();
+
 		public IEnumerator TimedUpdate()
 		{
 			if (EnableTimedUpdate)
 			{
-				lock (StaticData.OrderRecordMeta)
+				yield return new WaitForSeconds(60);
+
+				if (EveStateMachine.AppState == AppState.Idle)
 				{
-					var regions = StaticData.OrderRecordMeta.Keys.ToArray();
-					for (int i = 0; i < regions.Length; i++)
-					{
-						var itemTypes = StaticData.OrderRecordMeta[regions[i]].Keys.ToArray();
-						for (int j = 0; j < itemTypes.Length; j++)
-						{
-							if (DateTime.TryParse(StaticData.OrderRecordMeta[regions[i]][itemTypes[j]].Expiration, out DateTime expiration))
-							{
-								bool isExpired = DateTime.Now >= expiration;
-
-								if (isExpired)
-								{
-									StaticData.UpdateItemMarketData(itemTypes[j], StaticData.OrderRecordMeta[regions[i]][itemTypes[j]].ETag);
-								}
-							}
-
-							yield return null;
-						}
-					}
+					EveStateMachine.SetNextState(new UpdateCorpOrders(), AppState.UpdateCorpOrders);
 				}
 
-				//lock (StaticData.MarketObjects)
-				//{
-				//	var mos = StaticData.MarketObjects.Values.ToArray();
-
-				//	for (int i = 0; i < StaticData.MarketObjects.Count; i++)
-				//	{
-				//		MarketObject mo = StaticData.MarketObjects.Values.ToArray()[i];
-
-				//		lock (StaticData.GroupObjects)
-				//		{
-				//			StaticData.UpdateMarketData(StaticData.GroupObjects[mo.Group.TypeId].Types);
-				//		}
-
-				//		yield return null;
-				//	}
-				//}
+				StartCoroutine(TimedUpdate());
 			}
-
-			yield return new WaitForSeconds(60);
-			EveDelegate.ItemMarketUpdateComplete?.Invoke();
-			StartCoroutine(TimedUpdate());
 		}
 
 		private void ResetTimer()
@@ -130,48 +115,24 @@ namespace EveMarket
 		public void LoadStaticData()
 		{
 			StaticData.LoadStaticData();
-			BuildDisplayString();
-			ui.CreateGroupContainers();
+			//ui.CreateGroupContainers();
 		}
 
-		public void UpdateStaticData()
-		{
-			StaticData.UpdateStaticData();
-			BuildDisplayString();
-		}
+		//public void UpdateStaticData()
+		//{
+		//	StaticData.UpdateStaticData();
+		//}
 
 		public void UpdateMarketData(Component sender, object obj)
 		{
 			StaticData.UpdateMarketData(obj as List<int>);
-			BuildDisplayString();
-		}
-
-		private void BuildDisplayString()
-		{
-			sb.Clear();
-
-			for (int i = 0; i < StaticData.MarketObjects.Count; i++)
-			{
-				MarketObject marketObject = StaticData.MarketObjects.ElementAt(i).Value;
-
-				sb.Append($"\nGroup: {marketObject.GroupName}\n");
-
-				for (int j = 0; j < marketObject.ItemCount; j++)
-				{
-					MarketItem marketItem = marketObject.GetItemByIndex(j);
-
-					sb.Append($"\n  {marketItem.ItemName}   Average Price: {marketItem.AveragePrice}");
-				}
-
-				sb.Append($"\n\n");
-			}
 		}
 
 		private void UpdateSettings()
 		{
 			EnableTimedUpdate = AppSettings.Settings.EnableTimedUpdate;
 			Debug.Log($"EnableTimedUpdate = {EnableTimedUpdate}");
-			ui.SetProfitMargin();
+			//ui.SetProfitMargin();
 		}
 	}
 }

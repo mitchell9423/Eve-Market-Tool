@@ -1,0 +1,15 @@
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\bin\Debug\net8.0\WebServer.exe
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\bin\Debug\net8.0\WebServer.deps.json
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\bin\Debug\net8.0\WebServer.runtimeconfig.json
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\bin\Debug\net8.0\WebServer.dll
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\bin\Debug\net8.0\WebServer.pdb
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\WebServer.GeneratedMSBuildEditorConfig.editorconfig
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\WebServer.AssemblyInfoInputs.cache
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\WebServer.AssemblyInfo.cs
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\WebServer.csproj.CoreCompileInputs.cache
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\WebServer.sourcelink.json
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\WebServer.dll
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\refint\WebServer.dll
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\WebServer.pdb
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\WebServer.genruntimeconfig.cache
+D:\GitHub\Eve-Market-Tool\Server\WebServer\WebServer\obj\Debug\net8.0\ref\WebServer.dll

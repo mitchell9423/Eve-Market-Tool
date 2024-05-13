@@ -97,11 +97,18 @@ namespace EveMarket
 	[Serializable]
 	public class OrderRecord
 	{
-		public List<MarketOrder> marketOrders = new List<MarketOrder>();
+		public string Expiration;
+		public string ETag;
+		public int TypeId;
 
-		public OrderRecord(List<MarketOrder> marketOrders)
+		public List<MarketOrder> marketOrders;
+
+		public OrderRecord(int typeId, List<MarketOrder> marketOrders, string Expiration, string ETag)
 		{
-			this.marketOrders = marketOrders;
+			TypeId = typeId;
+			this.marketOrders = marketOrders ?? new List<MarketOrder>();
+			this.Expiration = Expiration;
+			this.ETag = ETag;
 		}
 
 		public void AddOrders(List<MarketOrder> marketOrders)
@@ -151,6 +158,24 @@ namespace EveMarket
 	}
 
 	[Serializable]
+	public class CorpOrderRecord
+	{
+		public string Expiration;
+		public string ETag;
+		public int TypeId;
+
+		public List<CorpOrder> CorpOrders;
+
+		public CorpOrderRecord(int typeId, List<CorpOrder> corpOrders, string expiration, string eTag)
+		{
+			TypeId = typeId;
+			CorpOrders = corpOrders ?? new List<CorpOrder>();
+			Expiration = expiration;
+			ETag = eTag;
+		}
+	}
+
+	[Serializable]
 	public class CorpOrder : IDataModel
 	{
 		[JsonProperty("duration")]
@@ -197,6 +222,31 @@ namespace EveMarket
 
 		[JsonProperty("wallet_division")]
 		public int WalletDivision { get; set; }
+	}
+
+	[Serializable]
+	public class CharacterVerificationResponse
+	{
+		public int CharacterId { get; set; }
+		public string CharacterName { get; set; }
+		public string ExpiresOn { get; set; }
+		public string Scopes { get; set; }
+		public string TokenType { get; set; }
+		public string CharacterOwnerHash { get; set; }
+		public string IntellectualProperty { get; set; }
+	}
+
+	[Serializable]
+	public class TokenResponse
+	{
+		[JsonProperty("access_token")]
+		public string AccessToken { get; set; }
+		[JsonProperty("token_type")]
+		public string TokenType { get; set; }
+		[JsonProperty("expires_in")]
+		public string ExpiresIn { get; set; }
+		[JsonProperty("refresh_token")]
+		public string RefreshToken { get; set; }
 	}
 
 	[Serializable]
