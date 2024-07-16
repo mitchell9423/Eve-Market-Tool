@@ -27,6 +27,8 @@ namespace EveMarket
 	public class Settings
 	{
 		public bool EnableTimedUpdate { get; set; } = true;
+		public float BaseYield { get; set; } = .54f;
+		public float ReprocessTax { get; set; } = .1f;
 		public int MarginPercentage { get; set; } = 15;
 		public string BuyRange { get; set; } = "4";
 		public System BuyOrderSystem { get; set; } = System.Tunttaras;
@@ -72,6 +74,28 @@ namespace EveMarket
 			Settings.MarginPercentage = val;
 
 			Debug.Log($"Profit Margin set to {val}");
+
+			QueueSave();
+		}
+
+		public static void SetBasePercent(float val)
+		{
+			if (Settings.BaseYield == val) return;
+
+			Settings.BaseYield = val;
+
+			Debug.Log($"Base Percent set to {val}");
+
+			QueueSave();
+		}
+
+		public static void SetReprocessTax(float val)
+		{
+			if (Settings.ReprocessTax == val) return;
+
+			Settings.ReprocessTax = val;
+
+			Debug.Log($"Reprocess Tax set to {val}");
 
 			QueueSave();
 		}

@@ -82,7 +82,11 @@ namespace EveMarket
 
 		private double SetMaxBuy(Region region = Region.None)
 		{
-			return MaxBuyPrice = (double)Math.Round(SetReprocessPrice(region) * ((100 - (double)AppSettings.Settings.MarginPercentage) / 100), 2);
+			double profitMargin = (double)AppSettings.Settings.MarginPercentage;
+			double profitMarginModifier = ((100 - profitMargin) / 100);
+			double reprocessedValue = SetReprocessPrice(region);
+			MaxBuyPrice = (double)Math.Round(reprocessedValue * profitMarginModifier, 2);
+			return MaxBuyPrice;
 		}
 
 		private void SetCurrentSellPrice()
@@ -215,7 +219,7 @@ namespace EveMarket
 							{
 								if (StaticData.SystemIds.ContainsKey(system) && StaticData.Routes.TryGetValue(StaticData.SystemIds[system], out List<RouteData> routes))
 								{
-									if (StaticData.RangeStringToInt.ContainsKey(AppSettings.Settings.BuyRange))
+									if (StaticData.RangeStringToInt.ContainsKey(order.Range))
 									{
 										var routeToOrder = routes.Find(route => route.Destination == order.SystemId);
 										distanceToOrderRange = routeToOrder.NumJumps - StaticData.RangeStringToInt[order.Range];
@@ -224,19 +228,31 @@ namespace EveMarket
 							}
 						}
 
-						if (distanceToOrderRange <= StaticData.RangeStringToInt[AppSettings.Settings.BuyRange] && order.Price > highestPice)
-							highestPice = order.Price;
+						if (order.Price > highestPice)
+						{
+							if (myOrder == null)
+							{
+								highestPice = order.Price;
+							}
+							else if (distanceToOrderRange <= StaticData.RangeStringToInt[myOrder.Range])
+							{
+								highestPice = order.Price;
+							}
+						}
+
 					}
 				}
 			}
 
-			CurrentBuyPrice[region][system] = highestPice > 0 ? highestPice + modifier : highestPice;
+			double currentBuyPrice = highestPice > 0 ? highestPice + modifier : highestPice;
 
 			if (ItemStatus[region][system] != EItemStatus.Completed
-				&& Math.Abs(CurrentBuyPrice[region][system] - currentSetBuyPrice) >= epsilon)
+				&& Math.Abs(currentBuyPrice - currentSetBuyPrice) >= epsilon)
 			{
 				ItemStatus[region][system] = EItemStatus.Outdated;
 			}
+
+			CurrentBuyPrice[region][system] = currentBuyPrice;
 		}
 
 		private void SetReprocessType()

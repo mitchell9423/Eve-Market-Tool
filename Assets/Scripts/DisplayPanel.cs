@@ -50,6 +50,8 @@ namespace EveMarket.UI
 		public Transform contentGrid;
 		public TMP_Dropdown presetDropdown;
 		[SerializeField] TMP_InputField ProfitMargin;
+		[SerializeField] TMP_InputField ReprocessTax;
+		[SerializeField] TMP_InputField BaseYield;
 
 		private System preset = System.None;
 		public static PanelState panelState = PanelState.RegionView;
@@ -63,7 +65,7 @@ namespace EveMarket.UI
 
 		private void Start()
 		{
-			EveDelegate.Subscribe(ref EveDelegate.AppSettingsChanged, SetProfitMargin);
+			EveDelegate.Subscribe(ref EveDelegate.AppSettingsChanged, ApplyAppSettings);
 		}
 
 		private void OnEnable()
@@ -73,7 +75,7 @@ namespace EveMarket.UI
 
 		private void OnDestroy()
 		{
-			EveDelegate.Unsubscribe(ref EveDelegate.AppSettingsChanged, SetProfitMargin);
+			EveDelegate.Unsubscribe(ref EveDelegate.AppSettingsChanged, ApplyAppSettings);
 		}
 
 		public void CreateGroupContainers()
@@ -81,6 +83,16 @@ namespace EveMarket.UI
 			if (ProfitMargin != null)
 			{
 				ProfitMargin.SetTextWithoutNotify(AppSettings.Settings.MarginPercentage.ToString());
+			}
+
+			if (BaseYield != null)
+			{
+				BaseYield.SetTextWithoutNotify(AppSettings.Settings.BaseYield.ToString());
+			}
+
+			if (ReprocessTax != null)
+			{
+				ReprocessTax.SetTextWithoutNotify(AppSettings.Settings.ReprocessTax.ToString());
 			}
 
 			if (panelState == PanelState.RegionView)
@@ -186,6 +198,22 @@ namespace EveMarket.UI
 			}
 		}
 
+		public void ApplyAppSettings()
+		{
+			if (ProfitMargin != null)
+			{
+				ProfitMargin.text = AppSettings.Settings.MarginPercentage.ToString();
+			}
+			if (ReprocessTax != null)
+			{
+				ReprocessTax.text = AppSettings.Settings.ReprocessTax.ToString();
+			}
+			if (BaseYield != null)
+			{
+				BaseYield.text = AppSettings.Settings.BaseYield.ToString();
+			}
+		}
+
 		public void SetProfitMargin()
 		{
 			if (ProfitMargin != null)
@@ -199,6 +227,24 @@ namespace EveMarket.UI
 			if (Int32.TryParse(ProfitMargin.text, out int val))
 			{
 				AppSettings.SetProfitMargin(val);
+				EveDelegate.UpdateItemNotify?.Invoke(0);
+			}
+		}
+
+		public void UpdateBaseYield()
+		{
+			if (float.TryParse(BaseYield.text, out float val))
+			{
+				AppSettings.SetBasePercent(val);
+				EveDelegate.UpdateItemNotify?.Invoke(0);
+			}
+		}
+
+		public void UpdateReprocessTax()
+		{
+			if (float.TryParse(ReprocessTax.text, out float val))
+			{
+				AppSettings.SetReprocessTax(val);
 				EveDelegate.UpdateItemNotify?.Invoke(0);
 			}
 		}

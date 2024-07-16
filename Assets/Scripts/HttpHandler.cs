@@ -95,6 +95,7 @@ namespace EveMarket.Network
 
 					if (webRequest.result == UnityWebRequest.Result.DataProcessingError || webRequest.result == UnityWebRequest.Result.ProtocolError)
 					{
+						// look into: https://esi.evetech.net/latest/markets/10000002/orders/?datasource=tranquility&order_type=all&page=1&type_id=60771
 						Debug.LogError($"Data Processing Error: {webRequest.error}\n{url}\n{webRequest.GetRequestHeader("If-None-Match")}\n{webRequest.downloadHandler.text}");
 						UnityMainThreadDispatcher.Instance?.Enqueue(() =>
 						{

@@ -566,7 +566,7 @@ namespace EveMarket
 							|| group.Name == Group.Plagioclase.ToString()
 							|| group.Name == Group.Pyroxeres.ToString()
 							|| group.Name == Group.Scordite.ToString()
-							|| group.Name == Group.Kernite.ToString()
+							//|| group.Name == Group.Kernite.ToString()
 							)
 						{
 							Debug.Log($"Creating Market Group {group.Name}.");
@@ -743,7 +743,7 @@ namespace EveMarket
 
 			if (code != 200 && code != 304)
 			{
-				Debug.LogWarning($"Error receiving data : code {code} : type {typeof(T)}.\n{response}");
+				Debug.LogWarning($"Error receiving data : code {code} : Region {region} : TypeId {type_id} : type {typeof(T).Name}.\n{response}");
 				NetworkManager.CompleteMarketUpdateTask();
 				return;
 			}

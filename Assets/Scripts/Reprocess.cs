@@ -118,7 +118,7 @@ namespace EveMarket.Util
 		static float ExceptionalOreProcessingSkillPercentage => 1 + (.02f * ExceptionalOreProcessingSkillLvl);
 
 		// 2% bonus to Mercoxite reprocessing yield per skill level.
-		public static int MercoxiteOreProcessingSkillLvl = 4;
+		public static int MercoxiteOreProcessingSkillLvl = 5;
 		static float MercoxiteOreProcessingSkillPercentage => 1 + (.02f * MercoxiteOreProcessingSkillLvl);
 
 		// 2% bonus to Carnotite, Zircon, Pollucite, and Cinnabar reprocessing yield per skill level.
@@ -145,7 +145,7 @@ namespace EveMarket.Util
 
 		public static float CalcNetYield(ReprocessType reprocessType)
 		{
-			float netYield = baseYield;
+			float netYield = AppSettings.Settings.BaseYield;
 			netYield *= ReprocessingSkillPercentage;
 			netYield *= ReprocessingEfficiencySkillPercentage;
 
@@ -490,7 +490,7 @@ namespace EveMarket.Util
 				}
 
 				val = Mathf.Round(val * 100) / 100;
-
+				val -= (val * AppSettings.Settings.ReprocessTax);
 				return val;
 			}
 
