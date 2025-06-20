@@ -15,6 +15,7 @@ namespace EveMarket
 	public enum AppState
 	{
 		Authentication,
+		VerifyToken,
 		LoadAppSettings,
 		LoadStaticData,
 		UpdateStaticData,

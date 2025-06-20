@@ -83,7 +83,7 @@ namespace EveMarket.Util
 			}
 		}
 
-		static float baseYield = .54f;
+		//static float baseYield = .54f;
 
 		public static int ReprocessingSkillLvl = 5;
 		static float ReprocessingSkillPercentage => 1 + (.03f * ReprocessingSkillLvl);

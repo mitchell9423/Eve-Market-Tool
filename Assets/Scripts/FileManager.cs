@@ -9,13 +9,13 @@ namespace EveMarket.Util
 {
 	public static class FileManager
 	{
-		const string MARKET_GROUPS_PATH = "StaticData\\MarketGroups.json";
-		const string UNIVERSE_TYPES_PATH = "StaticData\\UniverseItems.json";
-		const string MARKET_PRICES_PATH = "StaticData\\MarketPrices.json";
-		const string CORP_ORDERS_PATH = "StaticData\\CorpOrders.json";
-		const string ITEM_ORDERS_PATH = "StaticData\\ItemOrders.json";
-		const string ROUTES_PATH = "StaticData\\Routes.json";
-		const string APP_SETTINGS = "StaticData\\Settings.json";
+		const string MARKET_GROUPS_PATH = "StaticData/MarketGroups.json";
+		const string UNIVERSE_TYPES_PATH = "StaticData/UniverseItems.json";
+		const string MARKET_PRICES_PATH = "StaticData/MarketPrices.json";
+		const string CORP_ORDERS_PATH = "StaticData/CorpOrders.json";
+		const string ITEM_ORDERS_PATH = "StaticData/ItemOrders.json";
+		const string ROUTES_PATH = "StaticData/Routes.json";
+		const string APP_SETTINGS = "StaticData/Settings.json";
 
 		static readonly Dictionary<Type, string> TypeFilePath = new Dictionary<Type, string>()
 		{
@@ -34,7 +34,7 @@ namespace EveMarket.Util
 
 			if (!TypeFilePath.TryGetValue(typeof(T), out path))
 			{
-				TypeFilePath[typeof(T)] = $"StaticData\\{typeof(T)}.json";
+				TypeFilePath[typeof(T)] = $"StaticData/{typeof(T)}.json";
 				Debug.LogWarning($"File path for type {typeof(T)} not found.");
 			}
 

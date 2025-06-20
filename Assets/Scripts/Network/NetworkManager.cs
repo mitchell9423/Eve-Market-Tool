@@ -17,6 +17,9 @@ namespace EveMarket.Network
 
 	public static class NetworkManager
 	{
+		// Dev code
+		public static bool EnableLogin { get; set; } = true;
+
 		public static int pendingMarketGroups = 0;
 		public static int totalMarketGroups = 0;
 		public static int pendingMarketRequests = 0;
@@ -55,7 +58,14 @@ namespace EveMarket.Network
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError($"An error occurred: {ex.Message}");
+				string typeLog = $"type: {typeof(T)}";
+				string extensionLog = string.IsNullOrEmpty(extension) ? "" : $"extension: {extension}";
+				string regionLog = $"region: {region}";
+				string idLog = $"type_id: {type_id}";
+
+				Debug.LogError($"A request error occurred...\n" +
+                    $"{typeLog}  {extensionLog}  {regionLog}  {idLog}\n" +
+                    $"{ex.Message}");
 			}
 		}
 
@@ -104,11 +114,6 @@ namespace EveMarket.Network
 			completedRequests = 0;
 			totalRequests = 0;
 			Status = UpdateStatus.Idle;
-		}
-
-		public static void StartLoginProcess()
-		{
-			HttpHandler.instance.StartLoginProcess();
 		}
 	}
 }

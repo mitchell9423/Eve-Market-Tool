@@ -1,4 +1,5 @@
-using EveMarket.Network;
+﻿using EveMarket.Network;
+using EveMarket.Network.OAuth;
 using EveMarket.Util;
 using System;
 using System.Collections;
@@ -26,7 +27,14 @@ namespace EveMarket.StateMachine
 
 		public IEnumerator Execute()
 		{
-			NetworkManager.StartLoginProcess();
+			Task<bool> logInTask = LoginManager.Login();
+			yield return new WaitUntil(() => logInTask.IsCompleted);
+
+			if (logInTask.Result == true)
+			{
+				EveStateMachine.SetNextState(new VerifyToken(), AppState.VerifyToken);
+			}
+
 			completed = true;
 			yield return null;
 		}
@@ -42,19 +50,52 @@ namespace EveMarket.StateMachine
 		}
 	}
 
-	public class UpdateCorpOrders : IEveState
+	public class VerifyToken : IEveState
 	{
 		private bool completed = false;
 
+		public void Enter() { }
+
+		public IEnumerator Execute()
+		{
+			Task<bool> verifyTask = HttpHandler.instance.VerifyToken(); // assume returns true if valid
+
+			yield return new WaitUntil(() => verifyTask.IsCompleted);
+
+			if (verifyTask.Result)
+			{
+				EveStateMachine.SetNextState(new UpdateCorpOrders(), AppState.UpdateCorpOrders);
+			}
+			else
+			{
+				EveStateMachine.SetNextState(new Authentication(), AppState.Authentication);
+			}
+
+			completed = true;
+			yield return null;
+		}
+
+		public void Exit() => completed = true;
+
+		public bool IsCompleted() => completed;
+	}
+
+
+	public class UpdateCorpOrders : IEveState
+	{
+		private bool completed = false;
+		private string accessToken;
+
 		public void Enter()
 		{
+			accessToken = AppSettings.Settings.TokenResponse.AccessToken;
 		}
 
 		public IEnumerator Execute()
 		{
-			if (HttpHandler.instance.IsExpired())
+			if (HttpHandler.instance.IsExpired(StaticData.CorpOrderRecord.Expiration))
 			{
-				NetworkManager.StartLoginProcess();
+				yield return NetworkManager.AsyncRequest<CorpOrder>(extension: accessToken, type_id: AppSettings.Settings.CorpId, ETag: StaticData.CorpOrderRecord.ETag);
 			}
 			else
 			{

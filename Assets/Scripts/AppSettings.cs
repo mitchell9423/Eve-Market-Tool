@@ -1,4 +1,4 @@
-using EveMarket.Util;
+﻿using EveMarket.Util;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -38,8 +38,11 @@ namespace EveMarket
 		public double IskAmount { get; set; }
 		public double UnitPrice { get; set; }
 		public int CorpId { get; set; } = 98422411;
+		public string LastAuthState { get; set; }
 		public DateTime RefreshExpiration { get; set; }
+		public DateTime AccessTokenExpiresAt { get; set; }
 		public TokenResponse TokenResponse { get; set; } = new TokenResponse();
+		public CharacterVerificationResponse CharacterInfo { get; set; } = new CharacterVerificationResponse();
 	}
 
 	public static class AppSettings

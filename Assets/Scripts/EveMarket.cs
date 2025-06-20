@@ -13,11 +13,13 @@ namespace EveMarket
 {
 	public class EveMarket : MonoBehaviour
 	{
+		[SerializeField] bool EnableLogginProcess = true;
+
 		public ObjectType objectType = ObjectType.MarketGroup;
 
 		[SerializeField] UnityMainThreadDispatcher unityMainThreadDispatcher;
 		[SerializeField] HttpHandler httpHandler;
-		[SerializeField] EveSSOAuthenticator Authenticator;
+		//[SerializeField] EveSSOAuthenticator Authenticator;
 		[SerializeField] EveStateMachine stateMachine;
 		[SerializeField] DisplayPanel displayPanel;
 
@@ -30,7 +32,12 @@ namespace EveMarket
 
 		StringBuilder sb = new StringBuilder();
 
-		private void Start()
+        private void Awake()
+        {
+			NetworkManager.EnableLogin = EnableLogginProcess;
+        }
+
+        private void Start()
 		{
 			Application.runInBackground = true;
 
@@ -55,19 +62,20 @@ namespace EveMarket
 			{
 				httpHandler = gameObject.AddComponent<HttpHandler>();
 			}
+			/*
 
 			if (!gameObject.TryGetComponent(out Authenticator))
 			{
 				Authenticator = gameObject.AddComponent<EveSSOAuthenticator>();
 			}
-
-			Authenticator.SetCodeReceivedCallback((code) =>
+			Authenticator.SetCodeReceivedCallback(code =>
 			{
+				UnityEngine.Debug.LogError($"SetCodeReceivedCallback Called");
 				Debug.Log("Received OAuth code: " + code);
 				// Further processing like exchanging the code for a token
-				httpHandler.OnAuthorizationCodeReceived(code);
+				Authenticator.OnAuthCodeReceived(code);
 			});
-
+			*/
 			EveStateMachine.SetNextState(new LoadAppSettings(), AppState.LoadAppSettings);
 
 			StartCoroutine(TimedUpdate());

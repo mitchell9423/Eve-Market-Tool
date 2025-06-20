@@ -1,4 +1,4 @@
-
+﻿
 using EveMarket.Util;
 using System;
 using System.Collections.Generic;

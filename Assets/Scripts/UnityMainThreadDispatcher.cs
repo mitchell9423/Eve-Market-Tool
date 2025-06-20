@@ -22,15 +22,7 @@ namespace EveMarket.Util
 			}
 		}
 
-		public void Enqueue(global::System.Action action)
-		{
-			lock (_executionQueue)
-			{
-				_executionQueue.Enqueue(action);
-			}
-		}
-
-		void Update()
+		private void Update()
 		{
 			while (_executionQueue.Count > 0)
 			{
@@ -41,6 +33,38 @@ namespace EveMarket.Util
 				}
 				action?.Invoke();
 			}
+		}
+
+		public static void Enqueue(global::System.Action action)
+		{
+			lock (Instance?._executionQueue)
+			{
+				Instance?._executionQueue.Enqueue(action);
+			}
+		}
+
+		public static void Log(string message)
+        {
+			Enqueue(() =>
+			{
+				Debug.Log(message);
+			});
+		}
+
+		public static void LogWarning(string message)
+		{
+			Enqueue(() =>
+			{
+				Debug.LogWarning(message);
+			});
+		}
+
+		public static void LogError(string message)
+		{
+			Enqueue(() =>
+			{
+				Debug.LogError(message);
+			});
 		}
 	}
 }

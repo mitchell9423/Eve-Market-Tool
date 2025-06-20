@@ -1,99 +1,161 @@
-using EveMarket.Util;
-using System;
-using System.Net;
+
+using System.Collections;
 using System.Threading;
+using UnityEngine.Networking;
+using EveMarket.Util;
+using System.Threading.Tasks;
+using System.IO;
+using System;
+using Newtonsoft.Json;
 using UnityEngine;
+using System.Diagnostics;
 
-namespace EveMarket.Network
+namespace EveMarket.Network.OAuth
 {
-	public class EveSSOAuthenticator : MonoBehaviour
+	public static class LoginManager
 	{
-		private HttpListener listener;
-		private Thread listenerThread;
-		private Action<string> onCodeReceived;
-
-		void Start()
+		public static async Task<bool> Login()
 		{
-			StartListening();
-		}
+			EveSSOAuthenticator eveSSOAuthenticator = new EveSSOAuthenticator();
 
-		void OnDestroy()
-		{
-			StopListening();
-		}
-
-		public void StopListening()
-		{
 			try
 			{
-				if (listener != null)
-				{
-					listener!.Stop();
-					listener!.Close();
-				}
+				await eveSSOAuthenticator.RunSSOLogin();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogWarning($"Listener Error.\n{ex}");
+				UnityMainThreadDispatcher.LogError("Login failed: " + ex);
+				return false;
 			}
-			finally
+
+			return true;
+		}
+	}
+
+	class EveSSOAuthenticator
+	{
+		private const string LOGIN_SCRIPT_FILENAME = "eve-login.sh";
+		private const string LOGIN_TOKEN_FILENAME = "token.json";
+		private const string OAuth_DIR = "../OAuth";
+
+		private static string RootDir => $"{Application.dataPath}";
+		private static string ScriptPath => Path.GetFullPath(Path.Combine(RootDir, $"{OAuth_DIR}/{LOGIN_SCRIPT_FILENAME}"));
+		private static string TokenFilePath => Path.Combine(RootDir, $"{OAuth_DIR}/{LOGIN_TOKEN_FILENAME}");
+		private string SafeTokenPreview(string token) => token.Length <= 16 ? token : $"{token.Substring(0, 8)}...{token[^8..]}";
+
+		public async Task RunSSOLogin()
+		{
+			UnityMainThreadDispatcher dispatcher = UnityMainThreadDispatcher.Instance;
+
+			UnityMainThreadDispatcher.Log("🚀 Launching eve-login.sh from Unity...");
+
+			UnityMainThreadDispatcher.Log($"dataPath = {RootDir}");
+			UnityMainThreadDispatcher.Log($"ScriptPath = {ScriptPath}");
+			UnityMainThreadDispatcher.Log($"TokenFilePath = {TokenFilePath}");
+
+			if (!File.Exists(ScriptPath))
 			{
-				if (listenerThread != null)
-				{
-					listenerThread.Abort();
-				}
+				UnityMainThreadDispatcher.LogError("❌ Login script not found!");
+				return;
 			}
-		}
 
-		public void StartListening()
-		{
-			listener = new HttpListener();
-			listener.Prefixes.Add(NetworkSettings.CALLBACK_URL + "/"); // Add your OAuth redirect URI
-			listener.Start();
-			listenerThread = new Thread(new ThreadStart(HandleRequests));
-			listenerThread.Start();
-		}
-
-		private void HandleRequests()
-		{
-			while (listener.IsListening)
+			if (!new FileInfo(ScriptPath).IsReadOnly && !File.Exists("/usr/bin/env")) // Optional enhancement
 			{
-				try
-				{
-					HttpListenerContext context = listener.GetContext();
-					HttpListenerRequest request = context.Request;
-					HttpListenerResponse response = context.Response;
+				UnityMainThreadDispatcher.LogWarning("⚠️ Script file may not be executable or env is missing.");
+			}
 
-					if (request.Url.AbsolutePath.Contains("/oauth-callback"))
+			var tcs = new TaskCompletionSource<int>();
+
+			ProcessStartInfo psi = new ProcessStartInfo
+			{
+				FileName = "/bin/bash",
+				Arguments = $"{ScriptPath} " +
+                $"{LoginSettings.LogFile} " +
+				$"{LoginSettings.ClientId} " +
+                $"{LoginSettings.ClientSecret} " +
+                $"{NetworkSettings.CALLBACK_URL} " +
+                $"{LoginSettings.Scope} " +
+                $"{NetworkSettings.AUTHORIZATION_ENDPOINT} " +
+                $"{NetworkSettings.TOKEN_ENDPOINT} " +
+                $"{LoginSettings.CertFile} " +
+                $"{LoginSettings.KeyFile} " + 
+				$"{AppSettings.Settings.TokenResponse.RefreshToken} " +
+				$"{LoginSettings.TokenFile}",
+				WorkingDirectory = Path.GetDirectoryName(ScriptPath),
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				UseShellExecute = false,
+				CreateNoWindow = true
+			};
+
+			using (Process process = new Process { StartInfo = psi })
+			{
+				process.OutputDataReceived += (s, e) =>
+				{
+					if (!e.Data.Contains("DebugStringToFile") && !e.Data.Contains("GetStacktrace"))
 					{
-						var code = request.QueryString["code"];
-						Debug.Log($"Authorization code received: {code}");
-						//response.Redirect(NetworkSettings.CALLBACK_URL + "close");
-
-						if (onCodeReceived != null)
-						{
-							string responseString = "<html><body>You can close this tab/window.</body></html>";
-							var buffer = global::System.Text.Encoding.UTF8.GetBytes(responseString);
-							response.ContentLength64 = buffer.Length;
-							response.OutputStream.Write(buffer, 0, buffer.Length);
-							response.OutputStream.Close();
-
-							UnityMainThreadDispatcher.Instance?.Enqueue(() => onCodeReceived(code));
-							//StopListening();
-						}
+						if (!string.IsNullOrWhiteSpace(e.Data))
+							UnityMainThreadDispatcher.Log("OUT: " + e.Data);
 					}
-				}
-				catch (Exception ex)
+				};
+
+				process.ErrorDataReceived += (s, e) =>
 				{
-					Debug.LogWarning($"Listener Error.\n{ex}");
+					if (!e.Data.Contains("DebugStringToFile") && !e.Data.Contains("GetStacktrace"))
+					{
+						if (!string.IsNullOrWhiteSpace(e.Data))
+							UnityMainThreadDispatcher.LogError("ERR: " + e.Data);
+					}
+				};
+
+				process.EnableRaisingEvents = true;
+				process.Exited += (s, e) => tcs.TrySetResult(process.ExitCode);
+
+				process.Start();
+				process.BeginOutputReadLine();
+				process.BeginErrorReadLine();
+
+				int exitCode = await tcs.Task;
+
+
+				if (exitCode != 0)
+				{
+					UnityMainThreadDispatcher.Enqueue(() =>
+					{
+						UnityMainThreadDispatcher.LogError($"❌ Script exited with code {process.ExitCode}");
+					});
+					return;
 				}
 
+				UnityMainThreadDispatcher.Log("✅ Script completed. Reading token...");
 			}
-		}
 
-		public void SetCodeReceivedCallback(Action<string> callback)
-		{
-			onCodeReceived = callback;
+			if (!File.Exists(TokenFilePath))
+			{
+				UnityMainThreadDispatcher.LogError("❌ token.json not found!");
+				return;
+			}
+
+			string json = File.ReadAllText(TokenFilePath);
+			UnityMainThreadDispatcher.Log($"raw json: {json}\n{this.GetType()}:line 130");
+			TokenResponse token = JsonConvert.DeserializeObject<TokenResponse>(json);
+
+			if (!int.TryParse(token.ExpiresIn, out int seconds))
+			{
+				UnityMainThreadDispatcher.LogError("❌ Failed to parse ExpiresIn from token response.");
+				return;
+			}
+
+			UnityMainThreadDispatcher.Log($"✅ Access Token: {SafeTokenPreview(token.AccessToken)}...");
+			UnityMainThreadDispatcher.Log($"⏳ Expires in: {token.ExpiresIn}");
+			UnityMainThreadDispatcher.Log($"🔁 Refresh Token: {SafeTokenPreview(token.RefreshToken)}...");
+
+			// Store to app settings if needed
+			AppSettings.Settings.AccessTokenExpiresAt = DateTime.Now.AddSeconds(seconds);
+			AppSettings.Settings.TokenResponse = token;
+			AppSettings.SaveAppSettings();
+			//File.Delete(TokenFilePath);
+			return;
 		}
 	}
 }

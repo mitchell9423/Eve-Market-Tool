@@ -43,8 +43,8 @@ namespace EveMarket
 		[JsonProperty("description")]
 		public string Description { get; set; }
 
-		[JsonProperty("dogma_attributes")]
-		public List<DogmaAttribute> DogmaAttributes { get; set; }
+		//[JsonProperty("dogma_attributes")]
+		//public List<DogmaAttribute> DogmaAttributes { get; set; }
 
 		[JsonProperty("group_id")]
 		public int GroupId { get; set; }
@@ -227,12 +227,25 @@ namespace EveMarket
 	[Serializable]
 	public class CharacterVerificationResponse
 	{
-		public int CharacterId { get; set; }
+		[JsonProperty("CharacterID")]
+		public long CharacterID { get; set; }
+
+		[JsonProperty("CharacterName")]
 		public string CharacterName { get; set; }
+
+		[JsonProperty("ExpiresOn")]
 		public string ExpiresOn { get; set; }
+
+		[JsonProperty("Scopes")]
 		public string Scopes { get; set; }
+
+		[JsonProperty("TokenType")]
 		public string TokenType { get; set; }
+
+		[JsonProperty("CharacterOwnerHash")]
 		public string CharacterOwnerHash { get; set; }
+
+		[JsonProperty("IntellectualProperty")]
 		public string IntellectualProperty { get; set; }
 	}
 
@@ -241,12 +254,29 @@ namespace EveMarket
 	{
 		[JsonProperty("access_token")]
 		public string AccessToken { get; set; }
+
 		[JsonProperty("token_type")]
 		public string TokenType { get; set; }
+
 		[JsonProperty("expires_in")]
 		public string ExpiresIn { get; set; }
+
 		[JsonProperty("refresh_token")]
 		public string RefreshToken { get; set; }
+
+		[JsonProperty("scope")]
+		public string Scope { get; set; }
+	}
+
+	[Serializable]
+	public class VerifyResponse
+	{
+		public string CharacterName { get; set; }
+		public long CharacterID { get; set; }
+		public string ExpiresOn { get; set; }
+		public string Scopes { get; set; }
+		public string TokenType { get; set; }
+		public string CharacterOwnerHash { get; set; }
 	}
 
 	[Serializable]

@@ -19,28 +19,29 @@ namespace EveMarket.UI
 		private struct LayoutPropertyBlock
 		{
 			// Item block widths
-			public int nameWidth;
-			public int spacer;
-			public int labelWidth;
-			public int priceWidth;
-			public int compressedLabelWidth;
+			//public int nameWidth;
+			//public int spacer;
+			//public int labelWidth;
+			//public int priceWidth;
+			//public int compressedLabelWidth;
 
 			// Define the number of rows and columns
-			public int index;
-			public int numObjects;
+			//public int index;
+			//public int numObjects;
 
-			public int blockWidth;
-			public int columns;
-			public int rows;
+			//public int blockWidth;
+			//public int columns;
+			//public int rows;
 
 			// Define Label Texts
-			public string priceLabel;
-
+			//public string priceLabel;
+			/*
 			public void SetRowCol()
 			{
 				columns = Mathf.FloorToInt((float)Screen.width / (blockWidth + 20));
 				rows = numObjects > 0 ? Mathf.CeilToInt((float)numObjects / columns) : 0;
 			}
+			*/
 		}
 
 		[Header("Prefab Refs")]
