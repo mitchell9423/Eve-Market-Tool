@@ -120,13 +120,6 @@ namespace EveMarket.Network
         private const string rOUTE_URI = "https://esi.evetech.net/latest/route/[destination]/[origin]/?datasource=tranquility&flag=shortest";
         private const string cORP_ORDERS_URI = "https://esi.evetech.net/latest/corporations/[type_id]/orders/?datasource=tranquility&page=1&token=";
 
-        // Login/Authurization
-        private const string hTTP_CALLBACK_URL = "http://localhost:5555/oauth-callback/"; // This must match with the registered callback URL
-        private const string cALLBACK_URL = "https://localhost:8080/oauth-callback"; // This must match with the registered callback URL
-        private const string aUTHORIZATION_ENDPOINT = "https://login.eveonline.com/v2/oauth/authorize";
-        private const string tOKEN_ENDPOINT = "https://login.eveonline.com/v2/oauth/token";
-        private const string vERIFICATION_ENDPOINT = "https://login.eveonline.com/oauth/verify";
-
         public static string MARKET_PRICES_URI => mARKET_PRICES_URI;
         public static string MARKET_GROUP_URI => mARKET_GROUP_URI;
         public static string UNIVERSE_TYPES_URI => uNIVERSE_TYPES_URI;
@@ -134,11 +127,6 @@ namespace EveMarket.Network
         public static string ITEM_HISTORY_URI => iTEM_HISTORY_URI;
         public static string ROUTE_URI => rOUTE_URI;
         public static string CORP_ORDERS_URI => cORP_ORDERS_URI;
-        public static string HTTP_CALLBACK_URL => hTTP_CALLBACK_URL;
-        public static string CALLBACK_URL => cALLBACK_URL;
-        public static string AUTHORIZATION_ENDPOINT => aUTHORIZATION_ENDPOINT;
-        public static string TOKEN_ENDPOINT => tOKEN_ENDPOINT;
-        public static string VERIFICATION_ENDPOINT => vERIFICATION_ENDPOINT;
     }
 
 }

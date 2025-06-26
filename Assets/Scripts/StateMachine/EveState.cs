@@ -89,13 +89,23 @@ namespace EveMarket.StateMachine
 		public void Enter()
 		{
 			accessToken = AppSettings.Settings.TokenResponse.AccessToken;
+			if (StaticData.CorpOrderRecord == null)
+			{
+				StaticData.CorpOrderRecord = new CorpOrderRecord(0, null, DateTime.Now.ToString(), "");
+			}
 		}
 
 		public IEnumerator Execute()
 		{
 			if (HttpHandler.instance.IsExpired(StaticData.CorpOrderRecord.Expiration))
 			{
-				yield return NetworkManager.AsyncRequest<CorpOrder>(extension: accessToken, type_id: AppSettings.Settings.CorpId, ETag: StaticData.CorpOrderRecord.ETag);
+				EveMarketRequest request = new EveMarketRequest(
+					extension: accessToken,
+					type_id: AppSettings.Settings.CorpId,
+					etag: StaticData.CorpOrderRecord.ETag
+					);
+
+				yield return NetworkManager.AsyncRequest<CorpOrder>(request);
 			}
 			else
 			{
@@ -123,14 +133,11 @@ namespace EveMarket.StateMachine
 
 		public void Enter()
 		{
-			//Debug.Log($"Enter {GetType()}");
 			completed = false;
 		}
 
 		public IEnumerator Execute()
 		{
-			//Debug.Log($"Execute {GetType()}");
-
 			yield return new WaitUntil(() => AppSettings.LoadAppSettings());
 
 			EveStateMachine.SetNextState(new LoadStaticData(), AppState.LoadStaticData);
@@ -139,7 +146,7 @@ namespace EveMarket.StateMachine
 
 		public void Exit()
 		{
-			//Debug.Log($"Exit {GetType()}");
+			Debug.Log($"Refresh token = {AppSettings.Settings.TokenResponse.RefreshToken}");
 			completed = true;
 		}
 
@@ -403,6 +410,11 @@ namespace EveMarket.StateMachine
 
 							OrderRecord record = item.GetOrderRecord(region);
 
+							if (record == null)
+							{
+								continue;
+							}
+
 							if (DateTime.TryParse(record.Expiration, out DateTime expiration))
 							{
 								isExpired = DateTime.Now >= expiration;
@@ -410,7 +422,13 @@ namespace EveMarket.StateMachine
 
 							if (isExpired)
 							{
-								StaticData.UpdateItemMarketData(typeId: item.TypeId, region: region, tag: record.ETag);
+								EveMarketRequest eveMarketRequest = new EveMarketRequest(
+									type_id: item.TypeId,
+									region: region,
+									etag: record.ETag
+									);
+
+								StaticData.UpdateItemMarketData(eveMarketRequest);
 							}
 
 							yield return null;

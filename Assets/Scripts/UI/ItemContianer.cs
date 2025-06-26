@@ -20,7 +20,7 @@ namespace EveMarket.UI
 				items = marketObject.Items.Values.ToList();
 				items.Sort((item1, item2) => item1.ItemName.CompareTo(item2.ItemName));
 			}
-
+			
 			PopulateItemContainer(items, AppSettings.Presets[AppSettings.Settings.ActivePreset]);
 		}
 

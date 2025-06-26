@@ -64,7 +64,8 @@ namespace EveMarket
 		Morphite,
 		Zydrine,
 		NeoJadarite,
-		ChromodynamicTricarboxyls
+		ChromodynamicTricarboxyls,
+		Eleutrium
 	}
 
 	public enum Group
@@ -277,7 +278,7 @@ namespace EveMarket
 		public static Dictionary<int, MarketItem> MarketItems = new Dictionary<int, MarketItem>();
 		public static Dictionary<int, UniverseItem> UniverseItems = new Dictionary<int, UniverseItem>();
 
-		private static List<UniverseItem> GetUniverseItem()
+		private static List<UniverseItem> GetUniverseItems()
 		{
 			return FileManager.DeserializeFromFile<List<UniverseItem>>();
 		}
@@ -387,7 +388,8 @@ namespace EveMarket
 
 					Debug.Log($"Requesting market group info - {GroupIdsToName[marketGroupIds[i]]}.");
 
-					await NetworkManager.AsyncRequest<MarketGroup>(marketGroupIds[i].ToString());
+					EveMarketRequest eveMarketRequest = new EveMarketRequest(type_id: marketGroupIds[i], extension: $"{marketGroupIds[i]}/");
+					await NetworkManager.AsyncRequest<MarketGroup>(eveMarketRequest);
 				}
 
 				return true;
@@ -422,16 +424,22 @@ namespace EveMarket
 			{
 				for (int i = 0; i < Enum.GetValues(typeof(Region)).Length - 1; i++)
 				{
-					await RequestMarketItemOrders(typeId: id, region: (Region)i, tag: tag);
+					EveMarketRequest eveMarketRequest = new EveMarketRequest(
+						type_id: id,
+						region: (Region)i,
+						etag: tag
+						);
+
+					await RequestMarketItemOrders(eveMarketRequest);
 				}
 			}
 
 			NetworkManager.CompleteGroupUpdate(groupRequestId);
 		}
 
-		public static async void UpdateItemMarketData(int typeId = 0, Region region = Region.The_Forge, string tag = "")
+		public static async void UpdateItemMarketData(EveMarketRequest eveMarketRequest)
 		{
-			await RequestMarketItemOrders(typeId: typeId, region: region, tag: tag);
+			await RequestMarketItemOrders(eveMarketRequest);
 		}
 
 		public static bool LoadStaticData()
@@ -439,24 +447,35 @@ namespace EveMarket
 			Debug.Log("Loading static data.");
 
 			bool success = true;
-			Dictionary<int, UniverseItem> universeItem = null;
+
+			Dictionary<int, UniverseItem> universeItems = null;
 
 			try
 			{
-				universeItem = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>>();
+				universeItems = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>>();
+				if (universeItems == null || universeItems.Count() <= 0)
+				{
+					Debug.LogWarning("Failed to load Universe Items from file.");
+					success = false;
+				}
 			}
 			catch (Exception ex)
 			{
+				Debug.LogWarning($"Failed to load Universe Items from file.");
 				Debug.LogException(ex);
-				universeItem = new Dictionary<int, UniverseItem>();
-				FileManager.SerializeObject(universeItem);
 				success = false;
 			}
 			finally
 			{
+				if (universeItems == null)
+				{
+					universeItems = new Dictionary<int, UniverseItem>();
+					FileManager.SerializeObject(universeItems);
+				}
+
 				lock (UniverseItems)
 				{
-					UniverseItems = universeItem;
+					UniverseItems = universeItems;
 				}
 			}
 
@@ -483,17 +502,34 @@ namespace EveMarket
 				success = false;
 			}
 
-			Dictionary<int, MarketGroup> groupObjects = FileManager.DeserializeFromFile<Dictionary<int, MarketGroup>>();
-			if (groupObjects != null)
+			Dictionary<int, MarketGroup> groupObjects = null;
+			try
 			{
+				groupObjects = FileManager.DeserializeFromFile<Dictionary<int, MarketGroup>>();
+				if (groupObjects == null || groupObjects.Count() <= 0)
+				{
+					Debug.LogWarning("Failed to load Market Groups from file.");
+					success = false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.LogWarning("Failed to load Market Groups from file.");
+				Debug.LogException(ex);
+				success = false;
+			}
+			finally
+			{
+				if (groupObjects == null)
+				{
+					groupObjects = new Dictionary<int, MarketGroup>();
+					FileManager.SerializeObject(groupObjects);
+				}
+
 				lock (MarketGroups)
 				{
 					MarketGroups = groupObjects;
 				}
-			}
-			else
-			{
-				success = false;
 			}
 
 			Dictionary<Region, Dictionary<int, OrderRecord>> orderRecords = FileManager.DeserializeFromFile<Dictionary<Region, Dictionary<int, OrderRecord>>>();
@@ -595,7 +631,7 @@ namespace EveMarket
 				stringBuilder.Append($"Corp Order - Code:{code} - ");
 				var oldExpiration = CorpOrderRecord.Expiration;
 				var oldTag = CorpOrderRecord.ETag;
-				string action = $"Updated.";
+				string action = $" Updated.";
 
 				if (code == 304)
 				{
@@ -606,7 +642,7 @@ namespace EveMarket
 				}
 				else if (corpOrders != null)
 				{
-					stringBuilder.Append($"Updated.\n[{type_id} : ");
+					stringBuilder.Append($"{action}\n[{type_id} : ");
 					//Debug.Log($"Corp Order - Code:{code} - Updated.\n[{type_id} : {expiration} : {tag}]");
 					CorpOrderRecord = new CorpOrderRecord(type_id, corpOrders, expiration, tag);
 				}
@@ -674,7 +710,7 @@ namespace EveMarket
 
 						await WaitForPendingMarketRequestsToComplete();
 						Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
-						_ = NetworkManager.AsyncRequest<List<int>>(data: new RouteData(origin: origin, destination: order.SystemId));
+						_ = NetworkManager.AsyncRequest<List<int>>(new EveMarketRequest(data: new RouteData(origin: origin, destination: order.SystemId)));
 					}
 				}
 
@@ -806,7 +842,7 @@ namespace EveMarket
 
 					foreach (var typeId in marketGroup.Types)
 					{
-						await NetworkManager.AsyncRequest<UniverseItem>(typeId.ToString());
+						await NetworkManager.AsyncRequest<UniverseItem>(new EveMarketRequest(type_id: typeId, extension: $"{typeId}/"));
 					}
 				}
 				else if (objectModel is UniverseItem universeItem)
@@ -840,7 +876,7 @@ namespace EveMarket
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError($"Error deserializing type {typeof(T)} object.\n\n{ex}");
+				Debug.LogError($"StaticData:HandleResponse:873\nError handling response for type {typeof(T)} object.\n\n{ex}\nResponse:\n{response}");
 			}
 			finally
 			{
@@ -853,11 +889,11 @@ namespace EveMarket
 			}
 		}
 
-		public static async Task RequestMarketItemOrders(int typeId = 0, Region region = Region.The_Forge, string tag = "")
+		public static async Task RequestMarketItemOrders(EveMarketRequest eveMarketRequest)
 		{
 			await WaitForPendingMarketRequestsToComplete();
 			Interlocked.Increment(ref NetworkManager.pendingMarketRequests);
-			_ = NetworkManager.AsyncRequest<List<MarketOrder>>(region: region, type_id: typeId, ETag: tag);
+			_ = NetworkManager.AsyncRequest<List<MarketOrder>>(eveMarketRequest);
 		}
 
 		private static void SaveStaticData()
@@ -896,7 +932,10 @@ namespace EveMarket
 
 			lock (CorpOrderRecord)
 			{
-				FileManager.SerializeObject(CorpOrderRecord);
+				if (CorpOrderRecord != null)
+				{
+					FileManager.SerializeObject(CorpOrderRecord);
+				}
 			}
 
 			IsSubscribed = false;

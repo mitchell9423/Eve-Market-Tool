@@ -13,6 +13,28 @@ using UnityEngine.Networking;
 
 namespace EveMarket.Network
 {
+	public class EveMarketRequest
+	{
+		public string Url { get; set; }
+		public string ETag { get; set; }
+		public Action<long, string, string, string, Region, int> Callback { get; set; }
+		public Region Region { get; set; }
+		public int Type_id;
+		public string Extension { get; set; }
+		public RouteData Data { get; set; }
+
+		public EveMarketRequest(string url = "", string etag = "", Action<long, string, string, string, Region, int> callback = null, Region region = Region.The_Forge, int type_id = 0, RouteData data = new RouteData(), string extension = "")
+		{
+			Url = url;
+			ETag = etag;
+			Callback = callback;
+			Region = region;
+			Type_id = type_id;
+			Extension = extension;
+			Data = data;
+		}
+	}
+
 	public class HttpHandler : MonoBehaviour
 	{
 		public int codeRecievedCounter;
@@ -64,19 +86,19 @@ namespace EveMarket.Network
 			}
 		}
 
-		public async Task AsyncGetRequest<T>(string url, string tag, global::System.Action<long, string, string, string, Region, int> callback, Region region, int type_id = 0)
+		public async Task AsyncGetRequest<T>(EveMarketRequest request)
 		{
 			NetworkManager.Status = UpdateStatus.Updating;
 			Interlocked.Increment(ref NetworkManager.totalRequests);
 			Interlocked.Increment(ref NetworkManager.pendingRequests);
 			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
-			UnityWebRequest webRequest = UnityWebRequest.Get(url);
+			UnityWebRequest webRequest = UnityWebRequest.Get(request.Url);
 
-			if (!string.IsNullOrEmpty(tag))
+			if (!string.IsNullOrEmpty(request.ETag))
 			{
 				webRequest.SetRequestHeader("accept", "application/json");
-				webRequest.SetRequestHeader("If-None-Match", tag);
+				webRequest.SetRequestHeader("If-None-Match", request.ETag);
 				webRequest.SetRequestHeader("Cache-Control", "no-cache");
 			}
 
@@ -86,6 +108,8 @@ namespace EveMarket.Network
 
 				asyncOps.Last().completed += (AsyncOperation op) =>
 				{
+					if (request == null) Debug.LogError($"request is null for {typeof(T)}");
+
 					string Expiration = webRequest.GetResponseHeader("expires");
 
 					if (!string.IsNullOrEmpty(Expiration))
@@ -97,35 +121,36 @@ namespace EveMarket.Network
 					if (webRequest.result == UnityWebRequest.Result.DataProcessingError || webRequest.result == UnityWebRequest.Result.ProtocolError)
 					{
 						// look into: https://esi.evetech.net/latest/markets/10000002/orders/?datasource=tranquility&order_type=all&page=1&type_id=60771
-						Debug.LogError($"Data Processing Error: {webRequest.error}\n{url}\n{webRequest.GetRequestHeader("If-None-Match")}\n{webRequest.downloadHandler.text}");
+						Debug.LogError($"Data Processing Error: {webRequest.error}\n{request.Url}\n{webRequest.GetRequestHeader("If-None-Match")}\n{webRequest.downloadHandler.text}");
 						UnityMainThreadDispatcher.Enqueue(() =>
 						{
-							callback(webRequest.responseCode, webRequest.GetResponseHeader("etag"), Expiration, null, region, 0);
+							request.Callback(webRequest.responseCode, webRequest.GetResponseHeader("etag"), Expiration, null, request.Region, 0);
 						});
 					}
 					else if (webRequest.result == UnityWebRequest.Result.ConnectionError)
 					{
 						string objectName = "Unknown";
-						if (StaticData.UniverseItems.TryGetValue(type_id, out UniverseItem item))
+						if (StaticData.UniverseItems.TryGetValue(request.Type_id, out UniverseItem item))
 						{
 							objectName = item.Name;
 						}
-						else if (StaticData.MarketGroups.TryGetValue(type_id, out MarketGroup group))
+						else if (StaticData.MarketGroups.TryGetValue(request.Type_id, out MarketGroup group))
 						{
 							objectName = group.Name;
 						}
 
-						Debug.LogError($"Web request Error: {webRequest.error}\n{url}[{objectName}]\n{webRequest.downloadHandler.text}");
+						Debug.LogError($"Web request Error: {webRequest.error}\n{request.Url}[{objectName}]\n{webRequest.downloadHandler.text}");
 						UnityMainThreadDispatcher.Enqueue(() =>
 						{
-							callback(webRequest.responseCode, webRequest.GetResponseHeader("etag"), Expiration, null, region, 0);
+							request.Callback(webRequest.responseCode, webRequest.GetResponseHeader("etag"), Expiration, null, request.Region, 0);
 						});
 					}
 					else
 					{
 						UnityMainThreadDispatcher.Enqueue(() =>
 						{
-							callback(webRequest.responseCode, webRequest.GetResponseHeader("etag"), Expiration, webRequest.downloadHandler.text, region, type_id);
+							Debug.Log($"Web response url: {request.Url}");
+							request.Callback(webRequest.responseCode, webRequest.GetResponseHeader("etag"), Expiration, webRequest.downloadHandler.text, request.Region, request.Type_id);
 						});
 					}
 
@@ -169,10 +194,10 @@ namespace EveMarket.Network
 			UnityEngine.Debug.Log($"Token Response: {AppSettings.Settings.TokenResponse.AccessToken}");
 
 			// Fetch ESI data
-			_ = NetworkManager.AsyncRequest<CorpOrder>(
+			_ = NetworkManager.AsyncRequest<CorpOrder>(new EveMarketRequest(
 				extension: AppSettings.Settings.TokenResponse.AccessToken,
 				type_id: AppSettings.Settings.CorpId,
-				ETag: StaticData.CorpOrderRecord.ETag
+				etag: StaticData.CorpOrderRecord.ETag)
 			);
 
 			// 🔐 Verify Token Info
@@ -185,7 +210,7 @@ namespace EveMarket.Network
 			if (IsExpired(AppSettings.Settings.AccessTokenExpiresAt))
 				return false;
 
-			using (UnityWebRequest www = UnityWebRequest.Get(NetworkSettings.VERIFICATION_ENDPOINT))
+			using (UnityWebRequest www = UnityWebRequest.Get(OAuth.LoginConfig.VERIFICATION_ENDPOINT))
 			{
 				www.SetRequestHeader("Authorization", $"Bearer {AppSettings.Settings.TokenResponse.AccessToken}");
 
@@ -209,7 +234,7 @@ namespace EveMarket.Network
 		{
 			string token = AppSettings.Settings.TokenResponse.AccessToken;
 
-			UnityWebRequest www = UnityWebRequest.Get(NetworkSettings.VERIFICATION_ENDPOINT);
+			UnityWebRequest www = UnityWebRequest.Get(OAuth.LoginConfig.VERIFICATION_ENDPOINT);
 			www.SetRequestHeader("Authorization", $"Bearer {token}");
 
 			yield return www.SendWebRequest();

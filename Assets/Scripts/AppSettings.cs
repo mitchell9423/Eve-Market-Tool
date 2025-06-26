@@ -64,6 +64,7 @@ namespace EveMarket
 
 		public static Dictionary<System, BuyPreset> Presets = new Dictionary<System, BuyPreset>()
 		{
+			{ System.None, new BuyPreset(Region.Lonetrek, System.Jita, "1", 10) },
 			{ System.Tunttaras, new BuyPreset(Region.Lonetrek, System.Tunttaras, "4", 10) },
 			{ System.Umokka, new BuyPreset(Region.Lonetrek, System.Umokka, "3", 10) },
 			{ System.Ylandoki, new BuyPreset(Region.Lonetrek, System.Ylandoki, "1", 10) },
@@ -130,6 +131,7 @@ namespace EveMarket
 			}
 
 			EveDelegate.AppSettingsChanged?.Invoke();
+
 			return true;
 		}
 

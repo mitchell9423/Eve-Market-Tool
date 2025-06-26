@@ -39,7 +39,7 @@ namespace EveMarket.Network
 			{ typeof(List<int>), NetworkSettings.ROUTE_URI}
 		};
 
-		public static async Task AsyncRequest<T>(string extension = "", Region region = Region.The_Forge, int type_id = 0, RouteData data = new RouteData(), string ETag = "") where T : class
+		public static async Task AsyncRequest<T>(EveMarketRequest eveMarketRequest) where T : class
 		{
 			try
 			{
@@ -47,21 +47,26 @@ namespace EveMarket.Network
 
 				lock (ModelTypeToURI) { baseUri = ModelTypeToURI[typeof(T)]; }
 
-				baseUri = baseUri.Replace("[region_id]", StaticData.RegionId[region].ToString());
-				baseUri = baseUri.Replace("[type_id]", type_id.ToString());
-				baseUri = baseUri.Replace("[destination]", data.Destination.ToString());
-				baseUri = baseUri.Replace("[origin]", data.Origin.ToString());
+				baseUri = baseUri.Replace("[region_id]", StaticData.RegionId[eveMarketRequest.Region].ToString());
+				baseUri = baseUri.Replace("[type_id]", eveMarketRequest.Type_id.ToString());
+				baseUri = baseUri.Replace("[destination]", eveMarketRequest.Data.Destination.ToString());
+				baseUri = baseUri.Replace("[origin]", eveMarketRequest.Data.Origin.ToString());
 
-				string url = baseUri + extension;
+				eveMarketRequest.Url = baseUri + eveMarketRequest.Extension;
+				eveMarketRequest.Callback = StaticData.HandleResponse<T>;
 
-				await HttpHandler.instance.AsyncGetRequest<T>(url, ETag, StaticData.HandleResponse<T>, region, type_id);
+				if (typeof(T) == typeof(UniverseItem))
+                {
+					Debug.LogWarning($"Requesting {typeof(T)}\nURL: {eveMarketRequest.Url}");
+                }
+				await HttpHandler.instance.AsyncGetRequest<T>(eveMarketRequest);
 			}
 			catch (Exception ex)
 			{
 				string typeLog = $"type: {typeof(T)}";
-				string extensionLog = string.IsNullOrEmpty(extension) ? "" : $"extension: {extension}";
-				string regionLog = $"region: {region}";
-				string idLog = $"type_id: {type_id}";
+				string extensionLog = string.IsNullOrEmpty(eveMarketRequest.Extension) ? "" : $"extension: {eveMarketRequest.Extension}";
+				string regionLog = $"region: {eveMarketRequest.Region}";
+				string idLog = $"type_id: {eveMarketRequest.Type_id}";
 
 				Debug.LogError($"A request error occurred...\n" +
                     $"{typeLog}  {extensionLog}  {regionLog}  {idLog}\n" +

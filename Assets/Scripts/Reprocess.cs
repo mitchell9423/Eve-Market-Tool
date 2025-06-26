@@ -28,7 +28,8 @@ namespace EveMarket.Util
 				int Zydrine = 0,
 				int Morphite = 0,
 				int NeoJadarite = 0,
-				int ChromodynamicTricarboxyls = 0
+				int ChromodynamicTricarboxyls = 0,
+				int Eleutrium = 0
 				)
 			{
 				BaseYield = new Dictionary<Product, int>();
@@ -49,6 +50,7 @@ namespace EveMarket.Util
 				BaseYield[Product.Zydrine] = Zydrine;
 				BaseYield[Product.NeoJadarite] = NeoJadarite;
 				BaseYield[Product.ChromodynamicTricarboxyls] = ChromodynamicTricarboxyls;
+				BaseYield[Product.Eleutrium] = Eleutrium;
 			}
 
 			public double GetNetValue(ReprocessType reprocessType)

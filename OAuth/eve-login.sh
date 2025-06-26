@@ -16,8 +16,8 @@ AUTH_URI="$6"
 TOKEN_URL="$7"
 CERT_FILE="$8"
 KEY_FILE="$9"
-REFRESH_TOKEN="${10}"
-TOKEN_FILE="${11}"
+TOKEN_FILE="${10}"
+REFRESH_TOKEN="${11}"
 
 STATE=$(uuidgen)  # Generate a unique random state string
 AUTH_URL="${AUTH_URI}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE// /%20}&state=${STATE}"
@@ -93,7 +93,7 @@ B64_AUTH=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
 # ==== ATTEMPT TOKEN REFRESH FIRST ====
 echo "🔁 Checking for existing refresh token..."
 if [ -n "$REFRESH_TOKEN" ] && [ "$REFRESH_TOKEN" != "null" ]; then
-    echo "🔐 Attempting to refresh token..."
+    echo "🔐 Attempting to refresh token = $REFRESH_TOKEN"
     RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
       -H "Authorization: Basic $B64_AUTH" \
       -H "Content-Type: application/x-www-form-urlencoded" \
@@ -156,7 +156,8 @@ wait_for_http_ready() {
   local waited=0
 
   echo "🌐 [$name] Probing $url for HTTP response..."
-  while ! curl -ks "$url" > /dev/null 2>&1; do
+  #while ! curl -ks "$url" > /dev/null 2>&1; do
+  while ! nc -z localhost 8080; do
     echo "⏳ [$name] Still not ready... (${waited}s elapsed)"
     sleep 1
     waited=$((waited + 1))
@@ -168,20 +169,46 @@ wait_for_http_ready() {
   echo "✅ [$name] $url is responsive."
 }
 
+wait_till_ready() {
+  local url=$1
+  local hostname=$2
+  local port=$3
+  local name=$4
+  MAX_RETRIES=10
+  RETRY_DELAY=1
+  i=0
+
+    echo "⏳ [$name] Probing $url for HTTP response..."
+    while ! nc -z $hostname $port; do
+        echo "⏳ [$name] Still not ready... (${i}s elapsed)"
+        sleep $RETRY_DELAY
+        i=$((i + RETRY_DELAY))
+        if [ "$i" -ge "$MAX_RETRIES" ]; then
+            echo "❌ [$name] Timeout! $url not responding after ${MAX_RETRIES}s."
+            exit 1
+        fi
+    done
+
+echo "✅ [$name] Ready!"
+
+}
+
 # ==== START LOCAL LISTENER ====
 echo "👂 Starting Python listener in background..."
 rm -f auth_code.tmp
 python3 listener.py &
 LISTENER_PID=$!
 wait_for_port 5555 "Listener"
-wait_for_http_ready http://localhost:5555 "Listener"
+#wait_for_http_ready http://localhost:5555 "Listener"
+wait_till_ready http://localhost:5555 localhost 5555 "Listener"
 
 # ==== START SSL PROXY ====
 echo "🚀 Launching local-ssl-proxy in background..."
-DEBUG=* local-ssl-proxy --source 8080 --target 127.0.0.1:5555 --cert "$CERT_FILE" --key "$KEY_FILE" &
+DEBUG=* local-ssl-proxy --source 8080 --target 5555 --cert "$CERT_FILE" --key "$KEY_FILE" &
 PROXY_PID=$!
 wait_for_port 8080 "SSL Proxy"
-wait_for_http_ready https://localhost:8080 "SSL Proxy"
+#wait_for_http_ready https://localhost:8080 "SSL Proxy"
+wait_till_ready https://localhost:8080 localhost 8080 "SSL Proxy"
 
 # ==== CLEANUP ON EXIT ====
 trap "echo '🧹 Cleaning up...'; kill $LISTENER_PID $PROXY_PID 2>/dev/null" EXIT

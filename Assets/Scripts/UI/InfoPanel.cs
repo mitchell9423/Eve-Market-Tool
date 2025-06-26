@@ -80,6 +80,11 @@ namespace EveMarket.UI
 			}
 			else
 			{
+				if (!item.CurrentBuyPrice[Region].ContainsKey(System))
+                {
+					item.CurrentBuyPrice[Region][System] = 0;
+				}
+
 				buyPrice.text = $"{item.CurrentBuyPrice[Region][System]}";
 				maxBuyPrice.text = $"Max Buy: {item.MaxBuyPrice}";
 			}

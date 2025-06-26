@@ -65,22 +65,22 @@ namespace EveMarket.Network.OAuth
 			}
 
 			var tcs = new TaskCompletionSource<int>();
-
+			UnityMainThreadDispatcher.LogWarning($"Passing Argument Refresh Token = {AppSettings.Settings.TokenResponse.RefreshToken}");
 			ProcessStartInfo psi = new ProcessStartInfo
 			{
 				FileName = "/bin/bash",
 				Arguments = $"{ScriptPath} " +
-                $"{LoginSettings.LogFile} " +
-				$"{LoginSettings.ClientId} " +
-                $"{LoginSettings.ClientSecret} " +
-                $"{NetworkSettings.CALLBACK_URL} " +
-                $"{LoginSettings.Scope} " +
-                $"{NetworkSettings.AUTHORIZATION_ENDPOINT} " +
-                $"{NetworkSettings.TOKEN_ENDPOINT} " +
-                $"{LoginSettings.CertFile} " +
-                $"{LoginSettings.KeyFile} " + 
-				$"{AppSettings.Settings.TokenResponse.RefreshToken} " +
-				$"{LoginSettings.TokenFile}",
+                $"{LoginConfig.LogFile} " +
+				$"{LoginConfig.ClientId} " +
+                $"{LoginConfig.ClientSecret} " +
+                $"{LoginConfig.CALLBACK_URL} " +
+                $"{LoginConfig.Scope} " +
+                $"{LoginConfig.AUTHORIZATION_ENDPOINT} " +
+                $"{LoginConfig.TOKEN_ENDPOINT} " +
+                $"{LoginConfig.CertFile} " +
+                $"{LoginConfig.KeyFile} " + 
+				$"{LoginConfig.TokenFile} " +
+				$"{AppSettings.Settings.TokenResponse.RefreshToken}",
 				WorkingDirectory = Path.GetDirectoryName(ScriptPath),
 				RedirectStandardOutput = true,
 				RedirectStandardError = true,

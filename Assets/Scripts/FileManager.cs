@@ -30,15 +30,35 @@ namespace EveMarket.Util
 
 		private static string GetFilePath<T>()
 		{
-			string path;
+			//string userDirectory = Application.persistentDataPath;
 
-			if (!TypeFilePath.TryGetValue(typeof(T), out path))
+			if (!TypeFilePath.TryGetValue(typeof(T), out string relativePath))
 			{
 				TypeFilePath[typeof(T)] = $"StaticData/{typeof(T)}.json";
 				Debug.LogWarning($"File path for type {typeof(T)} not found.");
 			}
 
-			return $"{Path.GetFullPath(@"./")}{path}";
+			//string filePath = Path.Combine(userDirectory, $"{path}");
+			//Debug.LogWarning($"{typeof(T)} path: {filePath}");
+			return EnsureFileAndDirectory(relativePath);
+			//return $"{Path.GetFullPath(@"./")}{path}";
+		}
+
+		public static string EnsureFileAndDirectory(string relativePath)
+		{
+			// Combine persistentDataPath with the relative path
+			string fullPath = Path.Combine(Application.persistentDataPath, relativePath);
+			string directory = Path.GetDirectoryName(fullPath);
+
+			// Create directory if it doesn't exist
+			if (!Directory.Exists(directory))
+				Directory.CreateDirectory(directory);
+
+			// Create file if it doesn't exist
+			if (!File.Exists(fullPath))
+				File.WriteAllText(fullPath, ""); // Empty file
+
+			return fullPath;
 		}
 
 		public static void SerializeObject<T>(T @object)
@@ -49,10 +69,6 @@ namespace EveMarket.Util
 				return;
 			}
 
-			string path = GetFilePath<T>();
-
-			if (string.IsNullOrEmpty(path)) { return; }
-
 			string data;
 
 			lock (@object)
@@ -60,7 +76,16 @@ namespace EveMarket.Util
 				data = JsonConvert.SerializeObject(@object, Formatting.Indented);
 			}
 
-			Task.Run(() => WriteFile(path, data));
+			UnityMainThreadDispatcher.Enqueue(() =>
+			{
+				string path = EnsureFileAndDirectory(GetFilePath<T>());
+
+				Debug.LogWarning($"Saving {typeof(T)} @ {path}");
+
+				if (string.IsNullOrEmpty(path)) { return; }
+
+				Task.Run(() => WriteFile(path, data));
+			});
 		}
 
 		public static T DeserializeFromFile<T>() where T : class

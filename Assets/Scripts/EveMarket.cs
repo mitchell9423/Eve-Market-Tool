@@ -17,10 +17,10 @@ namespace EveMarket
 
 		public ObjectType objectType = ObjectType.MarketGroup;
 
-		[SerializeField] UnityMainThreadDispatcher unityMainThreadDispatcher;
-		[SerializeField] HttpHandler httpHandler;
+		//[SerializeField] UnityMainThreadDispatcher unityMainThreadDispatcher;
+		//[SerializeField] HttpHandler httpHandler;
 		//[SerializeField] EveSSOAuthenticator Authenticator;
-		[SerializeField] EveStateMachine stateMachine;
+		//[SerializeField] EveStateMachine stateMachine;
 		[SerializeField] DisplayPanel displayPanel;
 
 		public static bool EnableTimedUpdate { get; set; } = true;
@@ -48,17 +48,17 @@ namespace EveMarket
 				displayPanel = FindObjectOfType<DisplayPanel>();
 			}
 
-			if (!gameObject.TryGetComponent(out stateMachine))
+			if (!gameObject.TryGetComponent(out EveStateMachine stateMachine))
 			{
 				stateMachine = gameObject.AddComponent<EveStateMachine>();
 			}
 
-			if (!gameObject.TryGetComponent(out unityMainThreadDispatcher))
+			if (!gameObject.TryGetComponent(out UnityMainThreadDispatcher unityMainThreadDispatcher))
 			{
 				unityMainThreadDispatcher = gameObject.AddComponent<UnityMainThreadDispatcher>();
 			}
 
-			if (!gameObject.TryGetComponent(out httpHandler))
+			if (!gameObject.TryGetComponent(out HttpHandler httpHandler))
 			{
 				httpHandler = gameObject.AddComponent<HttpHandler>();
 			}
@@ -120,11 +120,11 @@ namespace EveMarket
 			LastUpdate = DateTime.Now;
 		}
 
-		public void LoadStaticData()
-		{
-			StaticData.LoadStaticData();
-			//ui.CreateGroupContainers();
-		}
+		//public void LoadStaticData()
+		//{
+		//	StaticData.LoadStaticData();
+		//	//ui.CreateGroupContainers();
+		//}
 
 		//public void UpdateStaticData()
 		//{

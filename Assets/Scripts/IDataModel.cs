@@ -16,6 +16,12 @@ namespace EveMarket
 	}
 
 	[Serializable]
+	public class MarketGroupIds
+	{
+		List<int> Ids { get; set; } = new List<int>();
+	}
+
+	[Serializable]
 	public class MarketGroup : IObjectModel
 	{
 		[JsonProperty("description")]
