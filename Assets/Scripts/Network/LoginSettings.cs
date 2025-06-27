@@ -17,7 +17,6 @@ namespace EveMarket.Network.OAuth
         private const string tOKEN_ENDPOINT = "https://login.eveonline.com/v2/oauth/token";
         private const string certFile = "./localhost.pem";
         private const string keyFile = "./localhost-key.pem";
-        private const string tokenFile = "./token.json";
         private static string refreshToken = "";
         private const string vERIFICATION_ENDPOINT = "https://login.eveonline.com/oauth/verify";
         private const string codeFile = "./auth_code.tmp";
@@ -33,7 +32,6 @@ namespace EveMarket.Network.OAuth
         public static string CertFile => certFile;
         public static string KeyFile => keyFile;
         public static string RefreshToken { get => refreshToken; set => refreshToken = value; }
-        public static string TokenFile => tokenFile;
         public static string VERIFICATION_ENDPOINT => vERIFICATION_ENDPOINT;
         public static string CodeFile => codeFile;
         public static string HTTP_CALLBACK_URL => hTTP_CALLBACK_URL;

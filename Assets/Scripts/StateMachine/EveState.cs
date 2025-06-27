@@ -146,8 +146,6 @@ namespace EveMarket.StateMachine
 
 		public void Exit()
 		{
-			Debug.Log($"Refresh token = {AppSettings.Settings.TokenResponse.RefreshToken}");
-			completed = true;
 		}
 
 		public bool IsCompleted()

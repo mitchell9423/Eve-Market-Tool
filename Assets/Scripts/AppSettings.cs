@@ -121,17 +121,15 @@ namespace EveMarket
 
 		public static bool LoadAppSettings()
 		{
-			Debug.Log($"Loading App Settings.");
-			Settings = FileManager.DeserializeFromFile<Settings>();
+			Debug.Log($"Loading App Settings...");
 
-			if (Settings == null)
+			if ((Settings = FileManager.DeserializeFromFile<Settings>()) == null)
 			{
-				Debug.LogWarning($"Creating new settings object.");
 				Settings = new Settings();
+				Debug.LogWarning($"Created new settings object.");
 			}
 
 			EveDelegate.AppSettingsChanged?.Invoke();
-
 			return true;
 		}
 

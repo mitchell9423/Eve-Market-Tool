@@ -16,6 +16,7 @@ namespace EveMarket.Util
 		const string ITEM_ORDERS_PATH = "StaticData/ItemOrders.json";
 		const string ROUTES_PATH = "StaticData/Routes.json";
 		const string APP_SETTINGS = "StaticData/Settings.json";
+		const string TOKEN_FILE = "OAuth/token.json";
 
 		static readonly Dictionary<Type, string> TypeFilePath = new Dictionary<Type, string>()
 		{
@@ -25,10 +26,11 @@ namespace EveMarket.Util
 			{ typeof(Dictionary<int, UniverseItem>), UNIVERSE_TYPES_PATH },
 			{ typeof(Dictionary<Region, Dictionary<int, OrderRecord>>), ITEM_ORDERS_PATH },
 			{ typeof(Dictionary<int, List<RouteData>>), ROUTES_PATH },
-			{ typeof(Settings), APP_SETTINGS }
+			{ typeof(Settings), APP_SETTINGS },
+			{ typeof(TokenResponse), TOKEN_FILE}
 		};
 
-		private static string GetFilePath<T>()
+		public static string GetFilePath<T>()
 		{
 			//string userDirectory = Application.persistentDataPath;
 
@@ -105,14 +107,14 @@ namespace EveMarket.Util
 
 				if (deserializedObject == null)
 				{
-					Debug.LogWarning($"Failed to deserialize {path} to type {typeof(T)}.");
+					Debug.LogWarning($"Failed to load {typeof(T)} at {path}.");
 				}
 
 				return deserializedObject;
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Debug.LogWarning($"Failed to load {typeof(T)} at {path}.\n{ex}");
 				return null;
 			}
 		}

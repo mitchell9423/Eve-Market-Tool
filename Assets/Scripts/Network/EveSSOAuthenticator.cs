@@ -20,7 +20,7 @@ namespace EveMarket.Network.OAuth
 
 			try
 			{
-				await eveSSOAuthenticator.RunSSOLogin();
+				await eveSSOAuthenticator.RunSSOLogin("test");
 			}
 			catch (Exception ex)
 			{
@@ -43,15 +43,15 @@ namespace EveMarket.Network.OAuth
 		private static string TokenFilePath => Path.Combine(RootDir, $"{OAuth_DIR}/{LOGIN_TOKEN_FILENAME}");
 		private string SafeTokenPreview(string token) => token.Length <= 16 ? token : $"{token.Substring(0, 8)}...{token[^8..]}";
 
-		public async Task RunSSOLogin()
+		public async Task RunSSOLogin(string test)
 		{
 			UnityMainThreadDispatcher dispatcher = UnityMainThreadDispatcher.Instance;
 
-			UnityMainThreadDispatcher.Log("🚀 Launching eve-login.sh from Unity...");
+			UnityMainThreadDispatcher.Log("🚀 Launching Login Script from Unity...");
 
-			UnityMainThreadDispatcher.Log($"dataPath = {RootDir}");
-			UnityMainThreadDispatcher.Log($"ScriptPath = {ScriptPath}");
-			UnityMainThreadDispatcher.Log($"TokenFilePath = {TokenFilePath}");
+			//UnityMainThreadDispatcher.Log($"dataPath = {RootDir}");
+			//UnityMainThreadDispatcher.Log($"ScriptPath = {ScriptPath}");
+			//UnityMainThreadDispatcher.Log($"TokenFilePath = {TokenFilePath}");
 
 			if (!File.Exists(ScriptPath))
 			{
@@ -65,7 +65,6 @@ namespace EveMarket.Network.OAuth
 			}
 
 			var tcs = new TaskCompletionSource<int>();
-			UnityMainThreadDispatcher.LogWarning($"Passing Argument Refresh Token = {AppSettings.Settings.TokenResponse.RefreshToken}");
 			ProcessStartInfo psi = new ProcessStartInfo
 			{
 				FileName = "/bin/bash",
@@ -79,8 +78,7 @@ namespace EveMarket.Network.OAuth
                 $"{LoginConfig.TOKEN_ENDPOINT} " +
                 $"{LoginConfig.CertFile} " +
                 $"{LoginConfig.KeyFile} " + 
-				$"{LoginConfig.TokenFile} " +
-				$"{AppSettings.Settings.TokenResponse.RefreshToken}",
+				$"{FileManager.GetFilePath<TokenResponse>()}",
 				WorkingDirectory = Path.GetDirectoryName(ScriptPath),
 				RedirectStandardOutput = true,
 				RedirectStandardError = true,
@@ -127,7 +125,7 @@ namespace EveMarket.Network.OAuth
 					return;
 				}
 
-				UnityMainThreadDispatcher.Log("✅ Script completed. Reading token...");
+				UnityMainThreadDispatcher.Log("✅ Login Script Completed. Reading token...");
 			}
 
 			if (!File.Exists(TokenFilePath))
@@ -136,9 +134,10 @@ namespace EveMarket.Network.OAuth
 				return;
 			}
 
+
+			UnityMainThreadDispatcher.Log("✅ Reading Token...");
+			TokenResponse token = FileManager.DeserializeFromFile<TokenResponse>();
 			string json = File.ReadAllText(TokenFilePath);
-			UnityMainThreadDispatcher.Log($"raw json: {json}\n{this.GetType()}:line 130");
-			TokenResponse token = JsonConvert.DeserializeObject<TokenResponse>(json);
 
 			if (!int.TryParse(token.ExpiresIn, out int seconds))
 			{
@@ -146,15 +145,10 @@ namespace EveMarket.Network.OAuth
 				return;
 			}
 
-			UnityMainThreadDispatcher.Log($"✅ Access Token: {SafeTokenPreview(token.AccessToken)}...");
-			UnityMainThreadDispatcher.Log($"⏳ Expires in: {token.ExpiresIn}");
-			UnityMainThreadDispatcher.Log($"🔁 Refresh Token: {SafeTokenPreview(token.RefreshToken)}...");
-
 			// Store to app settings if needed
 			AppSettings.Settings.AccessTokenExpiresAt = DateTime.Now.AddSeconds(seconds);
 			AppSettings.Settings.TokenResponse = token;
 			AppSettings.SaveAppSettings();
-			//File.Delete(TokenFilePath);
 			return;
 		}
 	}

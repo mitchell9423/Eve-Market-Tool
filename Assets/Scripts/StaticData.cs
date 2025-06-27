@@ -444,7 +444,7 @@ namespace EveMarket
 
 		public static bool LoadStaticData()
 		{
-			Debug.Log("Loading static data.");
+			Debug.Log("Loading Static Data...");
 
 			bool success = true;
 
@@ -455,13 +455,11 @@ namespace EveMarket
 				universeItems = FileManager.DeserializeFromFile<Dictionary<int, UniverseItem>>();
 				if (universeItems == null || universeItems.Count() <= 0)
 				{
-					Debug.LogWarning("Failed to load Universe Items from file.");
 					success = false;
 				}
 			}
 			catch (Exception ex)
 			{
-				Debug.LogWarning($"Failed to load Universe Items from file.");
 				Debug.LogException(ex);
 				success = false;
 			}
@@ -546,6 +544,7 @@ namespace EveMarket
 			}
 
 			Dictionary<int, List<RouteData>> routes = FileManager.DeserializeFromFile<Dictionary<int, List<RouteData>>>();
+
 			if (routes != null)
 			{
 				Routes = routes;
@@ -554,17 +553,6 @@ namespace EveMarket
 			{
 				success = false;
 			}
-
-			//if (itemObjects == null)
-			//{
-			//	UpdateStaticData();
-			//}
-			//else
-			//{
-			//	EveDelegate.StaticLoadComplete?.Invoke();
-			//	Debug.Log("Static Data Loaded.");
-			//}
-			Debug.Log("Static Data Loaded.");
 
 			return success;
 		}
@@ -579,7 +567,7 @@ namespace EveMarket
 
 		public static void ConstructMarketObjects()
 		{
-			Debug.Log("Constructing Market Objects.");
+			Debug.Log("Constructing Market Objects...");
 
 			lock (MarketGroups)
 			{
@@ -606,7 +594,7 @@ namespace EveMarket
 							//|| group.Name == Group.Kernite.ToString()
 							)
 						{
-							Debug.Log($"Creating Market Group {group.Name}.");
+							Debug.Log($"Creating {group.Name} Market Group...");
 							MarketObjects[group.TypeId] = new MarketObject(group);
 						}
 					}

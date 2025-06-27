@@ -17,7 +17,7 @@ TOKEN_URL="$7"
 CERT_FILE="$8"
 KEY_FILE="$9"
 TOKEN_FILE="${10}"
-REFRESH_TOKEN="${11}"
+#REFRESH_TOKEN="${11}"
 
 STATE=$(uuidgen)  # Generate a unique random state string
 AUTH_URL="${AUTH_URI}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE// /%20}&state=${STATE}"
@@ -28,19 +28,19 @@ exec > >(tee -i $LOG_FILE)
 exec 2>&1
 
 
-echo "LOG_FILE = ${LOG_FILE}"
-echo "CLIENT_ID = ${CLIENT_ID}"
-echo "CLIENT_SECRET = ${CLIENT_SECRET}"
-echo "REDIRECT_URI = ${REDIRECT_URI}"
-echo "AUTH_URI = ${AUTH_URI}"
-echo "TOKEN_URL = ${TOKEN_URL}"
-echo "CERT_FILE = ${CERT_FILE}"
-echo "KEY_FILE = ${KEY_FILE}"
-echo "REFRESH_TOKEN = ${REFRESH_TOKEN}"
-echo "AUTH_URL = ${AUTH_URL}"
+#echo "LOG_FILE = ${LOG_FILE}"
+#echo "CLIENT_ID = ${CLIENT_ID}"
+#echo "CLIENT_SECRET = ${CLIENT_SECRET}"
+#echo "REDIRECT_URI = ${REDIRECT_URI}"
+#echo "AUTH_URI = ${AUTH_URI}"
+#echo "TOKEN_URL = ${TOKEN_URL}"
+#echo "CERT_FILE = ${CERT_FILE}"
+#echo "KEY_FILE = ${KEY_FILE}"
+#echo "REFRESH_TOKEN = ${REFRESH_TOKEN}"
+#echo "AUTH_URL = ${AUTH_URL}"
 
 
-echo "🌐 Starting EVE SSO login flow..."
+echo "🌐 Starting EVE SSO Login flow..."
 
 
 # ==== CHECK DEPENDENCIES ====
@@ -91,31 +91,35 @@ B64_AUTH=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
 
 
 # ==== ATTEMPT TOKEN REFRESH FIRST ====
-echo "🔁 Checking for existing refresh token..."
-if [ -n "$REFRESH_TOKEN" ] && [ "$REFRESH_TOKEN" != "null" ]; then
-    echo "🔐 Attempting to refresh token = $REFRESH_TOKEN"
-    RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
-      -H "Authorization: Basic $B64_AUTH" \
-      -H "Content-Type: application/x-www-form-urlencoded" \
-      -d "grant_type=refresh_token&refresh_token=$REFRESH_TOKEN")
+echo "🔁 Checking for refresh token..."
+if [ -f "$TOKEN_FILE" ]; then
+    REFRESH_TOKEN=$(jq -r '.refresh_token' "$TOKEN_FILE")
+    
+    if [ -n "$REFRESH_TOKEN" ] && [ "$REFRESH_TOKEN" != "null" ]; then
+        echo "🔐 Attempting to refresh token: $REFRESH_TOKEN"
+        RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
+          -H "Authorization: Basic $B64_AUTH" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "grant_type=refresh_token&refresh_token=$REFRESH_TOKEN")
 
-        if echo "$RESPONSE" | jq -e '.access_token' > /dev/null; then
-          echo "✅ Token refreshed successfully."
-          if [ -z "$RESPONSE" ]; then
-          echo "❌ RESPONSE is empty, not writing token file."
+            if echo "$RESPONSE" | jq -e '.access_token' > /dev/null; then
+              echo "✅ Token refreshed successfully."
+              if [ -z "$RESPONSE" ]; then
+              echo "❌ RESPONSE is empty, not writing token file."
+            else
+              echo "$RESPONSE" > "$TOKEN_FILE"
+            fi
+
+            exit 0
         else
-          echo "📝 TOKEN_FILE is: $TOKEN_FILE"
-          echo "$RESPONSE" > "$TOKEN_FILE"
-          echo "✅ Token written to $TOKEN_FILE"
+            echo "⚠️ Refresh failed, proceeding to full login..."
+            echo "⚠️ Response: $RESPONSE"
         fi
-
-        exit 0
     else
-        echo "⚠️ Refresh failed, proceeding to full login..."
-        echo "⚠️ Response: $RESPONSE"
+        echo "❌ Refresh token not found"
     fi
 else
-    echo "❌ Refresh token not found"
+    echo "❌ token.json not found."
 fi
 
 

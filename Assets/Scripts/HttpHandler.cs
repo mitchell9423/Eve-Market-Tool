@@ -189,21 +189,6 @@ namespace EveMarket.Network
 			//StartCoroutine(instance.GetAccessToken("refresh_token", "refresh_token", AppSettings.Settings.TokenResponse.RefreshToken));
 		}
 
-		private IEnumerator UseAccessToken()
-		{
-			UnityEngine.Debug.Log($"Token Response: {AppSettings.Settings.TokenResponse.AccessToken}");
-
-			// Fetch ESI data
-			_ = NetworkManager.AsyncRequest<CorpOrder>(new EveMarketRequest(
-				extension: AppSettings.Settings.TokenResponse.AccessToken,
-				type_id: AppSettings.Settings.CorpId,
-				etag: StaticData.CorpOrderRecord.ETag)
-			);
-
-			// 🔐 Verify Token Info
-			yield return StartCoroutine(VerifyAccessToken());
-		}
-
 		public async Task<bool> VerifyToken()
 		{
 

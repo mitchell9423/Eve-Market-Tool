@@ -33,9 +33,10 @@ namespace EveMarket
 
 		public MarketItem(int typeId)
 		{
+			//Debug.Log($"Creating Market Item {ItemName}.");
+
 			TypeId = typeId;
 			EveDelegate.Subscribe(ref EveDelegate.UpdateItemNotify, UpdateEventHandler);
-			Debug.Log($"Creating Market Item {ItemName}.");
 
 			InitDictionaries();
 			SetReprocessType();
@@ -376,10 +377,10 @@ namespace EveMarket
 
 		public void UpdateMarketData(Region region = Region.None, System system = System.None)
 		{
+			Debug.Log($"Updating {ItemName} Market Item...");
 			SetCurrentSellPrice();
 			SetCurrentBuyPrice(region, system);
 			EveDelegate.UpdateUINotify?.Invoke(TypeId);
-			Debug.Log($"Market Item {ItemName} Updated!");
 		}
 
 		public void UpdateEventHandler(int typeId = 0)

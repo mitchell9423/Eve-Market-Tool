@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace EveMarket.Util
@@ -43,27 +44,57 @@ namespace EveMarket.Util
 			}
 		}
 
+		private static string GetMeta()
+		{
+			var frame = new StackTrace(true).GetFrame(2); // 1 to get caller
+			var file = frame.GetFileName();
+
+			if (string.IsNullOrEmpty(file))
+            {
+				return "";
+			}
+
+			var line = frame.GetFileLineNumber();
+
+			frame = new StackTrace(true).GetFrame(4); // 1 to get caller
+			var method = frame.GetMethod();
+			var dtype = method.DeclaringType;
+			var name = method.Name;
+			string methodParams = "";
+			foreach (var prop in method.GetParameters())
+            {
+				//methodParams += $", {prop.Name()}";
+			}
+
+			string relativePath = file.Replace(Application.dataPath, "Assets"); // make path relative for Unity
+			string meta = $"\n{dtype}:{name}({methodParams}) (at <a href=\"{relativePath}\" line=\"{line}\">{relativePath}:{line}</a>)";
+			return meta;
+		}
+
 		public static void Log(string message)
-        {
+		{
+			string meta = GetMeta();
 			Enqueue(() =>
 			{
-				Debug.Log(message);
+				UnityEngine.Debug.Log($"{message}{meta}");
 			});
 		}
 
 		public static void LogWarning(string message)
 		{
+			string meta = GetMeta();
 			Enqueue(() =>
 			{
-				Debug.LogWarning(message);
+				UnityEngine.Debug.LogWarning($"{message}{meta}");
 			});
 		}
 
 		public static void LogError(string message)
 		{
+			string meta = GetMeta();
 			Enqueue(() =>
 			{
-				Debug.LogError(message);
+				UnityEngine.Debug.LogError($"{message}{meta}");
 			});
 		}
 	}

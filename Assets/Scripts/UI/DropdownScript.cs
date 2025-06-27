@@ -42,7 +42,7 @@ namespace EveMarket.UI
 		{
 			dropdown.value = (int)AppSettings.Settings.ActivePreset;
 			dropdown.RefreshShownValue();
-			Debug.Log($"ActivePreset = {AppSettings.Settings.ActivePreset}");
+			Debug.Log($"Active Preset: {AppSettings.Settings.ActivePreset}");
 		}
 	}
 }
