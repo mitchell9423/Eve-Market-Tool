@@ -127,7 +127,7 @@ namespace EveMarket.Network.OAuth
 					return;
 				}
 
-				UnityMainThreadDispatcher.Log("✅ Login Script Completed. Reading token...");
+				UnityMainThreadDispatcher.Log("✅ Login Script Completed.");
 			}
 
 			if (!File.Exists(TokenFilePath))

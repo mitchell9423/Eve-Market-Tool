@@ -149,7 +149,6 @@ namespace EveMarket.Network
 					{
 						UnityMainThreadDispatcher.Enqueue(() =>
 						{
-							Debug.Log($"Web response url: {request.Url}");
 							request.Callback(webRequest.responseCode, webRequest.GetResponseHeader("etag"), Expiration, webRequest.downloadHandler.text, request.Region, request.Type_id);
 						});
 					}

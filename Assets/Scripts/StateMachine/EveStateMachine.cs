@@ -47,8 +47,6 @@ namespace EveMarket.StateMachine
 
 				yield return new WaitForSeconds(.2f);
 			}
-
-			//StateMachine_Co = StartCoroutine(RunStateMachine());
 		}
 
 		public static void SetNextState(IEveState eveState, AppState appState, bool interrupt = false)
@@ -76,7 +74,6 @@ namespace EveMarket.StateMachine
 				NextState = null;
 				CurrentState.Enter();
 				ActiveState_Co = StartCoroutine(CurrentState.Execute());
-				Debug.Log($"State Changed to: {CurrentState.GetType()}");
 			}
 		}
 	}
