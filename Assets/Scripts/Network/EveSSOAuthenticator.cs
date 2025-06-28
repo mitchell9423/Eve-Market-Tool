@@ -78,13 +78,15 @@ namespace EveMarket.Network.OAuth
                 $"{LoginConfig.TOKEN_ENDPOINT} " +
                 $"{LoginConfig.CertFile} " +
                 $"{LoginConfig.KeyFile} " + 
-				$"{FileManager.GetFilePath<TokenResponse>()}",
+				$"\"{FileManager.GetFilePath<TokenResponse>()}\"",
 				WorkingDirectory = Path.GetDirectoryName(ScriptPath),
 				RedirectStandardOutput = true,
 				RedirectStandardError = true,
 				UseShellExecute = false,
 				CreateNoWindow = true
 			};
+			
+			UnityMainThreadDispatcher.LogWarning($"Path to token jason:\n{FileManager.GetFilePath<TokenResponse>()}");
 
 			using (Process process = new Process { StartInfo = psi })
 			{

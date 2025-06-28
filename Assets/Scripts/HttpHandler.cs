@@ -191,7 +191,6 @@ namespace EveMarket.Network
 
 		public async Task<bool> VerifyToken()
 		{
-
 			if (IsExpired(AppSettings.Settings.AccessTokenExpiresAt))
 				return false;
 

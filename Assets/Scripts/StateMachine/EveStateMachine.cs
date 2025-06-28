@@ -13,6 +13,8 @@ namespace EveMarket.StateMachine
 		Coroutine StateMachine_Co;
 		Coroutine ActiveState_Co;
 
+		bool isRunning;
+
 		// Start is called before the first frame update
 		void Start()
 		{
@@ -21,6 +23,8 @@ namespace EveMarket.StateMachine
 
 		private void OnDestroy()
 		{
+			isRunning = false;
+
 			if (StateMachine_Co != null)
 			{
 				StopCoroutine(StateMachine_Co);
@@ -29,18 +33,22 @@ namespace EveMarket.StateMachine
 
 		IEnumerator RunStateMachine()
 		{
-			if (NextState != null)
+			isRunning = true;
+			while (isRunning)
 			{
-				ChangeState();
-			}
-			else if (CurrentState.IsCompleted())
-			{
-				AppState = AppState.Idle;
+				if (NextState != null)
+				{
+					ChangeState();
+				}
+				else if (CurrentState.IsCompleted())
+				{
+					AppState = AppState.Idle;
+				}
+
+				yield return new WaitForSeconds(.2f);
 			}
 
-			yield return new WaitForSeconds(.2f);
-
-			StateMachine_Co = StartCoroutine(RunStateMachine());
+			//StateMachine_Co = StartCoroutine(RunStateMachine());
 		}
 
 		public static void SetNextState(IEveState eveState, AppState appState, bool interrupt = false)
@@ -66,9 +74,9 @@ namespace EveMarket.StateMachine
 
 				CurrentState = NextState;
 				NextState = null;
-				//Debug.Log($"State Changed to {CurrentState.GetType()}");
 				CurrentState.Enter();
 				ActiveState_Co = StartCoroutine(CurrentState.Execute());
+				Debug.Log($"State Changed to: {CurrentState.GetType()}");
 			}
 		}
 	}

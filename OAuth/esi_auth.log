@@ -1,7 +1,6 @@
 🌐 Starting EVE SSO Login flow...
 🔐 Validating Certs
 🔁 Checking for refresh token...
-🔐 Attempting to refresh token = QdcUWBLLKE6o8vpdBBc9IA==
+/Users/robertmitchell/Library/Application Support/DefaultCompany/Eve Market/OAuth/token.json
+🔐 Attempting to refresh token: QdcUWBLLKE6o8vpdBBc9IA==
 ✅ Token refreshed successfully.
-📝 TOKEN_FILE is: ./token.json
-✅ Token written to ./token.json

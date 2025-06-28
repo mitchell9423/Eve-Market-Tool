@@ -26,7 +26,7 @@ namespace EveMarket
 			}
 		}
 
-		public void UpdateMaretData()
+		public void UpdateMarketData()
 		{
 			foreach (var item in Items.Values)
 			{

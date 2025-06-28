@@ -56,18 +56,13 @@ namespace EveMarket.Util
 
 			var line = frame.GetFileLineNumber();
 
-			frame = new StackTrace(true).GetFrame(4); // 1 to get caller
-			var method = frame.GetMethod();
-			var dtype = method.DeclaringType;
-			var name = method.Name;
-			string methodParams = "";
-			foreach (var prop in method.GetParameters())
-            {
-				//methodParams += $", {prop.Name()}";
-			}
+			frame = new StackTrace(true).GetFrame(4);
+			var method = frame?.GetMethod();
+			var dtype = method?.DeclaringType;
+			var name = method?.Name;
 
 			string relativePath = file.Replace(Application.dataPath, "Assets"); // make path relative for Unity
-			string meta = $"\n{dtype}:{name}({methodParams}) (at <a href=\"{relativePath}\" line=\"{line}\">{relativePath}:{line}</a>)";
+			string meta = $"\n{dtype}:{name}() (at <a href=\"{relativePath}\" line=\"{line}\">{relativePath}:{line}</a>)";
 			return meta;
 		}
 

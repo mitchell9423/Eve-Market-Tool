@@ -78,15 +78,17 @@ namespace EveMarket.Util
 				data = JsonConvert.SerializeObject(@object, Formatting.Indented);
 			}
 
+			UnityMainThreadDispatcher.Log($"Saving {typeof(T)}...");
+
 			UnityMainThreadDispatcher.Enqueue(() =>
 			{
 				string path = EnsureFileAndDirectory(GetFilePath<T>());
 
-				Debug.LogWarning($"Saving {typeof(T)} @ {path}");
-
 				if (string.IsNullOrEmpty(path)) { return; }
 
 				Task.Run(() => WriteFile(path, data));
+
+				UnityMainThreadDispatcher.Log($"{typeof(T)} Saved...");
 			});
 		}
 

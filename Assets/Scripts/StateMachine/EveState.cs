@@ -17,15 +17,26 @@ namespace EveMarket.StateMachine
 		bool IsCompleted();
 	}
 
-	public class Authentication : IEveState
+    public class EveMarketState : IEveState
 	{
-		private bool completed = false;
+		protected bool completed = false;
 
-		public void Enter()
-		{
-		}
+		public virtual void Enter() { }
 
-		public IEnumerator Execute()
+		public virtual IEnumerator Execute()
+        {
+			completed = true;
+			yield return null;
+        }
+
+		public virtual void Exit() { }
+
+		public bool IsCompleted() => completed;
+    }
+
+    public class Authentication : EveMarketState
+	{
+		public override IEnumerator Execute()
 		{
 			Task<bool> logInTask = LoginManager.Login();
 			yield return new WaitUntil(() => logInTask.IsCompleted);
@@ -34,29 +45,18 @@ namespace EveMarket.StateMachine
 			{
 				EveStateMachine.SetNextState(new VerifyToken(), AppState.VerifyToken);
 			}
+            else
+            {
+				EveStateMachine.SetNextState(new UpdateMarketOrders(), AppState.UpdateMarketOrders);
+			}
 
-			completed = true;
-			yield return null;
-		}
-
-		public void Exit()
-		{
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 
-	public class VerifyToken : IEveState
+	public class VerifyToken : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter() { }
-
-		public IEnumerator Execute()
+		public override IEnumerator Execute()
 		{
 			Task<bool> verifyTask = HttpHandler.instance.VerifyToken(); // assume returns true if valid
 
@@ -71,23 +71,18 @@ namespace EveMarket.StateMachine
 				EveStateMachine.SetNextState(new Authentication(), AppState.Authentication);
 			}
 
-			completed = true;
-			yield return null;
+			yield return base.Execute();
 		}
-
-		public void Exit() => completed = true;
-
-		public bool IsCompleted() => completed;
 	}
 
 
-	public class UpdateCorpOrders : IEveState
+	public class UpdateCorpOrders : EveMarketState
 	{
-		private bool completed = false;
 		private string accessToken;
 
-		public void Enter()
+		public override void Enter()
 		{
+			base.Enter();
 			accessToken = AppSettings.Settings.TokenResponse.AccessToken;
 			if (StaticData.CorpOrderRecord == null)
 			{
@@ -95,7 +90,7 @@ namespace EveMarket.StateMachine
 			}
 		}
 
-		public IEnumerator Execute()
+		public override IEnumerator Execute()
 		{
 			if (HttpHandler.instance.IsExpired(StaticData.CorpOrderRecord.Expiration))
 			{
@@ -112,60 +107,25 @@ namespace EveMarket.StateMachine
 				EveStateMachine.SetNextState(new UpdateMarketOrders(), AppState.UpdateMarketOrders);
 			}
 
-			completed = true;
-			yield return null;
-		}
-
-		public void Exit()
-		{
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 
-	public class LoadAppSettings : IEveState
+	public class LoadAppSettings : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
-		{
-			completed = false;
-		}
-
-		public IEnumerator Execute()
+		public override IEnumerator Execute()
 		{
 			yield return new WaitUntil(() => AppSettings.LoadAppSettings());
 
 			EveStateMachine.SetNextState(new LoadStaticData(), AppState.LoadStaticData);
-			completed = true;
-		}
-
-		public void Exit()
-		{
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 
-	public class LoadStaticData : IEveState
+	public class LoadStaticData : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
+		public override IEnumerator Execute()
 		{
-			//Debug.Log($"Enter {GetType()}");
-		}
-
-		public IEnumerator Execute()
-		{
-			//Debug.Log($"Execute {GetType()}");
 			if (StaticData.LoadStaticData())
 			{
 				EveStateMachine.SetNextState(new ConstructMarketObjects(), AppState.ConstructMarketObjects);
@@ -176,225 +136,87 @@ namespace EveMarket.StateMachine
 				EveStateMachine.SetNextState(new UpdateStaticData(), AppState.UpdateStaticData);
 			}
 
-			yield return null;
-			completed = true;
-		}
-
-		public void Exit()
-		{
-			//Debug.Log($"Exit {GetType()}");
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 
-	public class UpdateStaticData : IEveState
+	public class UpdateStaticData : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
-		{
-			//Debug.Log($"Enter {GetType()}");
-		}
-
-		public IEnumerator Execute()
+		public override IEnumerator Execute()
 		{
 			Task<bool> updateTask = StaticData.UpdateStaticData();
 
-			//Debug.Log($"Execute {GetType()}");
 			yield return new WaitUntil(() => updateTask.IsCompleted);
 
-			if (updateTask.Exception != null)
+			if (updateTask.Exception != null || updateTask.Result)
 			{
-				Debug.LogError("Task failed: " + updateTask.Exception);
+				Debug.LogError($"Static Data Update Failed!\n{updateTask.Exception}");
 			}
 			else
 			{
 				// Use the result from the task
 				bool result = updateTask.Result;
-				Debug.Log("Update Static Data completed with result: " + result);
+				Debug.Log("Static Data Update Complete." + result);
 
 				EveStateMachine.SetNextState(new UpdateMarketObjects(), AppState.UpdateMarketObjects);
 			}
 
-			completed = true; // Set your completion flag based on the task's result
-		}
-
-		public void Exit()
-		{
-			//Debug.Log($"Exit {GetType()}");
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			// Set your completion flag based on the task's result
+			yield return base.Execute();
 		}
 	}
 
-	public class ConstructMarketObjects : IEveState
+	public class ConstructMarketObjects : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
+		public override IEnumerator Execute()
 		{
-			//Debug.Log($"Enter {GetType()}");
-		}
-
-		public IEnumerator Execute()
-		{
-			//Debug.Log($"Execute {GetType()}");
 			StaticData.ConstructMarketObjects();
-			yield return null;
-			completed = true;
-		}
-
-		public void Exit()
-		{
-			//Debug.Log($"Exit {GetType()}");
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 
-	public class ConstructEveMarketUI : IEveState
+	public class ConstructEveMarketUI : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
-		{
-			//Debug.Log($"Enter {GetType()}");
+        public override void Enter()
+        {
+            base.Enter();
 			EveDelegate.CreateUI?.Invoke();
 		}
+    }
 
-		public IEnumerator Execute()
-		{
-			//Debug.Log($"Execute {GetType()}");
-			yield return null;
-			completed = true;
-		}
-
-		public void Exit()
-		{
-			//Debug.Log($"Exit {GetType()}");
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
-		}
-	}
-
-	public class UpdateEveMarketUI : IEveState
+	public class UpdateEveMarketUI : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
+		public override IEnumerator Execute()
 		{
-			//Debug.Log($"Enter {GetType()}");
-			EveDelegate.UpdateUI?.Invoke();
-		}
-
-		public IEnumerator Execute()
-		{
-			//Debug.Log($"Execute {GetType()}");
 			yield return new WaitForNextFrameUnit();
 			StaticData.UpdateChangedRecordsOnly = false;
-			completed = true;
-		}
-
-		public void Exit()
-		{
-			//Debug.Log($"Exit {GetType()}");
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 
-	public class UpdateMarketObjects : IEveState
+	public class UpdateMarketObjects : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
+		public override IEnumerator Execute()
 		{
-			//Debug.Log($"Enter {GetType()}");
-		}
-
-		public IEnumerator Execute()
-		{
-			//Debug.Log($"Execute {GetType()}");
 			yield return new WaitUntil(() => StaticData.UpdateMarketObjects());
 			EveStateMachine.SetNextState(new UpdateEveMarketUI(), AppState.UpdateEveMarketUI);
-			completed = true;
-		}
-
-		public void Exit()
-		{
-			//Debug.Log($"Exit {GetType()}");
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 
-	public class SaveMarketData : IEveState
+	public class SaveMarketData : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
+		public override IEnumerator Execute()
 		{
-			//Debug.Log($"Enter {GetType()}");
-		}
-
-		public IEnumerator Execute()
-		{
-			//Debug.Log($"Execute {GetType()}");
 			yield return new WaitUntil(() => StaticData.SaveMarketData());
-			completed = true;
-		}
-
-		public void Exit()
-		{
-			//Debug.Log($"Exit {GetType()}");
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 
-	public class UpdateMarketOrders : IEveState
+	public class UpdateMarketOrders : EveMarketState
 	{
-		private bool completed = false;
-
-		public void Enter()
+		public override IEnumerator Execute()
 		{
-			StaticData.UpdateChangedRecordsOnly = true;
-			//Debug.Log($"Enter {GetType()}");
-		}
-
-		public IEnumerator Execute()
-		{
-			//Debug.Log($"Execute {GetType()}");
-
 			lock (StaticData.MarketObjects)
 			{
 				foreach (var marketObject in StaticData.MarketObjects.Values)
@@ -404,21 +226,12 @@ namespace EveMarket.StateMachine
 						for (int k = 0; k < Enum.GetValues(typeof(Region)).Length - 1; k++)
 						{
 							Region region = (Region)k;
-							bool isExpired = true;
 
 							OrderRecord record = item.GetOrderRecord(region);
 
-							if (record == null)
-							{
-								continue;
-							}
+							if (record == null) continue;
 
-							if (DateTime.TryParse(record.Expiration, out DateTime expiration))
-							{
-								isExpired = DateTime.Now >= expiration;
-							}
-
-							if (isExpired)
+							if (HttpHandler.instance.IsExpired(record.Expiration))
 							{
 								EveMarketRequest eveMarketRequest = new EveMarketRequest(
 									type_id: item.TypeId,
@@ -435,21 +248,7 @@ namespace EveMarket.StateMachine
 				}
 			}
 
-			//EveStateMachine.SetNextState(new UpdateEveMarketUI(), AppState.UpdateEveMarketUI);
-
-			yield return null;
-			completed = true;
-		}
-
-		public void Exit()
-		{
-			//Debug.Log($"Exit {GetType()}");
-			completed = true;
-		}
-
-		public bool IsCompleted()
-		{
-			return completed;
+			yield return base.Execute();
 		}
 	}
 }

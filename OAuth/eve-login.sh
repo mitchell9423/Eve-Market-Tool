@@ -257,7 +257,7 @@ RESPONSE=$(curl -X POST "$TOKEN_URL" \
   -H "Authorization: Basic $B64_AUTH" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=authorization_code&code=$CODE&redirect_uri=$REDIRECT_URI")
-echo "$RESPONSE" > token.json
+echo "$RESPONSE" > "$TOKEN_FILE"
 echo "$CODE" > auth_code.tmp
 
 

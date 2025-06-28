@@ -953,16 +953,17 @@ namespace EveMarket
 		{
 			if (UpdateChangedRecordsOnly)
 			{
+				Debug.Log($"Updating New Objects Only!");
 				UpdateNewRecordItems();
 			}
 			else
 			{
-				//Debug.Log($"Updating All Market Objects!");
+				Debug.Log($"Updating All Market Objects!");
 				lock (MarketObjects)
 				{
 					foreach (var marketObject in MarketObjects.Values)
 					{
-						marketObject.UpdateMaretData();
+						marketObject.UpdateMarketData();
 					}
 				}
 			}
